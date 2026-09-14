@@ -1,0 +1,262 @@
+import { 
+  User, Team, Campaign, Agent, Call, QualityCriterion, 
+  QualityEvaluation, CoachingPlan, TrainingModule, TrainingSession, 
+  AuditLogEntry, DashboardMetrics, UserRole, ExperimentConfiguration, BenchmarkSample
+} from '../types';
+import { 
+  INITIAL_USERS, INITIAL_CAMPAIGNS, INITIAL_TEAMS, INITIAL_AGENTS, 
+  QUALITY_CRITERIA_LIST, INITIAL_CALLS, INITIAL_EVALUATIONS, 
+  INITIAL_COACHING_PLANS, INITIAL_TRAINING_MODULES, INITIAL_TRAINING_SESSIONS, 
+  INITIAL_AUDIT_LOGS, INITIAL_METRICS, SCIENTIFIC_EXPERIMENT_CONFIGS, BENCHMARK_SAMPLES 
+} from '../data/initialData';
+
+class StorageService {
+  private users: User[];
+  private currentUser: User;
+  private campaigns: Campaign[];
+  private teams: Team[];
+  private agents: Agent[];
+  private criteria: QualityCriterion[];
+  private calls: Call[];
+  private evaluations: QualityEvaluation[];
+  private coachingPlans: CoachingPlan[];
+  private trainingModules: TrainingModule[];
+  private trainingSessions: TrainingSession[];
+  private auditLogs: AuditLogEntry[];
+  private metrics: DashboardMetrics;
+  private experimentConfigs: ExperimentConfiguration[];
+  private benchmarkSamples: BenchmarkSample[];
+  private listeners: (() => void)[] = [];
+
+  constructor() {
+    this.users = this.load('kala_users', INITIAL_USERS);
+    this.currentUser = this.load('kala_current_user', INITIAL_USERS[3]); // Default: Claire Delattre (QA_MANAGER)
+    this.campaigns = this.load('kala_campaigns', INITIAL_CAMPAIGNS);
+    this.teams = this.load('kala_teams', INITIAL_TEAMS);
+    this.agents = this.load('kala_agents', INITIAL_AGENTS);
+    this.criteria = this.load('kala_criteria', QUALITY_CRITERIA_LIST);
+    this.calls = this.load('kala_calls', INITIAL_CALLS);
+    this.evaluations = this.load('kala_evaluations', INITIAL_EVALUATIONS);
+    this.coachingPlans = this.load('kala_coaching_plans', INITIAL_COACHING_PLANS);
+    this.trainingModules = this.load('kala_training_modules', INITIAL_TRAINING_MODULES);
+    this.trainingSessions = this.load('kala_training_sessions', INITIAL_TRAINING_SESSIONS);
+    this.auditLogs = this.load('kala_audit_logs', INITIAL_AUDIT_LOGS);
+    this.metrics = this.load('kala_metrics', INITIAL_METRICS);
+    this.experimentConfigs = this.load('kala_experiment_configs', SCIENTIFIC_EXPERIMENT_CONFIGS);
+    this.benchmarkSamples = this.load('kala_benchmark_samples', BENCHMARK_SAMPLES);
+  }
+
+  private load<T>(key: string, fallback: T): T {
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // Ignorer l'erreur de storage
+    }
+    return fallback;
+  }
+
+  private save<T>(key: string, value: T): void {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Local storage plein ou indisponible
+    }
+    this.notify();
+  }
+
+  public subscribe(listener: () => void): () => void {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener);
+    };
+  }
+
+  private notify(): void {
+    this.listeners.forEach(cb => cb());
+  }
+
+  // --- Users & Roles ---
+  public getUsers(): User[] { return this.users; }
+  public getCurrentUser(): User { return this.currentUser; }
+  public setCurrentUserRole(role: UserRole): void {
+    const matched = this.users.find(u => u.role === role);
+    if (matched) {
+      this.currentUser = matched;
+      this.save('kala_current_user', this.currentUser);
+      this.logAudit('CHANGEMENT_ROLE' as any, 'Session utilisateur', `Rôle basculé vers ${role} (${matched.name})`);
+    }
+  }
+
+  // --- Calls & Transcriptions ---
+  public getCalls(): Call[] { return this.calls; }
+  public getCallById(id: string): Call | undefined {
+    return this.calls.find(c => c.id === id);
+  }
+
+  public updateCallTranscriptionSegment(
+    callId: string, 
+    segmentId: string, 
+    correctedText: string
+  ): void {
+    const callIndex = this.calls.findIndex(c => c.id === callId);
+    if (callIndex === -1) return;
+
+    const call = { ...this.calls[callIndex] };
+    const trans = { ...call.transcription };
+    const segments = [...trans.segments];
+    const segIndex = segments.findIndex(s => s.id === segmentId);
+
+    if (segIndex !== -1) {
+      segments[segIndex] = {
+        ...segments[segIndex],
+        correctedText,
+        hasBeenEdited: true
+      };
+
+      // Si c'est la première correction, incrémenter la version
+      if (trans.versionNumber === 1) {
+        trans.versionNumber = 2;
+      }
+      trans.lastEditedBy = `${this.currentUser.name} (${this.currentUser.role})`;
+      trans.lastEditedAt = new Date().toISOString().replace('T', ' ').substring(0, 16);
+      trans.segments = segments;
+      trans.correctedText = segments.map(s => s.correctedText || s.text).join(' ');
+
+      call.transcription = trans;
+      this.calls[callIndex] = call;
+      this.save('kala_calls', this.calls);
+
+      this.logAudit(
+        'CORRECTION_TRANSCRIPTION',
+        `Appel ${call.callNumber}`,
+        `Segment ${segmentId} corrigé manuellement par ${this.currentUser.name}`
+      );
+    }
+  }
+
+  public addCall(newCall: Call): void {
+    this.calls.unshift(newCall);
+    this.save('kala_calls', this.calls);
+    this.logAudit('IMPORT_AUDIO', `Appel ${newCall.callNumber}`, `Nouvel enregistrement importé (${newCall.audioMetadata.filename})`);
+  }
+
+  // --- Quality Evaluations ---
+  public getEvaluations(): QualityEvaluation[] { return this.evaluations; }
+  public getEvaluationByCallId(callId: string): QualityEvaluation | undefined {
+    return this.evaluations.find(e => e.callId === callId);
+  }
+
+  public saveEvaluation(evaluation: QualityEvaluation): void {
+    const index = this.evaluations.findIndex(e => e.id === evaluation.id);
+    if (index >= 0) {
+      this.evaluations[index] = evaluation;
+    } else {
+      this.evaluations.push(evaluation);
+    }
+    this.save('kala_evaluations', this.evaluations);
+
+    // Mettre à jour l'appel lié
+    const callIndex = this.calls.findIndex(c => c.id === evaluation.callId);
+    if (callIndex >= 0) {
+      this.calls[callIndex].qualityScore = evaluation.overallScore;
+      this.calls[callIndex].qualityEvaluationId = evaluation.id;
+      this.save('kala_calls', this.calls);
+    }
+
+    this.logAudit(
+      'VALIDATION_QUALITE',
+      `Évaluation ${evaluation.id}`,
+      `Score enregistré : ${evaluation.overallScore}/100 - Statut : ${evaluation.status}`
+    );
+  }
+
+  // --- Criteria ---
+  public getCriteria(): QualityCriterion[] { return this.criteria; }
+  public updateCriterion(criterion: QualityCriterion): void {
+    const index = this.criteria.findIndex(c => c.id === criterion.id);
+    if (index >= 0) {
+      this.criteria[index] = criterion;
+      this.save('kala_criteria', this.criteria);
+      this.logAudit('MODIFICATION_GRILLE', `Critère ${criterion.label}`, `Poids modifié à ${criterion.weight}%`);
+    }
+  }
+
+  // --- Agents & Teams ---
+  public getAgents(): Agent[] { return this.agents; }
+  public getAgentById(id: string): Agent | undefined {
+    return this.agents.find(a => a.id === id);
+  }
+  public getTeams(): Team[] { return this.teams; }
+  public getCampaigns(): Campaign[] { return this.campaigns; }
+
+  // --- Coaching & Training ---
+  public getCoachingPlans(): CoachingPlan[] { return this.coachingPlans; }
+  public getCoachingPlanByAgentId(agentId: string): CoachingPlan | undefined {
+    return this.coachingPlans.find(cp => cp.agentId === agentId);
+  }
+  public saveCoachingPlan(plan: CoachingPlan): void {
+    const index = this.coachingPlans.findIndex(cp => cp.id === plan.id);
+    if (index >= 0) {
+      this.coachingPlans[index] = plan;
+    } else {
+      this.coachingPlans.push(plan);
+    }
+    this.save('kala_coaching_plans', this.coachingPlans);
+    this.logAudit('CREATION_COACHING', `Plan Agent ${plan.agentName}`, `Objectifs mis à jour`);
+  }
+
+  public getTrainingModules(): TrainingModule[] { return this.trainingModules; }
+  public getTrainingSessions(): TrainingSession[] { return this.trainingSessions; }
+  public addTrainingSession(session: TrainingSession): void {
+    this.trainingSessions.push(session);
+    this.save('kala_training_sessions', this.trainingSessions);
+  }
+
+  // --- Experiments & Benchmarks ---
+  public getExperimentConfigs(): ExperimentConfiguration[] { return this.experimentConfigs; }
+  public getBenchmarkSamples(): BenchmarkSample[] { return this.benchmarkSamples; }
+
+  // --- Metrics & Audit ---
+  public getMetrics(): DashboardMetrics { return this.metrics; }
+  public getAuditLogs(): AuditLogEntry[] { return this.auditLogs; }
+
+  public logAudit(action: AuditLogEntry['action'], targetResource: string, details: string): void {
+    const entry: AuditLogEntry = {
+      id: `log-${Date.now()}`,
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      userId: this.currentUser.id,
+      userName: this.currentUser.name,
+      userRole: this.currentUser.role,
+      action,
+      targetResource,
+      details,
+      ipAddress: '127.0.0.1 (Local)'
+    };
+    this.auditLogs.unshift(entry);
+    if (this.auditLogs.length > 100) this.auditLogs.pop();
+    this.save('kala_audit_logs', this.auditLogs);
+  }
+
+  public resetToFactoryDefaults(): void {
+    localStorage.clear();
+    this.users = INITIAL_USERS;
+    this.currentUser = INITIAL_USERS[3];
+    this.campaigns = INITIAL_CAMPAIGNS;
+    this.teams = INITIAL_TEAMS;
+    this.agents = INITIAL_AGENTS;
+    this.criteria = QUALITY_CRITERIA_LIST;
+    this.calls = INITIAL_CALLS;
+    this.evaluations = INITIAL_EVALUATIONS;
+    this.coachingPlans = INITIAL_COACHING_PLANS;
+    this.trainingModules = INITIAL_TRAINING_MODULES;
+    this.trainingSessions = INITIAL_TRAINING_SESSIONS;
+    this.auditLogs = INITIAL_AUDIT_LOGS;
+    this.metrics = INITIAL_METRICS;
+    this.experimentConfigs = SCIENTIFIC_EXPERIMENT_CONFIGS;
+    this.benchmarkSamples = BENCHMARK_SAMPLES;
+    this.notify();
+  }
+}
+
+export const storageService = new StorageService();
