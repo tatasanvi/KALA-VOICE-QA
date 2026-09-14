@@ -365,3 +365,25 @@ export interface DashboardMetrics {
   coachingNeededAgentsCount: number;
   averageProgressionPercentage: number;
 }
+
+export interface TeamNotification {
+  id: string;
+  type: 'URGENT_CALL' | 'LOW_QUALITY' | 'TRAINING_DUE' | 'COACHING_ASSIGNED' | 'SYSTEM';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  targetId?: string;
+  targetView?: string;
+  priority: 'HAUTE' | 'MOYENNE' | 'INFO';
+}
+
+export interface CtiIntegrationConfig {
+  provider: 'GENESYS_CLOUD' | 'ASTERISK_PBX' | 'TWILIO_FLEX' | 'REST_WEBHOOK';
+  endpointUrl: string;
+  apiKeyMasked: string;
+  autoAnalyze: boolean;
+  status: 'CONNECTÉ' | 'EN_ATTENTE' | 'SIMULÉ';
+  lastPing: string;
+}
+

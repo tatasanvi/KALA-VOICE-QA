@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { 
   Search, Filter, Play, Sparkles, CheckCircle2, 
-  Printer, Volume2, ShieldAlert
+  Printer, Volume2, ShieldAlert, UploadCloud
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { ReportService } from '../../services/reportService';
+import { AudioUploadModal } from '../common/AudioUploadModal';
 import { Call, UserRole } from '../../types';
 
 interface CallsViewProps {
@@ -21,6 +22,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate }
   const [selectedCampaign, setSelectedCampaign] = useState<string>('ALL');
   const [selectedNoiseFilter, setSelectedNoiseFilter] = useState<string>('ALL');
   const [selectedResolution, setSelectedResolution] = useState<string>('ALL');
+  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
 
   const filteredCalls = calls.filter(c => {
     if (selectedCampaign !== 'ALL' && c.campaignId !== selectedCampaign) return false;
@@ -109,9 +111,29 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate }
             >
               Exporter CSV
             </button>
+
+            <button 
+              className="btn btn-primary btn-sm"
+              onClick={() => setShowUploadModal(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              title="Importer un fichier audio réel (.wav, .mp3)"
+            >
+              <UploadCloud size={14} />
+              <span>Ingérer un Audio</span>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Modal d'ingestion Audio */}
+      <AudioUploadModal 
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onSuccess={(newCall) => {
+          onSelectCall(newCall.id);
+          onNavigate('transcriptions');
+        }}
+      />
 
       {/* Tableau des Appels */}
       <div className="data-table-container">

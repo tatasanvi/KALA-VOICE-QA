@@ -13,7 +13,9 @@ import { TeamsCampaignsView } from './components/views/TeamsCampaignsView';
 import { ExperimentLabView } from './components/views/ExperimentLabView';
 import { ReportsView } from './components/views/ReportsView';
 import { SettingsAuditView } from './components/views/SettingsAuditView';
+import { LoginModal } from './components/common/LoginModal';
 import { storageService } from './services/storageService';
+import { authApi } from './services/apiClient';
 import { UserRole } from './types';
 
 export const App: React.FC = () => {
@@ -21,6 +23,8 @@ export const App: React.FC = () => {
   const [selectedCallId, setSelectedCallId] = useState<string>('call-101');
   const [selectedAgentId, setSelectedAgentId] = useState<string>('agent-1');
   const [currentRole, setCurrentRole] = useState<UserRole>(() => storageService.getCurrentUser().role);
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [isApiOnline, setIsApiOnline] = useState<boolean>(true);
   const [, setTick] = useState<number>(0);
 
   // Souscription aux changements d'état du service de stockage
@@ -29,6 +33,15 @@ export const App: React.FC = () => {
       setTick(t => t + 1);
     });
     return () => unsub();
+  }, []);
+
+  // Tester la connectivité de l'API backend
+  useEffect(() => {
+    authApi.isOnline().then(online => setIsApiOnline(online));
+    const interval = setInterval(() => {
+      authApi.isOnline().then(online => setIsApiOnline(online));
+    }, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleRoleChange = (newRole: UserRole) => {
@@ -80,6 +93,13 @@ export const App: React.FC = () => {
           currentRole={currentRole} 
           onRoleChange={handleRoleChange} 
           activeViewTitle={viewTitles[activeView]} 
+          onNavigate={setActiveView}
+          onOpenLogin={() => setShowLoginModal(true)}
+          onLogout={() => {
+            authApi.logout();
+            handleRoleChange('AGENT');
+          }}
+          isOnline={isApiOnline}
         />
 
         <main className="content-area">
@@ -176,6 +196,15 @@ export const App: React.FC = () => {
           )}
         </main>
       </div>
+
+      {/* Modal d'Authentification / Login */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={(user) => {
+          handleRoleChange(user.role);
+        }}
+      />
     </div>
   );
 };

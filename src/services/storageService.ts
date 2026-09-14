@@ -1,7 +1,8 @@
 import { 
   User, Team, Campaign, Agent, Call, QualityCriterion, 
   QualityEvaluation, CoachingPlan, TrainingModule, TrainingSession, 
-  AuditLogEntry, DashboardMetrics, UserRole, ExperimentConfiguration, BenchmarkSample
+  AuditLogEntry, DashboardMetrics, UserRole, ExperimentConfiguration, BenchmarkSample,
+  TeamNotification, CtiIntegrationConfig
 } from '../types';
 import { 
   INITIAL_USERS, INITIAL_CAMPAIGNS, INITIAL_TEAMS, INITIAL_AGENTS, 
@@ -26,6 +27,8 @@ class StorageService {
   private metrics: DashboardMetrics;
   private experimentConfigs: ExperimentConfiguration[];
   private benchmarkSamples: BenchmarkSample[];
+  private notifications: TeamNotification[];
+  private ctiConfig: CtiIntegrationConfig;
   private listeners: (() => void)[] = [];
 
   constructor() {
@@ -44,6 +47,51 @@ class StorageService {
     this.metrics = this.load('kala_metrics', INITIAL_METRICS);
     this.experimentConfigs = this.load('kala_experiment_configs', SCIENTIFIC_EXPERIMENT_CONFIGS);
     this.benchmarkSamples = this.load('kala_benchmark_samples', BENCHMARK_SAMPLES);
+    
+    // Initialiser les notifications d'équipe
+    this.notifications = this.load('kala_notifications', [
+      {
+        id: 'notif-1',
+        type: 'URGENT_CALL',
+        title: 'Appel critique en attente de revue QA',
+        message: 'L\'appel CALL-2024-001 (Marc Vasseur) a déclenché une alerte conformité et nécessite une validation prioritaire.',
+        timestamp: 'Il y a 10 min',
+        read: false,
+        targetId: 'call-101',
+        targetView: 'calls',
+        priority: 'HAUTE'
+      },
+      {
+        id: 'notif-2',
+        type: 'LOW_QUALITY',
+        title: 'Score sous le seuil d\'alerte (<75%)',
+        message: 'L\'évaluation de l\'appel CALL-2024-002 (Julie Mercier) a obtenu 68.5/100. Plan de coaching recommandé.',
+        timestamp: 'Il y a 35 min',
+        read: false,
+        targetId: 'agent-2',
+        targetView: 'coaching',
+        priority: 'HAUTE'
+      },
+      {
+        id: 'notif-3',
+        type: 'TRAINING_DUE',
+        title: 'Session de formation planifiée',
+        message: 'Module MOD-REL : Traitement des objections & litiges prévu demain pour 3 conseillers.',
+        timestamp: 'Hier',
+        read: true,
+        targetView: 'training',
+        priority: 'MOYENNE'
+      }
+    ]);
+
+    this.ctiConfig = this.load('kala_cti_config', {
+      provider: 'GENESYS_CLOUD',
+      endpointUrl: 'https://api.mypurecloud.de/api/v2/conversations/calls',
+      apiKeyMasked: 'gns_sec_••••••••••••94f2',
+      autoAnalyze: true,
+      status: 'CONNECTÉ',
+      lastPing: new Date().toLocaleTimeString()
+    });
   }
 
   private load<T>(key: string, fallback: T): T {
@@ -288,6 +336,68 @@ class StorageService {
     this.auditLogs.unshift(entry);
     if (this.auditLogs.length > 100) this.auditLogs.pop();
     this.save('kala_audit_logs', this.auditLogs);
+  }
+
+  // --- Notifications Équipe ---
+  public getNotifications(): TeamNotification[] { return this.notifications; }
+  public getUnreadNotificationCount(): number {
+    return this.notifications.filter(n => !n.read).length;
+  }
+  public markNotificationAsRead(id: string): void {
+    const n = this.notifications.find(item => item.id === id);
+    if (n) {
+      n.read = true;
+      this.save('kala_notifications', this.notifications);
+      this.notify();
+    }
+  }
+  public markAllNotificationsAsRead(): void {
+    this.notifications.forEach(n => { n.read = true; });
+    this.save('kala_notifications', this.notifications);
+    this.notify();
+  }
+  public addNotification(notification: Omit<TeamNotification, 'id' | 'timestamp' | 'read'>): void {
+    const newNotif: TeamNotification = {
+      ...notification,
+      id: `notif-${Date.now()}`,
+      timestamp: "À l'instant",
+      read: false
+    };
+    this.notifications.unshift(newNotif);
+    this.save('kala_notifications', this.notifications);
+    this.notify();
+  }
+
+  // --- CTI Téléphonie ---
+  public getCtiConfig(): CtiIntegrationConfig { return this.ctiConfig; }
+  public updateCtiConfig(config: Partial<CtiIntegrationConfig>): void {
+    this.ctiConfig = { ...this.ctiConfig, ...config, lastPing: new Date().toLocaleTimeString() };
+    this.save('kala_cti_config', this.ctiConfig);
+    this.logAudit('IMPORT_AUDIO', 'Connecteur CTI', `Mise à jour configuration CTI : ${this.ctiConfig.provider} (${this.ctiConfig.status})`);
+    this.notify();
+  }
+
+  // --- Campagnes CRUD & Import ---
+  public addCampaign(campaign: Omit<Campaign, 'id' | 'createdAt'>): Campaign {
+    const newCamp: Campaign = {
+      ...campaign,
+      id: `camp-${Date.now()}`,
+      createdAt: new Date().toISOString().substring(0, 10)
+    };
+    this.campaigns.push(newCamp);
+    this.save('kala_campaigns', this.campaigns);
+    this.logAudit('IMPORT_AUDIO', `Campagne ${newCamp.name}`, 'Nouvelle campagne créée');
+    this.notify();
+    return newCamp;
+  }
+  public updateCampaign(campaign: Campaign): void {
+    const idx = this.campaigns.findIndex(c => c.id === campaign.id);
+    if (idx !== -1) {
+      this.campaigns[idx] = campaign;
+      this.save('kala_campaigns', this.campaigns);
+      this.logAudit('IMPORT_AUDIO', `Campagne ${campaign.name}`, 'Paramètres de campagne mis à jour');
+      this.notify();
+    }
   }
 
   public resetToFactoryDefaults(): void {
