@@ -10,19 +10,21 @@ interface TeamsCampaignsViewProps {
   onSelectAgent: (id: string) => void;
   onNavigate: (view: any) => void;
   currentRole: UserRole;
+  defaultTab?: 'CAMPAIGNS' | 'TEAMS' | 'CTI';
 }
 
 export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({ 
   onSelectAgent, 
   onNavigate,
-  currentRole
+  currentRole,
+  defaultTab = 'CAMPAIGNS'
 }) => {
   const campaigns = storageService.getCampaigns();
   const teams = storageService.getTeams();
   const agents = storageService.getAgents();
   const ctiConfig = storageService.getCtiConfig();
 
-  const [activeTab, setActiveTab] = useState<'CAMPAIGNS' | 'TEAMS' | 'CTI'>('CAMPAIGNS');
+  const [activeTab, setActiveTab] = useState<'CAMPAIGNS' | 'TEAMS' | 'CTI'>(defaultTab);
 
   // État Modal Création Campagne
   const [showCampModal, setShowCampModal] = useState(false);

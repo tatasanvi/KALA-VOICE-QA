@@ -128,6 +128,11 @@ class StorageService {
   public getUsers(): User[] { return this.users; }
   public getCurrentUser(): User { return this.currentUser; }
 
+  public setCurrentUser(user: User): void {
+    this.currentUser = user;
+    this.save('kala_current_user', this.currentUser);
+  }
+
   public createUser(data: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'>): User {
     const newUser: User = {
       ...data,

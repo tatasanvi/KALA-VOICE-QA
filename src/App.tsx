@@ -1,6 +1,28 @@
+// =============================================================================
+// KALA VOICE QA — Application Principale (App.tsx)
+// Routage React Router, Protection des Routes RBAC, Authentification & Layout Métier
+// =============================================================================
 import React, { useState, useEffect } from 'react';
+import { 
+  BrowserRouter, Routes, Route, Navigate, 
+  useParams, useNavigate, useLocation, Outlet 
+} from 'react-router-dom';
+
+// Context & Guards
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ProtectedRoute, RoleGuard } from './components/common/RouteGuards';
+
+// Navigation & Layout
 import { Navbar } from './components/common/Navbar';
-import { Sidebar, ViewType } from './components/common/Sidebar';
+import { Sidebar } from './components/common/Sidebar';
+
+// Public Views
+import { LoginView } from './components/views/LoginView';
+import { ForgotPasswordView } from './components/views/ForgotPasswordView';
+import { ResetPasswordView } from './components/views/ResetPasswordView';
+import { OnboardingView } from './components/views/OnboardingView';
+
+// Protected Views
 import { DashboardView } from './components/views/DashboardView';
 import { CallsView } from './components/views/CallsView';
 import { TranscriptionStudioView } from './components/views/TranscriptionStudioView';
@@ -13,27 +35,14 @@ import { TeamsCampaignsView } from './components/views/TeamsCampaignsView';
 import { ExperimentLabView } from './components/views/ExperimentLabView';
 import { ReportsView } from './components/views/ReportsView';
 import { SettingsAuditView } from './components/views/SettingsAuditView';
-import { LoginModal } from './components/common/LoginModal';
-import { storageService } from './services/storageService';
+import { UserManagementView } from './components/views/UserManagementView';
+
 import { authApi } from './services/apiClient';
-import { UserRole } from './types';
 
-export const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<ViewType>('dashboard');
-  const [selectedCallId, setSelectedCallId] = useState<string>('call-101');
-  const [selectedAgentId, setSelectedAgentId] = useState<string>('agent-1');
-  const [currentRole, setCurrentRole] = useState<UserRole>(() => storageService.getCurrentUser().role);
-  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+// ─── Layout Authentifié avec Sidebar, Navbar & Bannière Master 2 ───────────────
+const AppLayout: React.FC = () => {
+  const location = useLocation();
   const [isApiOnline, setIsApiOnline] = useState<boolean>(true);
-  const [, setTick] = useState<number>(0);
-
-  // Souscription aux changements d'état du service de stockage
-  useEffect(() => {
-    const unsub = storageService.subscribe(() => {
-      setTick(t => t + 1);
-    });
-    return () => unsub();
-  }, []);
 
   // Tester la connectivité de l'API backend
   useEffect(() => {
@@ -44,61 +53,33 @@ export const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleRoleChange = (newRole: UserRole) => {
-    setCurrentRole(newRole);
-    storageService.setCurrentUserRole(newRole);
-
-    // Navigation contextuelle automatique selon le rôle choisi
-    if (newRole === 'QA_MANAGER') {
-      setActiveView('quality');
-    } else if (newRole === 'TRAINER') {
-      setActiveView('coaching');
-    } else if (newRole === 'AGENT') {
-      setActiveView('agents');
-    } else if (newRole === 'SUPERVISOR') {
-      setActiveView('calls');
-    } else {
-      setActiveView('dashboard');
-    }
-  };
-
-  const viewTitles: Record<ViewType, string> = {
-    dashboard: "Tableau de Bord Exécutif Centre d'Appels",
-    calls: "Registre des Appels & Enregistrements",
-    transcriptions: "Studio Audio & Transcription Synchronisée",
-    analytics: "Analyse Sémantique & Intelligence Conversationnelle",
-    quality: "Espace Contrôle Qualité & Évaluation Assistée",
-    coaching: "Espace Coaching & Recommandations de Progrès",
-    training: "Académie & Modules de Formation Métier",
-    agents: "Fiches Conseillers & Profils 360°",
-    teams: "Structure des Équipes & Campagnes",
-    campaigns: "Structure des Campagnes Métiers",
-    reports: "Rapports d'Audit & Synthèses Métiers",
-    experimentation: "Laboratoire Expérimental ASR (Mémoire Master IA)",
-    settings: "Sécurité, Traçabilité & Paramètres Système"
+  const getPageTitle = (path: string): string => {
+    if (path.startsWith('/dashboard')) return "Tableau de Bord Exécutif Centre d'Appels";
+    if (path.startsWith('/appels')) return "Registre des Appels & Enregistrements";
+    if (path.startsWith('/transcriptions')) return "Studio Audio & Transcription Synchronisée";
+    if (path.startsWith('/analytics')) return "Analyse Sémantique & Intelligence Conversationnelle";
+    if (path.startsWith('/qualite')) return "Espace Contrôle Qualité & Évaluation Assistée";
+    if (path.startsWith('/coaching')) return "Espace Coaching & Recommandations de Progrès";
+    if (path.startsWith('/formation')) return "Académie & Modules de Formation Métier";
+    if (path.startsWith('/agents')) return "Fiches Conseillers & Profils 360°";
+    if (path.startsWith('/equipes')) return "Structure des Équipes & Plateaux Télécom";
+    if (path.startsWith('/campagnes')) return "Structure des Campagnes Métiers";
+    if (path.startsWith('/rapports')) return "Rapports d'Audit & Synthèses Métiers";
+    if (path.startsWith('/experimentation')) return "Laboratoire Expérimental ASR (Mémoire Master IA)";
+    if (path.startsWith('/parametres')) return "Sécurité, Traçabilité & Paramètres Système";
+    if (path.startsWith('/admin/users')) return "Administration & Gestion des Comptes Utilisateurs";
+    return "KALA VOICE QA — Plateforme Intelligente d'Analyse Vocale";
   };
 
   return (
     <div className="app-container">
-      {/* Sidebar de navigation */}
-      <Sidebar 
-        activeView={activeView} 
-        onSelectView={setActiveView} 
-        currentRole={currentRole} 
-      />
+      {/* Sidebar de navigation avec sections RBAC */}
+      <Sidebar />
 
       {/* Zone Principale */}
       <div className="main-wrapper">
         <Navbar 
-          currentRole={currentRole} 
-          onRoleChange={handleRoleChange} 
-          activeViewTitle={viewTitles[activeView]} 
-          onNavigate={setActiveView}
-          onOpenLogin={() => setShowLoginModal(true)}
-          onLogout={() => {
-            authApi.logout();
-            handleRoleChange('AGENT');
-          }}
+          activeViewTitle={getPageTitle(location.pathname)} 
           isOnline={isApiOnline}
         />
 
@@ -137,108 +118,269 @@ export const App: React.FC = () => {
         </div>
 
         <main className="content-area">
-          {activeView === 'dashboard' && (
-            <DashboardView 
-              onSelectCall={setSelectedCallId} 
-              onNavigate={setActiveView} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'calls' && (
-            <CallsView 
-              onSelectCall={setSelectedCallId} 
-              onNavigate={setActiveView} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'transcriptions' && (
-            <TranscriptionStudioView 
-              selectedCallId={selectedCallId} 
-              onSelectCall={setSelectedCallId} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'analytics' && (
-            <NlpAnalyticsView 
-              selectedCallId={selectedCallId} 
-              onSelectCall={setSelectedCallId} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'quality' && (
-            <QualityControlView 
-              selectedCallId={selectedCallId} 
-              onSelectCall={setSelectedCallId} 
-              onNavigate={setActiveView} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'coaching' && (
-            <CoachingView 
-              onNavigate={setActiveView} 
-              onSelectAgent={setSelectedAgentId} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'training' && (
-            <TrainingView 
-              onNavigate={setActiveView} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'agents' && (
-            <AgentProfileView 
-              selectedAgentId={selectedAgentId} 
-              onSelectAgent={setSelectedAgentId} 
-              onSelectCall={setSelectedCallId} 
-              onNavigate={setActiveView} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'teams' && (
-            <TeamsCampaignsView 
-              onSelectAgent={setSelectedAgentId} 
-              onNavigate={setActiveView} 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'reports' && (
-            <ReportsView 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'experimentation' && (
-            <ExperimentLabView 
-              currentRole={currentRole} 
-            />
-          )}
-
-          {activeView === 'settings' && (
-            <SettingsAuditView 
-              currentRole={currentRole} 
-            />
-          )}
+          <Outlet />
         </main>
       </div>
-
-      {/* Modal d'Authentification / Login */}
-      <LoginModal 
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLoginSuccess={(user) => {
-          handleRoleChange(user.role);
-        }}
-      />
     </div>
   );
 };
+
+// ─── Wrappers de Vues avec support des paramètres d'URL (useParams) ───────────
+
+const CallsRouteWrapper: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <CallsView 
+      initialCallId={id}
+      onSelectCall={(callId) => navigate(`/appels/${callId}`)}
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const DashboardRouteWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <DashboardView 
+      onSelectCall={(callId) => navigate(`/appels/${callId}`)}
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const TranscriptionRouteWrapper: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <TranscriptionStudioView 
+      selectedCallId={id || 'call-101'}
+      onSelectCall={(callId) => navigate(`/transcriptions/${callId}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const AnalyticsRouteWrapper: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <NlpAnalyticsView 
+      selectedCallId={id || 'call-101'}
+      onSelectCall={(callId) => navigate(`/analytics/${callId}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const QualityRouteWrapper: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <QualityControlView 
+      selectedCallId={id || 'call-101'}
+      onSelectCall={(callId) => navigate(`/qualite/evaluations/${callId}`)}
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const CoachingRouteWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <CoachingView 
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      onSelectAgent={(agentId) => navigate(`/agents/${agentId}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const TrainingRouteWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <TrainingView 
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const AgentsRouteWrapper: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <AgentProfileView 
+      selectedAgentId={id || 'agent-1'}
+      onSelectAgent={(agentId) => navigate(`/agents/${agentId}`)}
+      onSelectCall={(callId) => navigate(`/appels/${callId}`)}
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const TeamsRouteWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <TeamsCampaignsView 
+      defaultTab="TEAMS"
+      onSelectAgent={(agentId) => navigate(`/agents/${agentId}`)}
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const CampaignsRouteWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  const { role } = useAuth();
+
+  return (
+    <TeamsCampaignsView 
+      defaultTab="CAMPAIGNS"
+      onSelectAgent={(agentId) => navigate(`/agents/${agentId}`)}
+      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
+      currentRole={role || 'AGENT'}
+    />
+  );
+};
+
+const ReportsRouteWrapper: React.FC = () => {
+  const { role } = useAuth();
+  return <ReportsView currentRole={role || 'AGENT'} />;
+};
+
+const ExperimentLabRouteWrapper: React.FC = () => {
+  const { role } = useAuth();
+  return <ExperimentLabView currentRole={role || 'AGENT'} />;
+};
+
+const SettingsRouteWrapper: React.FC = () => {
+  const { role } = useAuth();
+  return <SettingsAuditView currentRole={role || 'AGENT'} />;
+};
+
+const UserManagementRouteWrapper: React.FC = () => {
+  const { user } = useAuth();
+  return <UserManagementView currentUserId={user?.id || ''} />;
+};
+
+// ─── Racine App ───────────────────────────────────────────────────────────────
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Routes Publiques */}
+          <Route path="/login" element={<LoginView />} />
+          <Route path="/forgot-password" element={<ForgotPasswordView />} />
+          <Route path="/reset-password" element={<ResetPasswordView />} />
+
+          {/* Onboarding Première Connexion */}
+          <Route 
+            path="/onboarding" 
+            element={
+              <ProtectedRoute>
+                <OnboardingView />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Routes Protégées sous Layout Principal */}
+          <Route 
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardRouteWrapper />} />
+
+            {/* Appels & Fiche Détail */}
+            <Route path="/appels" element={<CallsRouteWrapper />} />
+            <Route path="/appels/:id" element={<CallsRouteWrapper />} />
+
+            {/* Transcriptions & Studio Audio */}
+            <Route path="/transcriptions" element={<TranscriptionRouteWrapper />} />
+            <Route path="/transcriptions/:id" element={<TranscriptionRouteWrapper />} />
+
+            {/* Analyse IA */}
+            <Route path="/analytics" element={<AnalyticsRouteWrapper />} />
+            <Route path="/analytics/:id" element={<AnalyticsRouteWrapper />} />
+
+            {/* Contrôle Qualité */}
+            <Route path="/qualite" element={<QualityRouteWrapper />} />
+            <Route path="/qualite/evaluations" element={<QualityRouteWrapper />} />
+            <Route path="/qualite/evaluations/:id" element={<QualityRouteWrapper />} />
+
+            {/* Coaching & Formation */}
+            <Route path="/coaching" element={<CoachingRouteWrapper />} />
+            <Route path="/coaching/:id" element={<CoachingRouteWrapper />} />
+            <Route path="/formation" element={<TrainingRouteWrapper />} />
+            <Route path="/formation/:id" element={<TrainingRouteWrapper />} />
+
+            {/* Agents & Équipes & Campagnes */}
+            <Route path="/agents" element={<AgentsRouteWrapper />} />
+            <Route path="/agents/:id" element={<AgentsRouteWrapper />} />
+            <Route path="/equipes" element={<TeamsRouteWrapper />} />
+            <Route path="/equipes/:id" element={<TeamsRouteWrapper />} />
+            <Route path="/campagnes" element={<CampaignsRouteWrapper />} />
+            <Route path="/campagnes/:id" element={<CampaignsRouteWrapper />} />
+
+            {/* Rapports & Expérimentation */}
+            <Route path="/rapports" element={<ReportsRouteWrapper />} />
+            <Route path="/experimentation" element={<ExperimentLabRouteWrapper />} />
+
+            {/* Administration & Paramètres (RBAC Protégé) */}
+            <Route 
+              path="/parametres" 
+              element={
+                <RoleGuard allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER']}>
+                  <SettingsRouteWrapper />
+                </RoleGuard>
+              } 
+            />
+
+            <Route 
+              path="/admin/users" 
+              element={
+                <RoleGuard allowedRoles={['ADMIN']}>
+                  <UserManagementRouteWrapper />
+                </RoleGuard>
+              } 
+            />
+          </Route>
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+};
+
+export default App;

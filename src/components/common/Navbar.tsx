@@ -1,16 +1,21 @@
+// =============================================================================
+// KALA VOICE QA — Barre Supérieure (Navbar)
+// Statut API, Débruiteur KALA, Notifications en direct & Sélecteur de Rôle RBAC
+// =============================================================================
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserRole, TeamNotification } from '../../types';
 import { storageService } from '../../services/storageService';
+import { useAuth } from '../../context/AuthContext';
 import { 
-  ShieldCheck, UserCheck, Sparkles, Bell, LogOut, Check, ExternalLink, 
+  ShieldCheck, UserCheck, Sparkles, Bell, LogOut, Check, 
   Wifi, WifiOff, X
 } from 'lucide-react';
-import { authApi } from '../../services/apiClient';
 
 interface NavbarProps {
-  currentRole: UserRole;
-  onRoleChange: (role: UserRole) => void;
-  activeViewTitle: string;
+  currentRole?: UserRole;
+  onRoleChange?: (role: UserRole) => void;
+  activeViewTitle?: string;
   onNavigate?: (view: any) => void;
   onOpenLogin?: () => void;
   onLogout?: () => void;
@@ -18,32 +23,59 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
-  currentRole, 
-  onRoleChange, 
-  activeViewTitle,
+  activeViewTitle = "KALA VOICE QA — Plateforme Intelligente d'Analyse Vocale",
   onNavigate,
-  onOpenLogin,
-  onLogout,
   isOnline = true
 }) => {
-  const currentUser = storageService.getCurrentUser();
+  const navigate = useNavigate();
+  const { user, role, switchRole, logout } = useAuth();
   const notifications = storageService.getNotifications();
   const unreadCount = storageService.getUnreadNotificationCount();
 
   const [showNotifications, setShowNotifications] = useState(false);
 
   const roleLabels: Record<UserRole, { label: string; badge: string; color: string }> = {
-    ADMIN: { label: 'Administrateur', badge: 'Système & IA', color: 'badge-purple' },
-    MANAGER: { label: 'Manager Opérations', badge: 'Direction Métier', color: 'badge-blue' },
-    SUPERVISOR: { label: 'Superviseur', badge: 'Plateau Télécom', color: 'badge-blue' },
-    QA_MANAGER: { label: 'Responsable Qualité', badge: 'Audit & Conformité', color: 'badge-green' },
-    TRAINER: { label: 'Formateur / Coach', badge: 'Académie Métier', color: 'badge-amber' },
-    AGENT: { label: 'Conseiller Client', badge: 'Équipe Alpha', color: 'badge-gray' }
+    ADMIN:      { label: 'Administrateur',    badge: 'Système & IA',       color: 'badge-purple' },
+    MANAGER:    { label: 'Manager Opérations',badge: 'Direction Métier',   color: 'badge-blue' },
+    SUPERVISOR: { label: 'Superviseur',       badge: 'Plateau Télécom',    color: 'badge-blue' },
+    QA_MANAGER: { label: 'Responsable Qualité',badge: 'Audit & Conformité', color: 'badge-green' },
+    TRAINER:    { label: 'Formateur / Coach', badge: 'Académie Métier',    color: 'badge-amber' },
+    AGENT:      { label: 'Conseiller Client', badge: 'Équipe Alpha',       color: 'badge-gray' }
+  };
+
+  const currentRole = role || 'AGENT';
+
+  const handleRoleChangeInternal = (newRole: UserRole) => {
+    switchRole(newRole);
+
+    // Redirection automatique contextuelle selon le rôle choisi
+    if (newRole === 'QA_MANAGER') {
+      navigate('/qualite');
+    } else if (newRole === 'TRAINER') {
+      navigate('/coaching');
+    } else if (newRole === 'AGENT') {
+      navigate('/agents');
+    } else if (newRole === 'SUPERVISOR') {
+      navigate('/appels');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const handleNotificationClick = (notif: TeamNotification) => {
     storageService.markNotificationAsRead(notif.id);
-    if (notif.targetView && onNavigate) {
+    if (notif.targetView) {
+      const routeMap: Record<string, string> = {
+        calls: '/appels',
+        quality: '/qualite',
+        coaching: '/coaching',
+        training: '/formation',
+        dashboard: '/dashboard',
+        agents: '/agents'
+      };
+      navigate(routeMap[notif.targetView] || `/${notif.targetView}`);
+      setShowNotifications(false);
+    } else if (onNavigate) {
       onNavigate(notif.targetView);
       setShowNotifications(false);
     }
@@ -75,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             fontWeight: 600,
             color: isOnline ? '#34d399' : '#f87171'
           }}
-          title={isOnline ? "API Backend Express & Base SQLite connectés (:8000)" : "API hors-ligne : Mode Fallback Local Storage actif"}
+          title={isOnline ? "API Backend Express & Base SQLite connectés (:8000)" : "Mode Fallback Local Storage actif"}
         >
           {isOnline ? <Wifi size={13} /> : <WifiOff size={13} />}
           <span>{isOnline ? 'API Connectée' : 'Hors-Ligne'}</span>
@@ -101,73 +133,80 @@ export const Navbar: React.FC<NavbarProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: showNotifications ? 'var(--primary)' : 'rgba(255,255,255,0.06)'
+              background: showNotifications ? 'rgba(255,255,255,0.1)' : undefined
             }}
-            title="Notifications d'équipe & alertes"
+            title="Notifications d'équipe et alertes qualité"
           >
-            <Bell size={16} color="white" />
+            <Bell size={16} />
             {unreadCount > 0 && (
               <span style={{
                 position: 'absolute',
-                top: '-4px',
-                right: '-4px',
+                top: '-3px',
+                right: '-3px',
                 background: '#ef4444',
-                color: 'white',
+                color: '#ffffff',
                 fontSize: '10px',
-                fontWeight: 800,
-                width: '18px',
-                height: '18px',
+                fontWeight: 700,
+                width: '16px',
+                height: '16px',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '2px solid var(--surface-1)'
+                border: '2px solid #0f172a'
               }}>
                 {unreadCount}
               </span>
             )}
           </button>
 
-          {/* Popover Notifications */}
+          {/* Panneau déroulant des notifications */}
           {showNotifications && (
             <div style={{
               position: 'absolute',
+              top: 'calc(100% + 10px)',
               right: 0,
-              top: '46px',
               width: '360px',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border-active)',
+              background: 'rgba(15, 23, 42, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: 'var(--radius-lg)',
               boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(16px)',
               zIndex: 1000,
               overflow: 'hidden'
             }}>
               <div style={{
                 padding: '12px 16px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                borderBottom: '1px solid var(--border-subtle)',
-                background: 'rgba(0,0,0,0.2)'
+                alignItems: 'center'
               }}>
-                <div style={{ fontWeight: 700, fontSize: '13.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Bell size={15} color="var(--primary-light)" />
-                  <span>Alertes & Notifications ({unreadCount})</span>
+                <div style={{ fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Bell size={14} color="#60a5fa" />
+                  <span>Alertes Opérationnelles</span>
                 </div>
-                {unreadCount > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button 
                     onClick={() => storageService.markAllNotificationsAsRead()}
-                    style={{ background: 'none', border: 'none', color: 'var(--primary-light)', fontSize: '11px', cursor: 'pointer', fontWeight: 600 }}
+                    style={{ background: 'none', border: 'none', color: '#60a5fa', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
                   >
+                    <Check size={12} />
                     Tout marquer lu
                   </button>
-                )}
+                  <button 
+                    onClick={() => setShowNotifications(false)}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
               </div>
 
               <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
-                  <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-                    Aucune notification
+                  <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>
+                    Aucune notification active
                   </div>
                 ) : (
                   notifications.map(n => (
@@ -176,7 +215,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onClick={() => handleNotificationClick(n)}
                       style={{
                         padding: '12px 16px',
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
                         background: n.read ? 'transparent' : 'rgba(99, 102, 241, 0.08)',
                         cursor: 'pointer',
                         transition: 'background 0.2s',
@@ -218,14 +257,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rôle :</span>
           <select 
             value={currentRole} 
-            onChange={(e) => onRoleChange(e.target.value as UserRole)}
+            onChange={(e) => handleRoleChangeInternal(e.target.value as UserRole)}
             className="role-select"
             title="Basculez entre les rôles pour tester les permissions et les vues dédiées"
           >
             <option value="QA_MANAGER">Claire Delattre (Responsable Qualité)</option>
             <option value="SUPERVISOR">Marc Vasseur (Superviseur Plateau)</option>
             <option value="TRAINER">Patrick Simon (Formateur / Coach)</option>
-            <option value="AGENT">Jean Dupont (Agent Conseiller)</option>
+            <option value="AGENT">Koffi Mensah (Conseiller Client)</option>
             <option value="MANAGER">Sophie Laurent (Directrice Opérations)</option>
             <option value="ADMIN">Alexandre Moreau (Administrateur IA)</option>
           </select>
@@ -234,41 +273,30 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Utilisateur Actif & Déconnexion */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img 
-            src={currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'} 
-            alt={currentUser.name} 
+            src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'} 
+            alt={user?.name || 'Utilisateur'} 
             style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', border: '2px solid var(--border-active)', objectFit: 'cover' }}
           />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1.2 }}>{currentUser.name}</div>
+            <div style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1.2 }}>{user?.name || 'Invité'}</div>
             <span className={`badge ${roleLabels[currentRole].color}`} style={{ padding: '1px 6px', fontSize: '10.5px', marginTop: '2px' }}>
               <ShieldCheck size={10} style={{ marginRight: '3px' }} />
               {roleLabels[currentRole].label}
             </span>
           </div>
 
-          {/* Bouton Changer de Compte / Login */}
-          {onOpenLogin && (
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={onOpenLogin}
-              style={{ padding: '6px 10px', fontSize: '11.5px', display: 'flex', alignItems: 'center', gap: '5px' }}
-              title="Changer d'utilisateur ou s'authentifier"
-            >
-              <UserCheck size={13} />
-              <span>Connexion</span>
-            </button>
-          )}
-
-          {onLogout && (
-            <button 
-              className="btn btn-outline-danger btn-sm"
-              onClick={onLogout}
-              style={{ padding: '6px 8px' }}
-              title="Se déconnecter de la session"
-            >
-              <LogOut size={13} />
-            </button>
-          )}
+          {/* Bouton Déconnexion */}
+          <button 
+            className="btn btn-outline-danger btn-sm"
+            onClick={() => {
+              logout();
+              navigate('/login', { replace: true });
+            }}
+            style={{ padding: '6px 8px' }}
+            title="Se déconnecter de la session"
+          >
+            <LogOut size={13} />
+          </button>
         </div>
       </div>
     </header>

@@ -13,6 +13,7 @@ interface CallsViewProps {
   onSelectCall: (callId: string) => void;
   onNavigate: (view: any) => void;
   currentRole: UserRole;
+  initialCallId?: string;
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -37,7 +38,7 @@ const StatusBadge: React.FC<{ status?: CallStatus }> = ({ status }) => {
   );
 };
 
-export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, currentRole }) => {
+export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, currentRole, initialCallId }) => {
   const calls = storageService.getCalls();
   const campaigns = storageService.getCampaigns();
   const teams = storageService.getTeams();
@@ -49,9 +50,21 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
   const [selectedResolution, setSelectedResolution] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
-  const [selectedCall, setSelectedCall] = useState<Call | null>(null);
+  const [selectedCall, setSelectedCall] = useState<Call | null>(() => {
+    if (initialCallId) {
+      return calls.find(c => c.id === initialCallId) || null;
+    }
+    return null;
+  });
   const [sortField, setSortField] = useState<string>('callDate');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  React.useEffect(() => {
+    if (initialCallId) {
+      const found = calls.find(c => c.id === initialCallId);
+      if (found) setSelectedCall(found);
+    }
+  }, [initialCallId, calls]);
 
   const filteredCalls = calls.filter(c => {
     if (selectedCampaign !== 'ALL' && c.campaignId !== selectedCampaign) return false;

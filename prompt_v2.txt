@@ -1,0 +1,108 @@
+<USER_REQUEST>
+KALA VOICE QA — ANTIGRAVITY V2
+Transformation en plateforme SaaS métier complète avec authentification, rôles, workflow QA, coaching et formation
+0. RÈGLE ABSOLUE — À LIRE AVANT TOUT
+Tu travailles sur une application EXISTANTE :
+[https://kala-voice-qa.vercel.app/](https://kala-voice-qa.vercel.app/)
+NE RECONSTRUIS PAS L'APPLICATION DEPUIS ZÉRO.
+Avant toute modification :
+Analyse entièrement le projet existant.
+Identifie le framework utilisé.
+Identifie l'architecture des dossiers.
+Identifie les routes existantes.
+Identifie les composants réutilisables.
+Identifie le système de design existant.
+Identifie les données/mock data existantes.
+Identifie les éventuelles intégrations backend/API.
+Identifie si Supabase est déjà présent.
+Identifie les fonctionnalités déjà implémentées.
+Identifie les pages qui sont uniquement visuelles et celles qui sont réellement fonctionnelles.
+Ne supprime aucune fonctionnalité existante utile.
+Réutilise au maximum les composants existants.
+Ne crée pas de doublons de pages, composants ou services.
+Avant de modifier une architecture existante, comprends son fonctionnement.
+OBJECTIF :
+Transformer KALA VOICE QA en une véritable plateforme SaaS B2B professionnelle destinée aux centres de contacts / call centers.
+Le produit doit permettre :
+AUDIO
+→ TRANSCRIPTION
+→ ANALYSE IA
+→ CONTRÔLE QUALITÉ
+→ IDENTIFICATION DES LACUNES
+→ COACHING
+→ FORMATION
+→ RÉÉVALUATION
+→ SUIVI DE PERFORMANCE
+La transcription vocale en environnement bruité reste le cœur technologique et scientifique du produit.
+La Qualité, le Coaching et la Formation constituent les applications métier.
+1. POSITIONNEMENT DU PRODUIT
+Nom :
+KALA VOICE QA
+Sous-titre :
+Plateforme intelligente d'analyse vocale & qualité
+Positionnement :
+Une plateforme SaaS intelligente permettant aux centres de contacts d'analyser leurs conversations, automatiser une partie du contrôle qualité, identifier les lacunes des agents et transformer les résultats des évaluations en actions de coa
+<truncated 22077 bytes>
+ peux réellement gérer un centre de contacts avec cet outil."
+et non :
+"Ceci est une maquette de dashboard."
+51. LIVRABLE FINAL
+À la fin du travail :
+Vérifie toute l'application.
+Vérifie toutes les routes.
+Vérifie l'authentification.
+Vérifie les permissions.
+Vérifie le workflow métier.
+Vérifie la cohérence des données.
+Vérifie le responsive.
+Vérifie les états loading/error/empty.
+Supprime les composants inutilisés.
+Corrige les erreurs console.
+Corrige les liens morts.
+Vérifie les erreurs TypeScript/JavaScript.
+Vérifie les variables d'environnement nécessaires.
+Vérifie l'intégration Supabase si utilisée.
+Ne casse aucune fonctionnalité existante.
+Puis fournir un résumé final :
+CE QUI EXISTAIT
+...
+CE QUI A ÉTÉ MODIFIÉ
+...
+CE QUI EST RÉELLEMENT FONCTIONNEL
+...
+CE QUI RESTE À CONNECTER
+...
+VARIABLES D'ENVIRONNEMENT NÉCESSAIRES
+...
+TESTS EFFECTUÉS
+...
+PROCHAINES ÉTAPES RECOMMANDÉES
+...
+IMPORTANT :
+Si une fonctionnalité ne peut pas être réellement connectée à cause d'une dépendance externe, ne l'invente pas.
+Signale précisément ce qui manque et laisse une architecture propre permettant son intégration ultérieure.
+OBJECTIF FINAL
+KALA VOICE QA doit devenir une plateforme cohérente selon ce modèle :
+KALA VOICE QA │ AUTHENTIFICATION │ RBAC │ DASHBOARD │ ┌────────────────┼────────────────┐ │ │ │ APPELS QUALITÉ AGENTS │ │ │ ▼ ▼ ▼
+TRANSCRIPTION ÉVALUATION PERFORMANCE
+│ │
+▼ ▼
+ANALYSE IA LACUNES
+│ │
+└────────┬───────┘
+▼
+COACHING
+│
+▼
+FORMATION
+│
+▼
+RÉÉVALUATION
+│
+▼
+PROGRESSION
+La plateforme doit être pensée comme un véritable produit SaaS B2B IA destiné aux centres de contacts, tout en constituant le prototype applicatif de la recherche académique sur l'amélioration de la transcription vocale en milieux bruités.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-14T21:28:00Z.
+</ADDITIONAL_METADATA>
