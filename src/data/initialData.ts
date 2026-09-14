@@ -3,6 +3,7 @@ import {
   QualityEvaluation, CoachingPlan, TrainingModule, TrainingSession, 
   ExperimentConfiguration, BenchmarkSample, AuditLogEntry, DashboardMetrics
 } from '../types';
+import { generateCallsDataset } from './callsGenerator';
 
 export const INITIAL_USERS: User[] = [
   {
@@ -121,33 +122,43 @@ export const INITIAL_CAMPAIGNS: Campaign[] = [
 export const INITIAL_TEAMS: Team[] = [
   {
     id: 'team-1',
-    name: 'Équipe Alpha — Relations Clients',
+    name: 'Équipe Alpha — Relations Clients & Fibre',
     supervisorId: 'user-supervisor',
     supervisorName: 'Marc Vasseur',
-    description: 'Pôle spécialisé dans la gestion des demandes entrantes à forte valeur ajoutée.',
-    memberCount: 12,
+    description: 'Pôle spécialisé dans le support technique et la gestion des demandes entrantes à forte valeur.',
+    memberCount: 5,
     averageQualityScore: 82.4,
     createdAt: '2024-01-20'
   },
   {
     id: 'team-2',
-    name: 'Équipe Phénix — Rétention & Sauvetage',
+    name: 'Équipe Beta — Assurance Auto & Habitation',
     supervisorId: 'user-supervisor',
-    supervisorName: 'Hélène Mercier',
-    description: 'Cellule d\'experts en négociation et fidélisation des abonnés insatisfaits.',
-    memberCount: 10,
-    averageQualityScore: 86.1,
-    createdAt: '2024-02-01'
+    supervisorName: 'Karim Belkacem',
+    description: 'Instruction technique et légale des dossiers de sinistres et urgences habitation.',
+    memberCount: 5,
+    averageQualityScore: 86.8,
+    createdAt: '2024-02-10'
   },
   {
     id: 'team-3',
-    name: 'Équipe Titan — Sinistres Complexes',
+    name: 'Équipe Gamma — Énergie & Facturation Verte',
     supervisorId: 'user-supervisor',
-    supervisorName: 'Karim Belkacem',
-    description: 'Instruction technique et légale des dossiers d\'indemnisation assurantielle.',
-    memberCount: 8,
-    averageQualityScore: 88.7,
-    createdAt: '2024-02-10'
+    supervisorName: 'Sophie Laurent',
+    description: 'Gestion de la relation abonnés et facturation dynamique électricité renouvelable.',
+    memberCount: 5,
+    averageQualityScore: 83.2,
+    createdAt: '2024-02-15'
+  },
+  {
+    id: 'team-4',
+    name: 'Équipe Phénix — Rétention & Sauvetage',
+    supervisorId: 'user-supervisor',
+    supervisorName: 'Hélène Mercier',
+    description: 'Cellule d\'experts en négociation, désamorçage de crise et fidélisation des abonnés insatisfaits.',
+    memberCount: 5,
+    averageQualityScore: 85.5,
+    createdAt: '2024-02-01'
   }
 ];
 
@@ -159,12 +170,12 @@ export const INITIAL_AGENTS: Agent[] = [
     email: 'j.dupont@kalavoice.ai',
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150',
     teamId: 'team-1',
-    teamName: 'Équipe Alpha — Relations Clients',
+    teamName: 'Équipe Alpha — Relations Clients & Fibre',
     campaignId: 'camp-1',
     campaignName: 'Télécom Fibre & Mobile — Rétention',
     hireDate: '2023-09-01',
     seniority: '18 mois',
-    status: 'EN_COACHING',
+    status: 'ACTIF',
     callsAnalyzedCount: 142,
     averageQualityScore: 84.0,
     monthlyScores: [
@@ -190,15 +201,50 @@ export const INITIAL_AGENTS: Agent[] = [
   {
     id: 'agent-2',
     userId: 'user-agent-2',
+    name: 'Koffi Mensah',
+    email: 'k.mensah@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-4',
+    teamName: 'Équipe Phénix — Rétention & Sauvetage',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2023-02-15',
+    seniority: '14 mois',
+    status: 'EN_COACHING',
+    callsAnalyzedCount: 118,
+    averageQualityScore: 81.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 68 },
+      { month: 'Février', score: 72 },
+      { month: 'Mars', score: 76 },
+      { month: 'Avril', score: 81 }
+    ],
+    strengths: [
+      'Courtoisie exemplaire et phraséologie posée',
+      'Clôture d\'appel soignée et prise de congé chaleureuse',
+      'Patience remarquable face aux clients mécontents'
+    ],
+    improvementAxes: [
+      'Gestion des objections',
+      'Reformulation',
+      'Respect du script'
+    ],
+    assignedCoachingPlanId: 'coach-plan-koffi',
+    completedTrainingsCount: 3,
+    complianceRate: 91.5
+  },
+  {
+    id: 'agent-3',
+    userId: 'user-agent-3',
     name: 'Sarah Benali',
     email: 's.benali@kalavoice.ai',
     avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150',
     teamId: 'team-2',
-    teamName: 'Équipe Phénix — Rétention & Sauvetage',
-    campaignId: 'camp-1',
-    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    teamName: 'Équipe Beta — Assurance Auto & Habitation',
+    campaignId: 'camp-2',
+    campaignName: 'Assurance Auto & Habitation — Sinistres',
     hireDate: '2022-04-15',
-    seniority: '2 ans et demi',
+    seniority: '2 ans',
     status: 'ACTIF',
     callsAnalyzedCount: 230,
     averageQualityScore: 92.0,
@@ -208,116 +254,452 @@ export const INITIAL_AGENTS: Agent[] = [
       { month: 'Mars', score: 89 },
       { month: 'Avril', score: 92 }
     ],
-    strengths: [
-      'Excellente négociation et rétention client',
-      'Résolution immédiate au premier contact (FCR)',
-      'Clarté et précision des explications techniques'
-    ],
-    improvementAxes: [
-      'Optimisation de la durée moyenne de conversation (DMT)',
-      'Prise de congé plus synthétique'
-    ],
+    strengths: ['Excellente négociation', 'Résolution immédiate (FCR)', 'Clarté technique'],
+    improvementAxes: ['Optimisation DMT', 'Synthèse rapide'],
     completedTrainingsCount: 5,
     complianceRate: 98.0
   },
   {
-    id: 'agent-3',
-    userId: 'user-agent-3',
-    name: 'Lucas Martin',
-    email: 'l.martin@kalavoice.ai',
-    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150',
-    teamId: 'team-1',
-    teamName: 'Équipe Alpha — Relations Clients',
-    campaignId: 'camp-1',
-    campaignName: 'Télécom Fibre & Mobile — Rétention',
-    hireDate: '2023-11-10',
-    seniority: '6 mois',
-    status: 'EN_FORMATION',
-    callsAnalyzedCount: 88,
-    averageQualityScore: 75.0,
-    monthlyScores: [
-      { month: 'Janvier', score: 62 },
-      { month: 'Février', score: 68 },
-      { month: 'Mars', score: 73 },
-      { month: 'Avril', score: 75 }
-    ],
-    strengths: [
-      'Respect rigoureux des procédures de sécurité',
-      'Politesse et phraséologie réglementaire'
-    ],
-    improvementAxes: [
-      'Gestion des clients agressifs ou sous tension',
-      'Écoute active et questionnement ouvert',
-      'Reformulation des besoins complexes'
-    ],
-    assignedCoachingPlanId: 'coach-plan-2',
-    completedTrainingsCount: 2,
-    complianceRate: 88.0
-  },
-  {
     id: 'agent-4',
     userId: 'user-agent-4',
-    name: 'Amira Mansouri',
-    email: 'a.mansouri@kalavoice.ai',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
-    teamId: 'team-3',
-    teamName: 'Équipe Titan — Sinistres Complexes',
-    campaignId: 'camp-2',
-    campaignName: 'Assurance Auto & Habitation — Sinistres',
-    hireDate: '2022-10-01',
-    seniority: '2 ans',
+    name: 'Thomas Leroux',
+    email: 't.leroux@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-1',
+    teamName: 'Équipe Alpha — Relations Clients & Fibre',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2023-05-10',
+    seniority: '11 mois',
     status: 'ACTIF',
-    callsAnalyzedCount: 175,
-    averageQualityScore: 88.0,
+    callsAnalyzedCount: 95,
+    averageQualityScore: 79.5,
     monthlyScores: [
-      { month: 'Janvier', score: 80 },
-      { month: 'Février', score: 82 },
-      { month: 'Mars', score: 85 },
-      { month: 'Avril', score: 88 }
+      { month: 'Janvier', score: 70 },
+      { month: 'Février', score: 73 },
+      { month: 'Mars', score: 77 },
+      { month: 'Avril', score: 80 }
     ],
-    strengths: [
-      'Précision juridique et contractuelle irréprochable',
-      'Rigueur administrative et conformité des dossiers'
-    ],
-    improvementAxes: [
-      'Chaleur de l\'accueil dans les situations de stress client',
-      'Pédagogie sur les franchises d\'assurance'
-    ],
-    completedTrainingsCount: 4,
-    complianceRate: 97.0
+    strengths: ['Bonne élocution', 'Maîtrise de l\'outil CRM'],
+    improvementAxes: ['Gestion du stress', 'Traitement des réclamations'],
+    completedTrainingsCount: 2,
+    complianceRate: 89.0
   },
   {
     id: 'agent-5',
     userId: 'user-agent-5',
-    name: 'Thomas Leroy',
-    email: 't.leroy@kalavoice.ai',
-    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150',
+    name: 'Amina Traoré',
+    email: 'a.traore@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-3',
+    teamName: 'Équipe Gamma — Énergie & Facturation Verte',
+    campaignId: 'camp-3',
+    campaignName: 'Énergie & Facturation Verte — Service Client',
+    hireDate: '2022-11-01',
+    seniority: '17 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 164,
+    averageQualityScore: 87.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 80 },
+      { month: 'Février', score: 82 },
+      { month: 'Mars', score: 85 },
+      { month: 'Avril', score: 87 }
+    ],
+    strengths: ['Pédagogie tarifaire', 'Empathie naturelle', 'Clôture soignée'],
+    improvementAxes: ['Proactivité sur les options d\'économie d\'énergie'],
+    completedTrainingsCount: 4,
+    complianceRate: 96.0
+  },
+  {
+    id: 'agent-6',
+    userId: 'user-agent-6',
+    name: 'Lucas Bernard',
+    email: 'l.bernard@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150',
     teamId: 'team-2',
+    teamName: 'Équipe Beta — Assurance Auto & Habitation',
+    campaignId: 'camp-2',
+    campaignName: 'Assurance Auto & Habitation — Sinistres',
+    hireDate: '2023-01-20',
+    seniority: '15 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 128,
+    averageQualityScore: 85.5,
+    monthlyScores: [
+      { month: 'Janvier', score: 75 },
+      { month: 'Février', score: 79 },
+      { month: 'Mars', score: 83 },
+      { month: 'Avril', score: 86 }
+    ],
+    strengths: ['Rigueur procédurale', 'Clarté sur les franchises'],
+    improvementAxes: ['Chaleur de l\'accueil'],
+    completedTrainingsCount: 3,
+    complianceRate: 94.0
+  },
+  {
+    id: 'agent-7',
+    userId: 'user-agent-7',
+    name: 'Fatou Diallo',
+    email: 'f.diallo@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-4',
     teamName: 'Équipe Phénix — Rétention & Sauvetage',
     campaignId: 'camp-1',
     campaignName: 'Télécom Fibre & Mobile — Rétention',
-    hireDate: '2023-04-01',
+    hireDate: '2022-08-15',
+    seniority: '20 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 190,
+    averageQualityScore: 89.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 82 },
+      { month: 'Février', score: 85 },
+      { month: 'Mars', score: 87 },
+      { month: 'Avril', score: 89 }
+    ],
+    strengths: ['Taux de rétention exceptionnel (88%)', 'Excellente négociation'],
+    improvementAxes: ['Respect des temps de mise en attente'],
+    completedTrainingsCount: 4,
+    complianceRate: 97.0
+  },
+  {
+    id: 'agent-8',
+    userId: 'user-agent-8',
+    name: 'Maxime Dubois',
+    email: 'm.dubois@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-3',
+    teamName: 'Équipe Gamma — Énergie & Facturation Verte',
+    campaignId: 'camp-3',
+    campaignName: 'Énergie & Facturation Verte — Service Client',
+    hireDate: '2023-10-01',
+    seniority: '6 mois',
+    status: 'EN_FORMATION',
+    callsAnalyzedCount: 74,
+    averageQualityScore: 76.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 65 },
+      { month: 'Février', score: 69 },
+      { month: 'Mars', score: 73 },
+      { month: 'Avril', score: 76 }
+    ],
+    strengths: ['Bonne volonté', 'Assiduité'],
+    improvementAxes: ['Maîtrise des offres heures creuses', 'Reformulation'],
+    completedTrainingsCount: 2,
+    complianceRate: 87.0
+  },
+  {
+    id: 'agent-9',
+    userId: 'user-agent-9',
+    name: 'Chloé Martin',
+    email: 'c.martin@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-1',
+    teamName: 'Équipe Alpha — Relations Clients & Fibre',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2023-03-01',
+    seniority: '13 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 135,
+    averageQualityScore: 83.5,
+    monthlyScores: [
+      { month: 'Janvier', score: 76 },
+      { month: 'Février', score: 79 },
+      { month: 'Mars', score: 81 },
+      { month: 'Avril', score: 84 }
+    ],
+    strengths: ['Diagnostic réseau précis', 'Courtoisie constante'],
+    improvementAxes: ['Prise de congé plus dynamique'],
+    completedTrainingsCount: 3,
+    complianceRate: 93.0
+  },
+  {
+    id: 'agent-10',
+    userId: 'user-agent-10',
+    name: 'Idriss Ndiaye',
+    email: 'i.ndiaye@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-2',
+    teamName: 'Équipe Beta — Assurance Auto & Habitation',
+    campaignId: 'camp-2',
+    campaignName: 'Assurance Auto & Habitation — Sinistres',
+    hireDate: '2022-06-01',
+    seniority: '22 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 210,
+    averageQualityScore: 90.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 84 },
+      { month: 'Février', score: 86 },
+      { month: 'Mars', score: 88 },
+      { month: 'Avril', score: 90 }
+    ],
+    strengths: ['Empathie élevée', 'Respect scrupuleux du RGPD'],
+    improvementAxes: ['Raccourcir la vérification de dossier'],
+    completedTrainingsCount: 4,
+    complianceRate: 98.5
+  },
+  {
+    id: 'agent-11',
+    userId: 'user-agent-11',
+    name: 'Camille Robert',
+    email: 'c.robert@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-3',
+    teamName: 'Équipe Gamma — Énergie & Facturation Verte',
+    campaignId: 'camp-3',
+    campaignName: 'Énergie & Facturation Verte — Service Client',
+    hireDate: '2023-07-15',
+    seniority: '9 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 104,
+    averageQualityScore: 81.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 72 },
+      { month: 'Février', score: 75 },
+      { month: 'Mars', score: 78 },
+      { month: 'Avril', score: 81 }
+    ],
+    strengths: ['Rapidité de saisie', 'Écoute attentive'],
+    improvementAxes: ['Gestion des contestations d\'échéancier'],
+    completedTrainingsCount: 2,
+    complianceRate: 91.0
+  },
+  {
+    id: 'agent-12',
+    userId: 'user-agent-12',
+    name: 'Julien Petit',
+    email: 'j.petit@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-4',
+    teamName: 'Équipe Phénix — Rétention & Sauvetage',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2023-04-10',
     seniority: '12 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 140,
+    averageQualityScore: 84.5,
+    monthlyScores: [
+      { month: 'Janvier', score: 75 },
+      { month: 'Février', score: 78 },
+      { month: 'Mars', score: 82 },
+      { month: 'Avril', score: 85 }
+    ],
+    strengths: ['Persuasion commerciale', 'Dynamisme'],
+    improvementAxes: ['Diminuer le débit verbal'],
+    completedTrainingsCount: 3,
+    complianceRate: 93.5
+  },
+  {
+    id: 'agent-13',
+    userId: 'user-agent-13',
+    name: 'Aïssatou Sow',
+    email: 'a.sow@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-1',
+    teamName: 'Équipe Alpha — Relations Clients & Fibre',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2022-09-01',
+    seniority: '19 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 180,
+    averageQualityScore: 88.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 82 },
+      { month: 'Février', score: 84 },
+      { month: 'Mars', score: 86 },
+      { month: 'Avril', score: 88 }
+    ],
+    strengths: ['Pédagogie remarquable', 'Calme olympien'],
+    improvementAxes: ['Systématiser la proposition de l\'enquête satisfaction'],
+    completedTrainingsCount: 4,
+    complianceRate: 96.5
+  },
+  {
+    id: 'agent-14',
+    userId: 'user-agent-14',
+    name: 'David Moreau',
+    email: 'd.moreau@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-2',
+    teamName: 'Équipe Beta — Assurance Auto & Habitation',
+    campaignId: 'camp-2',
+    campaignName: 'Assurance Auto & Habitation — Sinistres',
+    hireDate: '2023-08-01',
+    seniority: '8 mois',
     status: 'EN_COACHING',
-    callsAnalyzedCount: 110,
+    callsAnalyzedCount: 82,
+    averageQualityScore: 78.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 68 },
+      { month: 'Février', score: 72 },
+      { month: 'Mars', score: 75 },
+      { month: 'Avril', score: 78 }
+    ],
+    strengths: ['Motivation', 'Rigueur administrative'],
+    improvementAxes: ['Gestion des clients sous le coup de l\'émotion'],
+    completedTrainingsCount: 2,
+    complianceRate: 88.5
+  },
+  {
+    id: 'agent-15',
+    userId: 'user-agent-15',
+    name: 'Élodie Roux',
+    email: 'e.roux@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-3',
+    teamName: 'Équipe Gamma — Énergie & Facturation Verte',
+    campaignId: 'camp-3',
+    campaignName: 'Énergie & Facturation Verte — Service Client',
+    hireDate: '2022-03-15',
+    seniority: '2 ans',
+    status: 'ACTIF',
+    callsAnalyzedCount: 220,
+    averageQualityScore: 91.5,
+    monthlyScores: [
+      { month: 'Janvier', score: 87 },
+      { month: 'Février', score: 89 },
+      { month: 'Mars', score: 90 },
+      { month: 'Avril', score: 92 }
+    ],
+    strengths: ['Excellente maîtrise technique Linky', 'Sens de la négociation'],
+    improvementAxes: ['Partager ses bonnes pratiques en atelier de co-développement'],
+    completedTrainingsCount: 5,
+    complianceRate: 98.0
+  },
+  {
+    id: 'agent-16',
+    userId: 'user-agent-16',
+    name: 'Ousmane Koné',
+    email: 'o.kone@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-4',
+    teamName: 'Équipe Phénix — Rétention & Sauvetage',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2023-06-15',
+    seniority: '10 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 112,
+    averageQualityScore: 82.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 73 },
+      { month: 'Février', score: 76 },
+      { month: 'Mars', score: 79 },
+      { month: 'Avril', score: 82 }
+    ],
+    strengths: ['Clarté des propositions', 'Esprit d\'équipe'],
+    improvementAxes: ['Reformulation avant annonce tarifaire'],
+    completedTrainingsCount: 3,
+    complianceRate: 92.0
+  },
+  {
+    id: 'agent-17',
+    userId: 'user-agent-17',
+    name: 'Léa Fournier',
+    email: 'l.fournier@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-1',
+    teamName: 'Équipe Alpha — Relations Clients & Fibre',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2023-02-01',
+    seniority: '14 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 145,
+    averageQualityScore: 85.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 77 },
+      { month: 'Février', score: 80 },
+      { month: 'Mars', score: 83 },
+      { month: 'Avril', score: 85 }
+    ],
+    strengths: ['Sourire téléphonique perceptible', 'Reformulation systématique'],
+    improvementAxes: ['Raccourcir la recherche dans la base de connaissances'],
+    completedTrainingsCount: 3,
+    complianceRate: 94.0
+  },
+  {
+    id: 'agent-18',
+    userId: 'user-agent-18',
+    name: 'Nicolas Girard',
+    email: 'n.girard@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1463453091185-61582044d556?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-2',
+    teamName: 'Équipe Beta — Assurance Auto & Habitation',
+    campaignId: 'camp-2',
+    campaignName: 'Assurance Auto & Habitation — Sinistres',
+    hireDate: '2022-12-01',
+    seniority: '16 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 155,
+    averageQualityScore: 86.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 78 },
+      { month: 'Février', score: 81 },
+      { month: 'Mars', score: 84 },
+      { month: 'Avril', score: 86 }
+    ],
+    strengths: ['Rigueur contractuelle', 'Transmission rapide aux experts'],
+    improvementAxes: ['Personnalisation de la prise de congé'],
+    completedTrainingsCount: 4,
+    complianceRate: 95.5
+  },
+  {
+    id: 'agent-19',
+    userId: 'user-agent-19',
+    name: 'Myriam Khelifi',
+    email: 'm.khelifi@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-3',
+    teamName: 'Équipe Gamma — Énergie & Facturation Verte',
+    campaignId: 'camp-3',
+    campaignName: 'Énergie & Facturation Verte — Service Client',
+    hireDate: '2023-09-15',
+    seniority: '7 mois',
+    status: 'EN_FORMATION',
+    callsAnalyzedCount: 68,
     averageQualityScore: 77.0,
     monthlyScores: [
-      { month: 'Janvier', score: 69 },
-      { month: 'Février', score: 71 },
+      { month: 'Janvier', score: 66 },
+      { month: 'Février', score: 70 },
       { month: 'Mars', score: 74 },
       { month: 'Avril', score: 77 }
     ],
-    strengths: [
-      'Dynamisme commercial et sens de la répartie',
-      'Rapidité de traitement dans l\'outil CRM'
-    ],
-    improvementAxes: [
-      'Réduction des interruptions intempestives du client',
-      'Respect systématique des mentions légales obligatoires'
-    ],
-    assignedCoachingPlanId: 'coach-plan-3',
+    strengths: ['Grande écoute', 'Courtoisie constante'],
+    improvementAxes: ['Gestion des objections sur les tarifs indexés'],
     completedTrainingsCount: 2,
-    complianceRate: 86.5
+    complianceRate: 89.0
+  },
+  {
+    id: 'agent-20',
+    userId: 'user-agent-20',
+    name: 'Antoine Mercier',
+    email: 'a.mercier@kalavoice.ai',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+    teamId: 'team-4',
+    teamName: 'Équipe Phénix — Rétention & Sauvetage',
+    campaignId: 'camp-1',
+    campaignName: 'Télécom Fibre & Mobile — Rétention',
+    hireDate: '2022-05-10',
+    seniority: '23 mois',
+    status: 'ACTIF',
+    callsAnalyzedCount: 205,
+    averageQualityScore: 91.0,
+    monthlyScores: [
+      { month: 'Janvier', score: 85 },
+      { month: 'Février', score: 87 },
+      { month: 'Mars', score: 89 },
+      { month: 'Avril', score: 91 }
+    ],
+    strengths: ['Leadership', 'Négociation complexe', 'Excellence relationnelle'],
+    improvementAxes: ['Animation d\'ateliers de tutorat'],
+    completedTrainingsCount: 5,
+    complianceRate: 98.0
   }
 ];
 
@@ -472,6 +854,7 @@ export const INITIAL_CALLS: Call[] = [
     durationSeconds: 125,
     direction: 'ENTRANT',
     callType: 'RÉTENTION',
+    status: 'EVALUE',
     audioMetadata: {
       id: 'audio-101',
       filename: 'rec_call_20240412_fibretel_dupont.wav',
@@ -712,9 +1095,9 @@ export const INITIAL_CALLS: Call[] = [
   {
     id: 'call-102',
     callNumber: 'CALL-2024-0412-9014',
-    agentId: 'agent-3',
-    agentName: 'Lucas Martin',
-    teamId: 'team-1',
+    agentId: 'agent-2',
+    agentName: 'Koffi Mensah',
+    teamId: 'team-4',
     campaignId: 'camp-1',
     campaignName: 'Télécom Fibre & Mobile — Rétention',
     customerPhoneMasked: '+33 7 •• •• 91 80',
@@ -723,6 +1106,7 @@ export const INITIAL_CALLS: Call[] = [
     durationSeconds: 160,
     direction: 'ENTRANT',
     callType: 'RÉCLAMATION',
+    status: 'COACHING_RECOMMANDE',
     audioMetadata: {
       id: 'audio-102',
       filename: 'rec_call_20240412_gsm_martin.wav',
@@ -889,9 +1273,9 @@ export const INITIAL_CALLS: Call[] = [
   {
     id: 'call-103',
     callNumber: 'CALL-2024-0412-9450',
-    agentId: 'agent-5',
-    agentName: 'Thomas Leroy',
-    teamId: 'team-2',
+    agentId: 'agent-4',
+    agentName: 'Thomas Leroux',
+    teamId: 'team-1',
     campaignId: 'camp-1',
     campaignName: 'Télécom Fibre & Mobile — Rétention',
     customerPhoneMasked: '+33 6 •• •• 12 55',
@@ -900,6 +1284,7 @@ export const INITIAL_CALLS: Call[] = [
     durationSeconds: 190,
     direction: 'SORTANT',
     callType: 'COMMERCIAL',
+    status: 'A_REVOIR',
     audioMetadata: {
       id: 'audio-103',
       filename: 'rec_call_20240412_leroy_sortant.wav',
@@ -1046,7 +1431,7 @@ export const INITIAL_CALLS: Call[] = [
   {
     id: 'call-104',
     callNumber: 'CALL-2024-0412-9800',
-    agentId: 'agent-2',
+    agentId: 'agent-3',
     agentName: 'Sarah Benali',
     teamId: 'team-2',
     campaignId: 'camp-1',
@@ -1158,8 +1543,10 @@ export const INITIAL_CALLS: Call[] = [
     },
     qualityEvaluationId: 'eval-104',
     qualityScore: 96,
+    status: 'EVALUE',
     isUrgentReviewRequired: false
-  }
+  },
+  ...generateCallsDataset()
 ];
 
 // ----------------------------------------------------------------------------
@@ -1428,7 +1815,11 @@ export const INITIAL_COACHING_PLANS: CoachingPlan[] = [
         targetCompetency: "Négociation & Rétention",
         currentLevel: "Intermédiaire (Note 7/10)",
         targetLevel: "Avancé (Note 9/10)",
+        action: "Simulations d'appels ciblées 2x par semaine sur grille de contre-argumentation",
+        responsable: "Patrick Simon (Formateur)",
+        date: "2024-04-15",
         status: 'EN_COURS',
+        resultat: "Progression notable sur la valorisation de la qualité réseau (+2 pts)",
         suggestedExercises: [
           "Simulation d'appel : Contestation offre Orange 2 mois offerts",
           "Atelier d'argumentation sur la stabilité de la fibre symétrique"
@@ -1441,7 +1832,11 @@ export const INITIAL_COACHING_PLANS: CoachingPlan[] = [
         targetCompetency: "Écoute active & Reformulation",
         currentLevel: "Bonne progression (Note 8/10)",
         targetLevel: "Excellence (Note 10/10)",
+        action: "Exercice d'écoute active et restitution synthétique des besoins clients",
+        responsable: "Marc Vasseur (Superviseur)",
+        date: "2024-03-25",
         status: 'VALIDÉ',
+        resultat: "Objectif atteint : 92% de reformulation conforme constatée sur les 15 derniers appels",
         suggestedExercises: [
           "Exercice des 3 mots clés : Reformuler en moins de 15 secondes le besoin vital du client"
         ]
@@ -1453,7 +1848,11 @@ export const INITIAL_COACHING_PLANS: CoachingPlan[] = [
         targetCompetency: "Rythme & Maîtrise conversationnelle",
         currentLevel: "En difficulté (1 à 3 coupures par appel)",
         targetLevel: "Moins de 1 coupure par tranche de 5 appels",
+        action: "Suivi par waveform synchronisée et auto-écoute hebdomadaire de 3 appels",
+        responsable: "Patrick Simon (Formateur)",
+        date: "2024-04-28",
         status: 'EN_COURS',
+        resultat: "Coupures réduites de 2.4/appel à 0.8/appel en mars",
         suggestedExercises: [
           "Écoute comparée d'enregistrements audio avec waveform synchronisée",
           "Jeu de rôle avec régulateurs visuels de tour de parole"
@@ -1491,13 +1890,95 @@ export const INITIAL_COACHING_PLANS: CoachingPlan[] = [
         targetCompetency: "Empathie relationnelle",
         currentLevel: "Débutant",
         targetLevel: "Confirmé",
+        action: "Atelier de calibrage vocal et phrases de réassurance immédiate",
+        responsable: "Patrick Simon (Formateur)",
+        date: "2024-04-19",
         status: 'EN_COURS',
+        resultat: "En cours : premier test positif sur les appels de réclamation technique",
         suggestedExercises: ["Atelier d'écoute de verbatim de clients en colère"]
       }
     ],
     trainerNotes: "Lucas manque encore d'assurance. Il a tendance à se réfugier derrière la procédure stricte lorsque la tension monte.",
     nextSessionDate: '2024-04-19 à 10:00',
     progressionPercentage: 40
+  },
+  {
+    id: 'coach-plan-koffi',
+    agentId: 'agent-2',
+    agentName: 'Koffi Mensah',
+    trainerId: 'user-trainer',
+    trainerName: 'Patrick Simon',
+    createdAt: '2024-02-01',
+    targetCompletionDate: '2024-04-30',
+    status: 'ACTIF',
+    overallObjectiveSummary: "Accompagnement intensif de Koffi Mensah : Traitement des objections tarifaires, reformulation empathique et respect rigoureux du script contractuel.",
+    strengthsSummary: [
+      "Courtoisie exemplaire et phraséologie posée",
+      "Clôture d'appel soignée et prise de congé chaleureuse",
+      "Patience remarquable face aux clients mécontents",
+      "Forte motivation et excellente écoute des feedbacks coach"
+    ],
+    improvementAxesSummary: [
+      "Gestion des objections concurrentielles",
+      "Reformulation systématique",
+      "Respect du script & mentions obligatoires RGPD"
+    ],
+    objectives: [
+      {
+        id: 'obj-koffi-1',
+        title: "Objectif 1 : Traitement des objections concurrentielles",
+        description: "Développer des réflexes d'argumentation face aux offres agressives de la concurrence sans entrer en confrontation.",
+        targetCompetency: "Négociation & Rétention",
+        currentLevel: "Initial : 5.8/10 (Hésitations sur tarifs)",
+        targetLevel: "Cible : 8.5/10 (Réponse fluide et structurée)",
+        action: "Atelier hebdomadaire de simulation avec grille comparative des forfaits Fibre du marché",
+        responsable: "Patrick Simon (Formateur)",
+        date: "2024-03-15",
+        status: 'VALIDÉ',
+        resultat: "Validé le 15/03 : Koffi désamorce désormais 82% des contestations tarifaires sans hésitation.",
+        suggestedExercises: [
+          "Jeu de rôle : Client brandissant une promo concurrente -50%",
+          "Quiz flash : 10 arguments phares du réseau fibre optique propriétaire"
+        ]
+      },
+      {
+        id: 'obj-koffi-2',
+        title: "Objectif 2 : Reformulation active et validation du besoin",
+        description: "Systématiser la reformulation avant toute proposition technique ou geste de rétention.",
+        targetCompetency: "Écoute active & Reformulation",
+        currentLevel: "Initial : 6.0/10 (Passage trop direct à la solution)",
+        targetLevel: "Cible : 9.0/10 (Validation explicite de l'accord client)",
+        action: "Mise en place du rituel 'Accuser réception - Reformuler l'attente - Valider avant d'agir'",
+        responsable: "Marc Vasseur (Superviseur)",
+        date: "2024-03-30",
+        status: 'VALIDÉ',
+        resultat: "Validé le 30/03 : Taux de validation par le client passé de 54% à 88%.",
+        suggestedExercises: [
+          "Exercice miroir : Synthétiser en une phrase la demande d'un client prolixe",
+          "Auto-analyse de 5 enregistrements récents avec transcription synchronisée"
+        ]
+      },
+      {
+        id: 'obj-koffi-3',
+        title: "Objectif 3 : Respect du script et mentions légales RGPD",
+        description: "Énoncer avec rigueur les mentions d'enregistrement d'appel et les conditions d'engagement sans omission.",
+        targetCompetency: "Conformité réglementaire",
+        currentLevel: "Initial : 7.2/10 (Oublis occasionnels de la mention d'enregistrement)",
+        targetLevel: "Cible : 10/10 (Zéro défaut conformité)",
+        action: "Affichage du mémo visuel '3 mentions obligatoires' et vérification hebdomadaire par QA",
+        responsable: "Claire Delattre (QA Manager)",
+        date: "2024-04-25",
+        status: 'EN_COURS',
+        resultat: "En excellente voie : 91.5% de conformité sur le mois d'avril (progression de +12.5 pts).",
+        suggestedExercises: [
+          "Exercice de récitation naturelle des mentions RGPD dès l'ouverture",
+          "Contrôle qualité croisé avec écoute d'un binôme"
+        ]
+      }
+    ],
+    trainerNotes: "Progression remarquable de Koffi Mensah ! Son score qualité est passé de 68% en janvier à 72% en février, 76% en mars et atteint 81% en avril, soit un uplift spectaculaire de +13 points (+19.1% relatif). Koffi est désormais autonome et sécurise ses appels critiques avec calme.",
+    nextSessionDate: '2024-04-22 à 15:00',
+    progressionPercentage: 78
   }
 ];
 
@@ -1549,6 +2030,40 @@ export const INITIAL_TRAINING_MODULES: TrainingModule[] = [
 ];
 
 export const INITIAL_TRAINING_SESSIONS: TrainingSession[] = [
+  {
+    id: 'sess-koffi-1',
+    agentId: 'agent-2',
+    agentName: 'Koffi Mensah',
+    trainerId: 'user-trainer',
+    trainerName: 'Patrick Simon',
+    moduleId: 'mod-1',
+    moduleTitle: 'Techniques Avancées de Traitement des Objections Concurrentielles',
+    scheduledDate: '2024-03-05',
+    status: 'TERMINÉE',
+    scoreObtained: 89,
+    preTrainingQualityScore: 68,
+    postTrainingQualityScore: 81,
+    upliftPercentage: 19.1,
+    trainerFeedback: "Koffi a fait d'immenses progrès : son score QA est monté de 68% à 81% (+13 points). Les simulations d'appels ont été validées avec brio.",
+    simulationExercisesCompleted: [
+      { title: "Mise en situation : Rétention forfait Fibre face à une promo concurrente", score: 92, passed: true },
+      { title: "Désamorçage d'une demande de résiliation agressive", score: 86, passed: true }
+    ]
+  },
+  {
+    id: 'sess-koffi-2',
+    agentId: 'agent-2',
+    agentName: 'Koffi Mensah',
+    trainerId: 'user-trainer',
+    trainerName: 'Patrick Simon',
+    moduleId: 'mod-4',
+    moduleTitle: 'Conformité Réglementaire, RGPD et Authentification Sécurisée',
+    scheduledDate: '2024-04-22',
+    status: 'PLANIFIÉE',
+    preTrainingQualityScore: 81,
+    trainerFeedback: "Session planifiée pour consolider le respect sans faille des mentions légales et atteindre 95% de conformité.",
+    simulationExercisesCompleted: []
+  },
   {
     id: 'sess-1',
     agentId: 'agent-1',

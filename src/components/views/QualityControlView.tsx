@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   CheckCircle2, Sparkles, Award, ShieldAlert, 
-  MessageSquare, Quote, Save, Printer, Sliders
+  MessageSquare, Quote, Save, Printer, Sliders, Target, Eye, ArrowRight
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { QualityService } from '../../services/qualityService';
@@ -123,13 +123,22 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           </select>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button 
             className="btn btn-secondary btn-sm"
             onClick={() => ReportService.printCallQualityReport(currentCall, evaluation)}
           >
             <Printer size={14} />
-            <span>Imprimer Rapport Audit</span>
+            <span>Imprimer Rapport</span>
+          </button>
+
+          <button 
+            className="btn btn-secondary btn-sm"
+            onClick={() => onNavigate('coaching')}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(251,191,36,0.12)', borderColor: 'rgba(251,191,36,0.35)', color: '#fbbf24' }}
+          >
+            <Target size={14} />
+            <span>Générer Plan Coaching</span>
           </button>
 
           <button 
@@ -141,6 +150,25 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             <span>Valider Définitivement</span>
           </button>
         </div>
+      </div>
+
+      {/* ─── Bannière Transparence IA ─────────────────────────────── */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.05) 100%)',
+        border: '1px solid rgba(99,102,241,0.3)', borderRadius: 'var(--radius-md)',
+        padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '10px'
+      }}>
+        <Eye size={16} color="var(--primary-light)" style={{ flexShrink: 0 }} />
+        <div style={{ flex: 1 }}>
+          <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--primary-light)' }}>
+            Évaluation assistée par IA — validation humaine requise.
+          </span>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '8px' }}>
+            Les notes proposées sont des suggestions extraites de la transcription. L'évaluateur doit valider, ajuster ou refuser chaque score.
+            L'IA ne doit jamais remplacer le jugement du responsable qualité.
+          </span>
+        </div>
+        <Sparkles size={14} color="#8b5cf6" style={{ flexShrink: 0 }} />
       </div>
 
       {notification && (
@@ -222,19 +250,23 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#c084fc' }}>
               Plan d'Action & Coaching
             </h3>
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={() => onNavigate('coaching')}
-              style={{ fontSize: '11px', padding: '2px 8px' }}
-            >
-              Vers Coaching
-            </button>
           </div>
-          <ul style={{ paddingLeft: '18px', fontSize: '13px', lineHeight: 1.6, color: '#e9d5ff' }}>
+          <ul style={{ paddingLeft: '18px', fontSize: '13px', lineHeight: 1.6, color: '#e9d5ff', marginBottom: '12px' }}>
             {evaluation.recommendations.map((rec, i) => (
               <li key={i}>{rec}</li>
             ))}
           </ul>
+          {evaluation.weaknesses.length > 0 && (
+            <button 
+              className="btn btn-primary btn-sm"
+              onClick={() => onNavigate('coaching')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)' }}
+            >
+              <Target size={14} />
+              <span>Générer Plan de Coaching & Assigner Formation</span>
+              <ArrowRight size={13} />
+            </button>
+          )}
         </div>
       </div>
 

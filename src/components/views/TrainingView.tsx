@@ -68,6 +68,69 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
         </button>
       </div>
 
+      {/* ── Spotlight ROI & Boucle d'Impact Métier ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 78, 59, 0.08))', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>
+              <TrendingUp size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Uplift Moyen Post-Formation</div>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: '#34d399' }}>+14.8%</div>
+            </div>
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+            Progression moyenne constatée sur la note QA des appels réels dans les 30 jours suivant la validation d'un module.
+          </p>
+        </div>
+
+        <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(49, 46, 129, 0.08))', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8' }}>
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Taux de Validation Simulations</div>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: '#818cf8' }}>94.2%</div>
+            </div>
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+            {sessions.filter(s => s.status === 'TERMINÉE').length} sessions complétées avec succès sur simulations vocales interactives.
+          </p>
+        </div>
+
+        {/* Focus Cas d'École Koffi Mensah */}
+        <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(120, 53, 15, 0.08))', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '16px' }}>🌟</span>
+              <div>
+                <div style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Cas d'École Pilote
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                  Koffi Mensah (Rétention Fibre)
+                </div>
+              </div>
+            </div>
+            <span className="badge badge-green" style={{ fontSize: '11px', fontWeight: 800 }}>+13 pts</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', marginTop: '6px' }}>
+            <span style={{ fontWeight: 700, color: '#f87171' }}>68% (Jan)</span>
+            <div style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', position: 'relative' }}>
+              <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '68%', background: '#f87171', borderRadius: '2px' }} />
+              <div style={{ position: 'absolute', left: '68%', top: 0, height: '100%', width: '13%', background: '#34d399', borderRadius: '2px' }} />
+            </div>
+            <span style={{ fontWeight: 800, color: '#34d399' }}>81% (Avr)</span>
+          </div>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.3 }}>
+            Module <em>Traitement Objections</em> : passage au-dessus du seuil de conformité grâce aux ateliers ciblés.
+          </p>
+        </div>
+      </div>
+
       {/* Catalogue des Modules */}
       <div>
         <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '14px' }}>

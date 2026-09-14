@@ -26,6 +26,10 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
   const coachingPlan = storageService.getCoachingPlanByAgentId(currentAgent.id);
   const sessions = storageService.getTrainingSessions().filter(s => s.agentId === currentAgent.id);
 
+  const firstScore = currentAgent.monthlyScores[0]?.score ?? Math.round(currentAgent.averageQualityScore);
+  const lastScore = currentAgent.monthlyScores[currentAgent.monthlyScores.length - 1]?.score ?? Math.round(currentAgent.averageQualityScore);
+  const scoreDiff = lastScore - firstScore;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Sélecteur d'Agent */}
@@ -89,6 +93,46 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
         </div>
       </div>
 
+      {/* Plan de Coaching Actif (si présent) */}
+      {coachingPlan && (
+        <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Target size={20} color="var(--primary-light)" />
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Plan de Coaching Actif — {coachingPlan.trainerName}</h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{coachingPlan.overallObjectiveSummary}</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span className="badge badge-purple">Progression : {coachingPlan.progressionPercentage}%</span>
+              <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('coaching')}>
+                Ouvrir Coaching
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+            {coachingPlan.objectives.map(obj => (
+              <div key={obj.id} style={{ background: 'rgba(0,0,0,0.25)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>{obj.targetCompetency}</span>
+                  <span className={`badge ${obj.status === 'VALIDÉ' ? 'badge-green' : 'badge-blue'}`} style={{ fontSize: '10px' }}>
+                    {obj.status}
+                  </span>
+                </div>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.3 }}>{obj.title}</div>
+                {obj.resultat && (
+                  <div style={{ fontSize: '11px', color: '#34d399', marginTop: '4px', fontWeight: 600 }}>
+                    ✓ {obj.resultat}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Évolution Temporelle du Score Qualité (Janvier -> Avril) */}
       <div className="glass-panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -96,7 +140,9 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
             <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Évolution Temporelle du Score Qualité</h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Progression chronologique des notes d'évaluations mensuelles</p>
           </div>
-          <span className="badge badge-green">+13 pts de progression globale</span>
+          <span className={`badge ${scoreDiff >= 0 ? 'badge-green' : 'badge-amber'}`}>
+            {scoreDiff >= 0 ? `+${scoreDiff}` : scoreDiff} pts de progression globale
+          </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: '180px', padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>

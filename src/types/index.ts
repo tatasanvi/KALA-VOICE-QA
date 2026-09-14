@@ -165,7 +165,12 @@ export interface CallAnalytics {
   
   // Règle d'explicabilité IA
   aiDisclaimer: string;
+  groundTruthDetected?: string[];
+  aiSuggestions?: string[];
+  undeterminedFields?: string[];
 }
+
+export type CallStatus = 'A_ANALYSER' | 'TRANSCRIT' | 'EVALUE' | 'A_REVOIR' | 'COACHING_RECOMMANDE';
 
 export interface Call {
   id: string;
@@ -181,6 +186,7 @@ export interface Call {
   durationSeconds: number;
   direction: 'ENTRANT' | 'SORTANT';
   callType: 'SUPPORT_TECHNIQUE' | 'RÉTENTION' | 'RÉCLAMATION' | 'COMMERCIAL' | 'ENQUÊTE';
+  status?: CallStatus;
   audioMetadata: AudioMetadata;
   transcription: Transcription;
   analytics: CallAnalytics;
@@ -245,7 +251,11 @@ export interface CoachingObjective {
   targetCompetency: string;
   currentLevel: string;
   targetLevel: string;
+  action?: string;
+  responsable?: string;
+  date?: string;
   status: 'A_FAIRE' | 'EN_COURS' | 'VALIDÉ';
+  resultat?: string;
   suggestedExercises: string[];
 }
 

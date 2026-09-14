@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   TrendingUp, Target, Plus, CheckCircle2, 
-  Calendar, Award, Sparkles, BookOpen, User
+  Calendar, Award, Sparkles, BookOpen, User, Clock, ArrowRight
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { CoachingPlan, UserRole } from '../../types';
@@ -167,51 +167,103 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
             {activePlan.overallObjectiveSummary}
           </p>
 
-          {/* Liste des Objectifs Spécifiques */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {activePlan.objectives.map((obj) => (
-              <div 
-                key={obj.id} 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.02)', 
-                  border: '1px solid var(--border-subtle)', 
-                  borderRadius: 'var(--radius-md)', 
-                  padding: '16px 20px' 
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Target size={16} color="var(--primary-light)" />
-                    <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {obj.title}
-                    </h4>
+          {/* Grille des Objectifs avec colonnes métier */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {activePlan.objectives.map((obj) => {
+              const statusColor = obj.status === 'VALIDÉ' ? '#34d399' : obj.status === 'EN_COURS' ? '#60a5fa' : '#fbbf24';
+              const statusBg = obj.status === 'VALIDÉ' ? 'rgba(52,211,153,0.12)' : obj.status === 'EN_COURS' ? 'rgba(96,165,250,0.12)' : 'rgba(251,191,36,0.12)';
+              const statusLabel = obj.status === 'VALIDÉ' ? '✅ Objectif Atteint' : obj.status === 'EN_COURS' ? '🔄 En Cours' : '📋 À Faire';
+              return (
+                <div 
+                  key={obj.id} 
+                  style={{ 
+                    background: 'rgba(255,255,255,0.02)', 
+                    border: `1px solid ${statusColor}33`, 
+                    borderLeft: `4px solid ${statusColor}`,
+                    borderRadius: 'var(--radius-md)', 
+                    padding: '14px 18px' 
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Target size={15} color={statusColor} />
+                      <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {obj.title}
+                      </h4>
+                    </div>
+                    <span style={{ 
+                      padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700,
+                      background: statusBg, color: statusColor, border: `1px solid ${statusColor}33`
+                    }}>
+                      {statusLabel}
+                    </span>
                   </div>
-                  <span className={`badge ${obj.status === 'VALIDÉ' ? 'badge-green' : 'badge-amber'}`}>
-                    {obj.status === 'VALIDÉ' ? 'Objectif Atteint' : 'En cours de travail'}
-                  </span>
-                </div>
 
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-                  {obj.description}
-                </p>
+                  <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: 1.5 }}>
+                    {obj.description}
+                  </p>
 
-                <div style={{ display: 'flex', gap: '18px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                  <span>Niveau initial : <strong style={{ color: '#f87171' }}>{obj.currentLevel}</strong></span>
-                  <span>$\rightarrow$ Niveau cible : <strong style={{ color: '#34d399' }}>{obj.targetLevel}</strong></span>
-                </div>
-
-                <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--primary-light)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#93c5fd', marginBottom: '4px' }}>
-                    Exercices & Simulations Pratiques :
+                  {/* Grille métier : Niveau / Cible / Action / Responsable / Date */}
+                  <div style={{ 
+                    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
+                    gap: '10px', marginBottom: '10px',
+                    background: 'rgba(0,0,0,0.2)', padding: '10px 12px', borderRadius: 'var(--radius-sm)'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Niveau initial</div>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#f87171' }}>{obj.currentLevel}</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ArrowRight size={12} color="var(--text-muted)" style={{ marginTop: '12px' }} />
+                      <div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Niveau cible</div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#34d399' }}>{obj.targetLevel}</div>
+                      </div>
+                    </div>
+                    {obj.action && (
+                      <div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Action concrète</div>
+                        <div style={{ fontSize: '12px', color: '#e2e8f0' }}>{obj.action}</div>
+                      </div>
+                    )}
+                    {obj.responsable && (
+                      <div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Responsable</div>
+                        <div style={{ fontSize: '12px', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <User size={11} /> {obj.responsable}
+                        </div>
+                      </div>
+                    )}
+                    {obj.date && (
+                      <div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Date cible</div>
+                        <div style={{ fontSize: '12px', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <Calendar size={11} /> {obj.date}
+                        </div>
+                      </div>
+                    )}
+                    {obj.resultat && (
+                      <div>
+                        <div style={{ fontSize: '10px', color: '#34d399', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Résultat</div>
+                        <div style={{ fontSize: '12px', color: '#d1fae5', fontWeight: 600 }}>{obj.resultat}</div>
+                      </div>
+                    )}
                   </div>
-                  <ul style={{ paddingLeft: '16px', fontSize: '12.5px', color: '#e2e8f0', lineHeight: 1.5 }}>
-                    {obj.suggestedExercises.map((ex, i) => (
-                      <li key={i}>{ex}</li>
-                    ))}
-                  </ul>
+
+                  {/* Exercices suggérés */}
+                  {obj.suggestedExercises.length > 0 && (
+                    <div style={{ background: 'rgba(99,102,241,0.05)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', borderLeft: '2px solid var(--primary-light)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#93c5fd', marginBottom: '3px' }}>Exercices & Simulations :</div>
+                      <ul style={{ paddingLeft: '14px', fontSize: '12px', color: '#e2e8f0', lineHeight: 1.5, margin: 0 }}>
+                        {obj.suggestedExercises.map((ex, i) => (
+                          <li key={i}>{ex}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div style={{ marginTop: '18px', padding: '14px', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--radius-md)', fontSize: '13px', color: 'var(--text-secondary)' }}>
