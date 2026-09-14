@@ -4,6 +4,7 @@ import {
   X, Save, Mail, Phone, Building2, AlertTriangle, Search, Filter
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
+import { usersApi } from '../../services/apiClient';
 import { User, UserRole } from '../../types';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
@@ -293,35 +294,58 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
   const refresh = () => setUsers(storageService.getUsers());
 
+  // Synchronisation avec l'API backend si disponible
+  React.useEffect(() => {
+    usersApi.list().then(res => {
+      if (res.ok && res.data && Array.isArray(res.data) && res.data.length > 0) {
+        // Met à jour l'affichage avec les données backend
+        setUsers(res.data);
+      }
+    }).catch(() => {
+      // Mode hors-ligne / fallback automatique
+    });
+  }, []);
+
   const notify = (msg: string) => {
     setSuccessMsg(msg);
     setTimeout(() => setSuccessMsg(null), 3500);
   };
 
-  const handleSave = (data: UserFormData) => {
+  const handleSave = async (data: UserFormData) => {
     if (modal?.mode === 'create') {
-      storageService.createUser(data);
+      const created = storageService.createUser(data);
       notify(`✅ Compte de ${data.name} créé avec succès.`);
+      refresh();
+      setModal(null);
+      // Appel API en arrière-plan
+      await usersApi.create({ ...data, password: 'kala2024!' });
     } else if (modal?.mode === 'edit' && modal.user) {
       storageService.updateUser({ ...modal.user, ...data });
       notify(`✅ Compte de ${data.name} mis à jour.`);
+      refresh();
+      setModal(null);
+      // Appel API en arrière-plan
+      await usersApi.update(modal.user.id, data);
     }
-    refresh();
-    setModal(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
-    storageService.deleteUser(deleteTarget.id);
-    notify(`🗑️ Compte de ${deleteTarget.name} supprimé.`);
+    const target = deleteTarget;
+    storageService.deleteUser(target.id);
+    notify(`🗑️ Compte de ${target.name} supprimé.`);
     setDeleteTarget(null);
     refresh();
+    // Appel API en arrière-plan
+    await usersApi.delete(target.id);
   };
 
-  const handleToggle = (user: User) => {
+  const handleToggle = async (user: User) => {
     storageService.toggleUserActive(user.id);
     notify(`${user.isActive ? '🔒 Compte désactivé' : '✅ Compte activé'} : ${user.name}`);
     refresh();
+    // Appel API en arrière-plan
+    await usersApi.toggleActive(user.id);
   };
 
   const filtered = users.filter(u => {

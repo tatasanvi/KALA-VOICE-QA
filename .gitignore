@@ -41,3 +41,11 @@ lerna-debug.log*
 
 # Misc
 .cache/
+
+# SQLite & Local DB
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+backend/dist/
+backend/node_modules/
