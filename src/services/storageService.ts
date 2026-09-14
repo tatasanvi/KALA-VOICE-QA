@@ -79,12 +79,64 @@ class StorageService {
   // --- Users & Roles ---
   public getUsers(): User[] { return this.users; }
   public getCurrentUser(): User { return this.currentUser; }
+
+  public createUser(data: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'>): User {
+    const newUser: User = {
+      ...data,
+      id: `user-${Date.now()}`,
+      createdAt: new Date().toISOString().substring(0, 10),
+      lastLoginAt: undefined
+    };
+    this.users.push(newUser);
+    this.save('kala_users', this.users);
+    this.logAudit('CREATION_UTILISATEUR', `Utilisateur ${newUser.name}`, `Compte créé : ${newUser.email} | Rôle : ${newUser.role} | Dépt : ${newUser.department}`);
+    return newUser;
+  }
+
+  public updateUser(updatedUser: User): void {
+    const index = this.users.findIndex(u => u.id === updatedUser.id);
+    if (index === -1) return;
+    const prev = this.users[index];
+    this.users[index] = updatedUser;
+    this.save('kala_users', this.users);
+    const changes: string[] = [];
+    if (prev.role !== updatedUser.role) changes.push(`Rôle : ${prev.role} → ${updatedUser.role}`);
+    if (prev.name !== updatedUser.name) changes.push(`Nom : ${prev.name} → ${updatedUser.name}`);
+    if (prev.email !== updatedUser.email) changes.push(`Email : ${prev.email} → ${updatedUser.email}`);
+    if (prev.isActive !== updatedUser.isActive) changes.push(`Statut : ${updatedUser.isActive ? 'Activé' : 'Désactivé'}`);
+    this.logAudit('MODIFICATION_UTILISATEUR', `Utilisateur ${updatedUser.name}`, changes.length ? changes.join(' | ') : 'Informations mises à jour');
+    // Sync currentUser if it's the same one
+    if (this.currentUser.id === updatedUser.id) {
+      this.currentUser = updatedUser;
+      this.save('kala_current_user', this.currentUser);
+    }
+  }
+
+  public deleteUser(userId: string): void {
+    const user = this.users.find(u => u.id === userId);
+    if (!user) return;
+    if (user.id === this.currentUser.id) return; // Cannot delete self
+    this.users = this.users.filter(u => u.id !== userId);
+    this.save('kala_users', this.users);
+    this.logAudit('SUPPRESSION_UTILISATEUR', `Utilisateur ${user.name}`, `Compte supprimé : ${user.email} | Rôle : ${user.role}`);
+  }
+
+  public toggleUserActive(userId: string): void {
+    const index = this.users.findIndex(u => u.id === userId);
+    if (index === -1) return;
+    if (this.users[index].id === this.currentUser.id) return; // Cannot deactivate self
+    this.users[index] = { ...this.users[index], isActive: !this.users[index].isActive };
+    this.save('kala_users', this.users);
+    const u = this.users[index];
+    this.logAudit('MODIFICATION_UTILISATEUR', `Utilisateur ${u.name}`, `Compte ${u.isActive ? 'activé' : 'désactivé'}`);
+  }
+
   public setCurrentUserRole(role: UserRole): void {
     const matched = this.users.find(u => u.role === role);
     if (matched) {
       this.currentUser = matched;
       this.save('kala_current_user', this.currentUser);
-      this.logAudit('CHANGEMENT_ROLE' as any, 'Session utilisateur', `Rôle basculé vers ${role} (${matched.name})`);
+      this.logAudit('CHANGEMENT_ROLE', 'Session utilisateur', `Rôle basculé vers ${role} (${matched.name})`);
     }
   }
 

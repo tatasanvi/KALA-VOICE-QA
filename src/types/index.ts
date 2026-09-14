@@ -18,7 +18,10 @@ export interface User {
   role: UserRole;
   avatarUrl?: string;
   department?: string;
+  phone?: string;
+  isActive: boolean;
   createdAt: string;
+  lastLoginAt?: string;
 }
 
 export interface Team {
@@ -344,7 +347,7 @@ export interface AuditLogEntry {
   userId: string;
   userName: string;
   userRole: UserRole;
-  action: 'IMPORT_AUDIO' | 'CORRECTION_TRANSCRIPTION' | 'VALIDATION_QUALITE' | 'MODIFICATION_GRILLE' | 'CREATION_COACHING' | 'EXPORT_RAPPORT';
+  action: 'IMPORT_AUDIO' | 'CORRECTION_TRANSCRIPTION' | 'VALIDATION_QUALITE' | 'MODIFICATION_GRILLE' | 'CREATION_COACHING' | 'EXPORT_RAPPORT' | 'CREATION_UTILISATEUR' | 'MODIFICATION_UTILISATEUR' | 'SUPPRESSION_UTILISATEUR' | 'CHANGEMENT_ROLE';
   targetResource: string;
   details: string;
   ipAddress: string;

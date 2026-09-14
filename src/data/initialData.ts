@@ -12,7 +12,10 @@ export const INITIAL_USERS: User[] = [
     role: 'ADMIN',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
     department: 'Direction Informatique & IA',
-    createdAt: '2024-01-10'
+    phone: '+33 1 42 68 00 01',
+    isActive: true,
+    createdAt: '2024-01-10',
+    lastLoginAt: '2024-09-14 08:31'
   },
   {
     id: 'user-manager',
@@ -21,7 +24,10 @@ export const INITIAL_USERS: User[] = [
     role: 'MANAGER',
     avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150',
     department: 'Direction des Opérations',
-    createdAt: '2024-01-15'
+    phone: '+33 1 42 68 00 02',
+    isActive: true,
+    createdAt: '2024-01-15',
+    lastLoginAt: '2024-09-14 09:15'
   },
   {
     id: 'user-supervisor',
@@ -30,7 +36,10 @@ export const INITIAL_USERS: User[] = [
     role: 'SUPERVISOR',
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
     department: 'Plateau Télécom',
-    createdAt: '2024-02-01'
+    phone: '+33 1 42 68 00 03',
+    isActive: true,
+    createdAt: '2024-02-01',
+    lastLoginAt: '2024-09-14 07:50'
   },
   {
     id: 'user-qa',
@@ -39,7 +48,10 @@ export const INITIAL_USERS: User[] = [
     role: 'QA_MANAGER',
     avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=150',
     department: 'Assurance Qualité & Conformité',
-    createdAt: '2024-02-05'
+    phone: '+33 1 42 68 00 04',
+    isActive: true,
+    createdAt: '2024-02-05',
+    lastLoginAt: '2024-09-14 10:02'
   },
   {
     id: 'user-trainer',
@@ -48,7 +60,10 @@ export const INITIAL_USERS: User[] = [
     role: 'TRAINER',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
     department: 'Académie & Formation Métier',
-    createdAt: '2024-02-10'
+    phone: '+33 1 42 68 00 05',
+    isActive: true,
+    createdAt: '2024-02-10',
+    lastLoginAt: '2024-09-13 16:45'
   },
   {
     id: 'user-agent-1',
@@ -57,7 +72,10 @@ export const INITIAL_USERS: User[] = [
     role: 'AGENT',
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150',
     department: 'Équipe Alpha - Service Fibre',
-    createdAt: '2024-03-01'
+    phone: '+33 1 42 68 00 06',
+    isActive: true,
+    createdAt: '2024-03-01',
+    lastLoginAt: '2024-09-14 08:00'
   }
 ];
 
