@@ -5,6 +5,7 @@ import { Router, Request, Response } from 'express';
 import { requireAuth, requireRole, QA_UP, TRAINER_UP, SUPERVISOR_UP, ALL_ROLES, MANAGER_UP } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
+import { canAccessCall } from '../middleware/callAccess.js';
 
 const sqlite = () => (db as any).session.client;
 
@@ -24,6 +25,8 @@ qualityRouter.get('/', requireAuth, requireRole(...QA_UP), (_req, res) => {
 });
 
 qualityRouter.get('/call/:callId', requireAuth, requireRole(...ALL_ROLES), (req, res) => {
+  const call = sqlite().prepare('SELECT agent_id, transcription_json FROM calls WHERE id = ?').get(req.params.callId) as any;
+  if (call && !canAccessCall(req.user!, call)) { res.status(404).json({ error: 'Évaluation introuvable.' }); return; }
   const row = sqlite().prepare('SELECT * FROM evaluations WHERE call_id = ?').get(req.params.callId) as any;
   if (!row) { res.status(404).json({ error: 'Évaluation introuvable.' }); return; }
   res.json({ ...row, items: JSON.parse(row.items_json ?? '[]'), strengths: JSON.parse(row.strengths_json ?? '[]'), weaknesses: JSON.parse(row.weaknesses_json ?? '[]'), recommendations: JSON.parse(row.recommendations_json ?? '[]') });

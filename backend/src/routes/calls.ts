@@ -5,6 +5,7 @@ import { Router, Request, Response } from 'express';
 import { requireAuth, requireRole, SUPERVISOR_UP, ALL_ROLES } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
+import { canAccessCall } from '../middleware/callAccess.js';
 
 const router = Router();
 const sqlite = () => (db as any).session.client;
@@ -55,7 +56,8 @@ router.get('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Resp
 // GET /api/calls/:id
 router.get('/:id', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Response): void => {
   const row = sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(req.params.id) as any;
-  if (!row) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
+  // 404 aussi hors périmètre : on ne révèle pas l'existence d'un appel inaccessible.
+  if (!row || !canAccessCall(req.user!, row)) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
   res.json(toCall(row));
 });
 
@@ -96,7 +98,7 @@ router.patch('/:callId/segments/:segId', requireAuth, requireRole(...ALL_ROLES),
   const { correctedText } = req.body as { correctedText?: string };
 
   const row = sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(callId) as any;
-  if (!row) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
+  if (!row || !canAccessCall(req.user!, row)) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
 
   const transcription = JSON.parse(row.transcription_json ?? '{}');
   const segments: any[] = transcription.segments ?? [];
