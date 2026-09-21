@@ -38,6 +38,7 @@ import { SettingsAuditView } from './components/views/SettingsAuditView';
 import { UserManagementView } from './components/views/UserManagementView';
 
 import { authApi } from './services/apiClient';
+import { DemoDataBanner } from './components/common/DemoDataBanner';
 
 // ─── Layout Authentifié avec Sidebar, Navbar & Bannière Master 2 ───────────────
 const AppLayout: React.FC = () => {
@@ -118,6 +119,7 @@ const AppLayout: React.FC = () => {
         </div>
 
         <main className="content-area">
+          <DemoDataBanner />
           <Outlet />
         </main>
       </div>

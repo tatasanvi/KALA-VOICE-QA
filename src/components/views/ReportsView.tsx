@@ -199,7 +199,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               Rapport d'Efficacité des Formations
             </h3>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Le taux de progression moyen après passage dans l'un des 4 modules de l'Académie Métier est mesuré à <strong>+11.2%</strong> en qualité d'interaction et à <strong>-38%</strong> sur le nombre d'interruptions client.
+              L'efficacité des formations n'a pas encore été mesurée : ce rapport sera alimenté par des évaluations réelles avant et après chaque module de l'Académie Métier.
             </p>
           </div>
         )}
@@ -210,7 +210,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               Comparatif des Performances Inter-Équipes
             </h3>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              L'Équipe Titan (Sinistres) conserve la tête avec un score de <strong>88.7%</strong>, suivie de l'Équipe Phénix (<strong>86.1%</strong>) et de l'Équipe Alpha (<strong>82.4%</strong>).
+              Comparatif indisponible en démonstration : les scores par équipe seront alimentés par des évaluations réelles.
             </p>
           </div>
         )}
@@ -221,7 +221,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               Rapport de Progression Chronologique du Centre
             </h3>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              L'introduction conjointe du débruitage ASR adaptatif (+11.2 dB SNR) et des plans de coaching personnalisés a permis d'élever le score qualité de 71% en Janvier à 84% en Avril.
+              Aucune progression n'a encore été mesurée : ce rapport retracera l'évolution du score qualité à partir d'évaluations réelles, sans attribuer d'effet au débruitage tant qu'il n'a pas été évalué.
             </p>
           </div>
         )}

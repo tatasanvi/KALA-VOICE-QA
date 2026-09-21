@@ -45,8 +45,8 @@ class StorageService {
     this.trainingSessions = this.load('kala_training_sessions', INITIAL_TRAINING_SESSIONS);
     this.auditLogs = this.load('kala_audit_logs', INITIAL_AUDIT_LOGS);
     this.metrics = this.load('kala_metrics', INITIAL_METRICS);
-    this.experimentConfigs = this.load('kala_experiment_configs', SCIENTIFIC_EXPERIMENT_CONFIGS);
-    this.benchmarkSamples = this.load('kala_benchmark_samples', BENCHMARK_SAMPLES);
+    this.experimentConfigs = this.load('kala_experiment_configs_v2', SCIENTIFIC_EXPERIMENT_CONFIGS);
+    this.benchmarkSamples = this.load('kala_benchmark_samples_v2', BENCHMARK_SAMPLES);
     
     // Initialiser les notifications d'équipe
     this.notifications = this.load('kala_notifications', [

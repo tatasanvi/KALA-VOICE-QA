@@ -4,7 +4,6 @@ import {
   User, Layers, PhoneCall, Sliders, Play, Pause, BarChart2
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
-import { callsApi } from '../../services/apiClient';
 import { Call } from '../../types';
 
 interface AudioUploadModalProps {
@@ -16,7 +15,6 @@ interface AudioUploadModalProps {
 export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const agents = storageService.getAgents();
   const campaigns = storageService.getCampaigns();
-  const teams = storageService.getTeams();
 
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -84,184 +82,10 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Aucune transcription n'est fabriquée : le pipeline ASR réel (Whisper) n'est pas encore branché.
+  // Le fichier est seulement lu localement pour l'écoute ; aucun appel, score ou texte n'est généré.
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) return;
-
-    setProcessing(true);
-
-    const selectedAgent = agents.find(a => a.id === agentId);
-    const selectedCampaign = campaigns.find(c => c.id === campaignId);
-    const selectedTeam = teams.find(t => t.id === selectedAgent?.teamId) || teams[0];
-
-    const callNumber = `CALL-2024-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    // Générer une transcription et analyse enrichie basée sur l'ingestion
-    const newCall: Call = {
-      id: `call-${Date.now()}`,
-      callNumber,
-      agentId,
-      agentName: selectedAgent?.name || 'Agent',
-      teamId: selectedTeam.id,
-      campaignId,
-      campaignName: selectedCampaign?.name || 'Campagne Générale',
-      customerPhoneMasked: customerPhone,
-      customerNameMasked: customerName,
-      callDate: new Date().toISOString().substring(0, 10),
-      durationSeconds: audioDuration,
-      direction,
-      callType: callType as any,
-      audioMetadata: {
-        id: `audio-${Date.now()}`,
-        filename: selectedFile.name,
-        fileSizeBytes: selectedFile.size,
-        durationSeconds: audioDuration,
-        sampleRateHz: 16000,
-        channels: 1,
-        snrDb: Math.round(12 + Math.random() * 10),
-        estimatedNoiseLevel: 'MODÉRÉ',
-        noiseType: 'PLATEAU_CALL_CENTER',
-        audioQualityScore: 84,
-        waveformSamples: [0.2, 0.5, 0.8, 0.6, 0.4, 0.7, 0.9, 0.5, 0.3, 0.6, 0.8, 0.4]
-      },
-      transcription: {
-        id: `trans-${Date.now()}`,
-        callId: `call-${Date.now()}`,
-        audioFileId: `audio-${Date.now()}`,
-        versionNumber: 1,
-        isLatest: true,
-        asrModelUsed: 'KALA-Denoiser+Whisper-Large-v3',
-        totalWords: 75,
-        processingTimeMs: 1100,
-        globalConfidenceScore: 94,
-        noiseRobustnessScore: 91,
-        rawText: `Bonjour, ${selectedAgent?.name || 'votre conseiller'} du service client. Bonjour, j'appelle concernant mon dossier.`,
-        createdAt: new Date().toISOString().substring(0, 10),
-        segments: [
-          {
-            id: 'seg-1',
-            transcriptionId: `trans-${Date.now()}`,
-            speaker: 'AGENT',
-            speakerLabel: selectedAgent?.name || 'Agent',
-            startTime: 1.2,
-            endTime: 6.5,
-            text: `Bonjour, ${selectedAgent?.name || 'votre conseiller'} du service client, en quoi puis-je vous aider aujourd'hui ?`,
-            confidenceScore: 0.96,
-            isNoisyPassage: false,
-            noiseImpactLevel: 'AUCUN',
-            hasBeenEdited: false
-          },
-          {
-            id: 'seg-2',
-            transcriptionId: `trans-${Date.now()}`,
-            speaker: 'CLIENT',
-            speakerLabel: 'Client',
-            startTime: 7.1,
-            endTime: 16.8,
-            text: "Bonjour, j'appelle concernant mon dossier et j'aimerais avoir une confirmation de mon suivi.",
-            confidenceScore: 0.91,
-            isNoisyPassage: false,
-            noiseImpactLevel: 'AUCUN',
-            hasBeenEdited: false
-          },
-          {
-            id: 'seg-3',
-            transcriptionId: `trans-${Date.now()}`,
-            speaker: 'AGENT',
-            speakerLabel: selectedAgent?.name || 'Agent',
-            startTime: 17.5,
-            endTime: 32.0,
-            text: "Très bien, je consulte immédiatement votre dossier informatique pour vérifier les informations.",
-            confidenceScore: 0.93,
-            isNoisyPassage: false,
-            noiseImpactLevel: 'AUCUN',
-            hasBeenEdited: false
-          },
-          {
-            id: 'seg-4',
-            transcriptionId: `trans-${Date.now()}`,
-            speaker: 'CLIENT',
-            speakerLabel: 'Client',
-            startTime: 33.2,
-            endTime: 42.1,
-            text: "Parfait, je vous remercie pour votre réactivité.",
-            confidenceScore: 0.95,
-            isNoisyPassage: false,
-            noiseImpactLevel: 'AUCUN',
-            hasBeenEdited: false
-          },
-          {
-            id: 'seg-5',
-            transcriptionId: `trans-${Date.now()}`,
-            speaker: 'AGENT',
-            speakerLabel: selectedAgent?.name || 'Agent',
-            startTime: 43.0,
-            endTime: 58.4,
-            text: "Tout est en ordre de notre côté. Avez-vous une autre question ? Je vous souhaite une excellente journée.",
-            confidenceScore: 0.97,
-            isNoisyPassage: false,
-            noiseImpactLevel: 'AUCUN',
-            hasBeenEdited: false
-          }
-        ]
-      },
-      analytics: {
-        id: `analytics-${Date.now()}`,
-        callId: `call-${Date.now()}`,
-        summary: `Appel client traité avec succès par ${selectedAgent?.name}. Validation immédiate des éléments du dossier sans blocage.`,
-        contactIntent: "Suivi et confirmation de dossier client",
-        mainTopics: ["Suivi dossier", "Service client", "Validation"],
-        keywords: ['dossier', 'confirmation', 'service client', 'réactivité'],
-        sentimentAgent: 'POSITIF',
-        sentimentClient: 'POSITIF',
-        sentimentTimeline: [
-          { minute: 0.5, agentSentiment: 0.8, clientSentiment: 0.2 },
-          { minute: 1.0, agentSentiment: 0.9, clientSentiment: 0.8 }
-        ],
-        objectionsDetected: [],
-        unresolvedIssues: [],
-        resolutionStatus: 'RÉSOLU',
-        actionItemsRequested: [],
-        importantInformation: [],
-        criticalMoments: [],
-        agentTalkTimeSeconds: 85,
-        clientTalkTimeSeconds: 60,
-        talkToListenRatio: 1.4,
-        interruptionCount: 0,
-        totalSilenceSeconds: 4,
-        speechRateWpm: 135,
-        detectedCommunicationIssues: [],
-        aiDisclaimer: "Analyse générée automatiquement par les modèles NLP KALA (Whisper-v3 + CamemBERT) à titre indicatif."
-      },
-      isUrgentReviewRequired: isUrgentReview,
-      qualityScore: 88
-    };
-
-    // 1. Sauvegarde locale optimiste
-    storageService.addCall(newCall);
-
-    // 2. Déclenchement d'une notification si revue urgente demandée
-    if (isUrgentReview) {
-      storageService.addNotification({
-        type: 'URGENT_CALL',
-        title: `Audit Prioritaire requis : ${callNumber}`,
-        message: `Appel importé par l'équipe assigné à ${selectedAgent?.name}. Signalement d'urgence activé.`,
-        targetId: newCall.id,
-        targetView: 'calls',
-        priority: 'HAUTE'
-      });
-    }
-
-    // 3. Appel API backend en arrière-plan
-    try {
-      await callsApi.create(newCall);
-    } catch {
-      // Ignorer l'erreur réseau si backend non disponible
-    }
-
-    setProcessing(false);
-    onSuccess(newCall);
-    onClose();
   };
 
   return (
@@ -295,7 +119,7 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
               <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Ingestion & Analyse d'Enregistrement Audio</h2>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 36px' }}>
-              Traitement par le pipeline KALA (Débruitage spectral + Whisper-v3 + Scoring QA)
+              Écoute locale du fichier. La transcription automatique n'est pas encore disponible.
             </p>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -453,6 +277,11 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
             />
           </div>
 
+          {/* Information honnête */}
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', padding: '10px 14px', borderRadius: 'var(--radius-md)' }}>
+            Aucune transcription n'est produite pour le moment : aucun texte, WER, SNR ni score ne sera généré tant que le pipeline de transcription réel n'est pas branché.
+          </div>
+
           {/* Actions */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose} disabled={processing}>
@@ -461,11 +290,12 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
             <button 
               type="submit" 
               className="btn btn-primary"
-              disabled={!selectedFile || processing}
+              disabled
+              title="Le pipeline de transcription réel n'est pas encore branché"
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             >
               <Sparkles size={16} />
-              <span>{processing ? 'Traitement IA & Débruitage...' : 'Ingérer & Lancer l\'Analyse'}</span>
+              <span>Transcription bientôt disponible</span>
             </button>
           </div>
         </form>

@@ -374,7 +374,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
             </div>
 
             <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-              <strong>Chaîne automatique activée :</strong> Débruitage spectral KALA $\rightarrow$ Segmentation ASR $\rightarrow$ Diarisation Agent/Client $\rightarrow$ Calcul de confiance.
+              <strong>Transcription non disponible :</strong> le pipeline de transcription réel n'est pas encore branché. Aucun résultat ne sera généré à partir de ce fichier.
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
@@ -383,12 +383,10 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
               </button>
               <button 
                 className="btn btn-primary"
-                onClick={() => {
-                  alert("Simulation de l'import : le fichier a été téléversé avec succès et la chaîne KALA a calculé un SNR de 13.8 dB avec transcription immédiate.");
-                  setShowImportModal(false);
-                }}
+                disabled
+                title="Le pipeline de transcription réel n'est pas encore branché"
               >
-                Lancer la transcription KALA
+                Transcription bientôt disponible
               </button>
             </div>
           </div>

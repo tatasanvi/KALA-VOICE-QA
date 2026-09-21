@@ -340,7 +340,6 @@ export interface BenchmarkSample {
     configId: string;
     configName: string;
     predictedText: string;
-    wer: number;
     cer: number;
     rtf: number;
     processingTimeMs: number;

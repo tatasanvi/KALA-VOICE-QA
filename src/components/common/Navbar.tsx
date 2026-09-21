@@ -117,7 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
           <Sparkles size={14} color="#60a5fa" />
           <span style={{ fontSize: '11.5px', color: '#93c5fd', fontWeight: 600 }}>
-            ASR & Dénosing : <strong style={{ color: '#ffffff' }}>KALA-Whisper-v3</strong> (+11.2 dB SNR)
+            ASR : <strong style={{ color: '#ffffff' }}>non branché</strong> (démonstration)
           </span>
         </div>
 

@@ -94,7 +94,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
             style={{ fontSize: '11.5px', padding: '4px 10px', marginLeft: '4px' }}
           >
             <Sparkles size={13} color="#93c5fd" />
-            <span>Débruité KALA (+11.2 dB)</span>
+            <span>Débruité KALA (simulation)</span>
           </button>
         </div>
       </div>

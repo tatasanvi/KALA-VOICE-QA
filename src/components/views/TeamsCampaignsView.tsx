@@ -89,7 +89,6 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
       
       setSimulationLog(prev => [
         `[${new Date().toLocaleTimeString()}] ✅ Décroché par ${assignedAgent.name} (Poste 104) — Stream audio SIP capturé (G.711 / 16kHz)`,
-        `[${new Date().toLocaleTimeString()}] 🎙️ Pipeline Débruitage KALA actif : WER estimé ~4.1%`,
         `[${new Date().toLocaleTimeString()}] 💾 Appel ${callNum} enregistré et archivé avec succès`,
         ...prev
       ]);
@@ -128,7 +127,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
           audioFileId: `audio-${callNum}`,
           versionNumber: 1,
           isLatest: true,
-          asrModelUsed: 'KALA-Denoiser+Whisper-Large-v3',
+          asrModelUsed: 'Whisper-small (non branché en démonstration)',
           totalWords: 45,
           processingTimeMs: 820,
           globalConfidenceScore: 94,
@@ -438,7 +437,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
               }}>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600 }}>Analyse & Transcription Automatique Immédiate</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Déclenche Whisper-v3 + scoring IA dès la fin de l'appel.</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Déclencherait Whisper-small (non branché en démonstration) dès la fin de l'appel.</div>
                 </div>
                 <input 
                   type="checkbox"
@@ -464,17 +463,17 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
               </div>
               <button 
                 className="btn btn-primary btn-sm"
-                onClick={handleSimulateCtiCall}
-                disabled={isSimulating}
+                disabled
+                title="La simulation d'appels est désactivée : elle fabriquait des appels et des scores fictifs"
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                <RefreshCw size={13} className={isSimulating ? 'spin' : ''} />
-                <span>{isSimulating ? 'Réception en cours...' : 'Simuler Appel Entrant'}</span>
+                <RefreshCw size={13} />
+                <span>Indisponible en démonstration</span>
               </button>
             </div>
 
             <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-              Injecte un appel entrant simulé avec ses paquets RTP et déclenche le pipeline complet d'évaluation.
+              Simulation désactivée : aucun appel, aucune transcription ni aucun score n'est généré depuis ce panneau.
             </p>
 
             {/* Console de logs */}
@@ -495,7 +494,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
             }}>
               {simulationLog.length === 0 ? (
                 <div style={{ color: 'var(--text-muted)', textAlign: 'center', margin: 'auto' }}>
-                  En attente d'événements CTI... Cliquez sur "Simuler Appel Entrant" pour tester le flux.
+                  Aucun événement CTI. La simulation d'appels est indisponible en démonstration.
                 </div>
               ) : (
                 simulationLog.map((log, idx) => (
