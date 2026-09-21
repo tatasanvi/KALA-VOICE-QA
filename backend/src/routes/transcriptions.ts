@@ -63,7 +63,7 @@ async function postToAsr(form: FormData): Promise<{ status: number; body: any }>
   });
 }
 
-// POST /api/transcriptions — transcription du signal brut, sans débruitage
+// POST /api/transcriptions — transcription du signal brut ; débruitage uniquement en comparaison facultative
 router.post('/', requireAuth, handleUpload, async (req: Request, res: Response): Promise<void> => {
   if (!req.file) {
     res.status(400).json({ error: 'Aucun fichier audio reçu.' });
@@ -74,6 +74,10 @@ router.post('/', requireAuth, handleUpload, async (req: Request, res: Response):
   form.append('file', new Blob([new Uint8Array(req.file.buffer)], { type: req.file.mimetype }), req.file.originalname);
   if (typeof req.body?.reference === 'string' && req.body.reference.trim()) {
     form.append('reference', req.body.reference);
+  }
+  if (req.body?.compare_dfn3 === 'true') {
+    // Option comparative (voie B, DeepFilterNet3) : désactivée par défaut.
+    form.append('compare_dfn3', 'true');
   }
 
   let asr: { status: number; body: any };

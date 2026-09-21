@@ -6,3 +6,4 @@ librosa
 fastapi
 uvicorn[standard]
 python-multipart
+deepfilternet-slim

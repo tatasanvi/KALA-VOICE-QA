@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { UploadCloud, FileAudio, AlertCircle, Loader2 } from 'lucide-react';
-import { transcriptionsApi, TranscriptionResult } from '../../services/apiClient';
+import { transcriptionsApi, TranscriptionResult, DenoisedResult } from '../../services/apiClient';
 
 const MAX_BYTES = 25 * 1024 * 1024;
 
@@ -13,7 +13,9 @@ const fmt = (t: number | null) => {
 
 const pct = (x: number) => `${(x * 100).toFixed(1)} %`;
 
-const MeasuredMetrics: React.FC<{ result: TranscriptionResult }> = ({ result }) => {
+type Metrics = Pick<TranscriptionResult, 'wer' | 'cer' | 'reference_normalized' | 'hypothesis_normalized'>;
+
+const MeasuredMetrics: React.FC<{ result: Metrics }> = ({ result }) => {
   if (result.wer === null || result.cer === null) return null;
   return (
     <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
@@ -36,13 +38,15 @@ const MeasuredMetrics: React.FC<{ result: TranscriptionResult }> = ({ result }) 
   );
 };
 
-const ResultView: React.FC<{ result: TranscriptionResult }> = ({ result }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-      <span className="badge badge-gray">Modèle : {result.model}</span>
-      <span className="badge badge-gray">Durée audio : {result.duration.toFixed(1)} s</span>
-      <span className="badge badge-gray">Temps de traitement : {result.processing_time.toFixed(1)} s</span>
-    </div>
+const ResultView: React.FC<{ result: TranscriptionResult | DenoisedResult; header?: React.ReactNode }> = ({ result, header }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0 }}>
+    {header ?? (
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        {'model' in result && <span className="badge badge-gray">Modèle : {result.model}</span>}
+        {'duration' in result && <span className="badge badge-gray">Durée audio : {result.duration.toFixed(1)} s</span>}
+        <span className="badge badge-gray">Temps de traitement : {result.processing_time.toFixed(1)} s</span>
+      </div>
+    )}
 
     <MeasuredMetrics result={result} />
 
@@ -71,12 +75,57 @@ const ResultView: React.FC<{ result: TranscriptionResult }> = ({ result }) => (
   </div>
 );
 
+const pts = (x: number) => `${x > 0 ? '+' : ''}${(x * 100).toFixed(1)} points`;
+
+// Deux transcriptions côte à côte : aucune voie n'est présentée comme meilleure, l'écart est affiché tel que mesuré.
+const ComparisonView: React.FC<{ result: TranscriptionResult }> = ({ result }) => {
+  const b = result.denoised!;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <span className="badge badge-gray">Modèle : {result.model}</span>
+        <span className="badge badge-gray">Durée audio : {result.duration.toFixed(1)} s</span>
+        {result.wer_delta !== null && result.wer_delta !== undefined && (
+          <span className="badge badge-blue" style={{ fontWeight: 700 }}>Écart de WER (avec − sans débruitage) : {pts(result.wer_delta)}</span>
+        )}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+        <div>
+          <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Sans débruitage (signal brut)</div>
+          <ResultView result={result} header={
+            <span className="badge badge-gray">Temps de transcription : {result.processing_time.toFixed(1)} s</span>
+          } />
+        </div>
+        <div>
+          <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Avec débruitage ({b.denoiser})</div>
+          <ResultView result={b} header={
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="badge badge-gray">Débruitage : {b.denoise_time.toFixed(1)} s</span>
+              <span className="badge badge-gray">Transcription : {b.processing_time.toFixed(1)} s</span>
+              {b.enh_corr !== null && (
+                <span className={`badge ${b.enh_ok ? 'badge-gray' : 'badge-amber'}`}
+                  title="Corrélation entre le signal envoyé au débruiteur et sa sortie. En dessous de 0,5, le débruitage est signalé comme douteux.">
+                  Corrélation entrée/sortie : {b.enh_corr.toFixed(3)}{b.enh_ok ? '' : ' (débruitage douteux)'}
+                </span>
+              )}
+            </div>
+          } />
+        </div>
+      </div>
+      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+        Résultat mesuré sur cet audio. Voir le mémoire pour l'analyse sur corpus.
+      </div>
+    </div>
+  );
+};
+
 // Upload réel -> service ASR local (Whisper-small, signal brut) -> affichage du résultat.
 // N'affiche que des valeurs renvoyées par le service : WER/CER seulement si une référence est saisie.
 export const RealTranscription: React.FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [reference, setReference] = useState('');
+  const [compareDfn3, setCompareDfn3] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TranscriptionResult | null>(null);
@@ -98,7 +147,7 @@ export const RealTranscription: React.FC = () => {
     setLoading(true);
     setError(null);
     setResult(null);
-    const res = await transcriptionsApi.transcribe(file, reference);
+    const res = await transcriptionsApi.transcribe(file, reference, compareDfn3);
     setLoading(false);
     if (res.ok && res.data) setResult(res.data);
     else setError(res.error ?? 'Échec de la transcription.');
@@ -161,8 +210,16 @@ export const RealTranscription: React.FC = () => {
         </div>
       </div>
 
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: loading ? 'default' : 'pointer' }}>
+        <input type="checkbox" checked={compareDfn3} disabled={loading}
+          onChange={e => { setCompareDfn3(e.target.checked); setResult(null); }} />
+        Comparer avec débruitage (DeepFilterNet3)
+      </label>
+
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-        Transcription par Whisper-small sur le signal brut, sans débruitage. Le fichier n'est pas conservé.
+        {compareDfn3
+          ? "Le fichier est transcrit deux fois par Whisper-small : sur le signal brut, puis après DeepFilterNet3. Le traitement est environ deux fois plus long. Le fichier n'est pas conservé."
+          : "Transcription par Whisper-small sur le signal brut, sans débruitage. Le fichier n'est pas conservé."}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -190,7 +247,7 @@ export const RealTranscription: React.FC = () => {
         </div>
       )}
 
-      {result && <ResultView result={result} />}
+      {result && (result.denoised ? <ComparisonView result={result} /> : <ResultView result={result} />)}
     </div>
   );
 };

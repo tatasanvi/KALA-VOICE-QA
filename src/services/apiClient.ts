@@ -179,14 +179,32 @@ export interface TranscriptionResult {
   cer: number | null;
   reference_normalized: string | null;
   hypothesis_normalized: string | null;
+  // Présents uniquement si la comparaison avec débruitage a été demandée.
+  denoised?: DenoisedResult | null;
+  wer_delta?: number | null;
+}
+
+export interface DenoisedResult {
+  text: string;
+  segments: TranscriptionSegmentResult[];
+  processing_time: number;
+  wer: number | null;
+  cer: number | null;
+  reference_normalized: string | null;
+  hypothesis_normalized: string | null;
+  denoiser: string;
+  denoise_time: number;
+  enh_corr: number | null;
+  enh_ok: boolean;
 }
 
 export const transcriptionsApi = {
-  transcribe: async (file: File, reference?: string): Promise<ApiResponse<TranscriptionResult>> => {
+  transcribe: async (file: File, reference?: string, compareDfn3 = false): Promise<ApiResponse<TranscriptionResult>> => {
     const token = tokenStore.get();
     const form = new FormData();
     form.append('file', file);
     if (reference && reference.trim()) form.append('reference', reference);
+    if (compareDfn3) form.append('compare_dfn3', 'true');
     try {
       const res = await fetch(`${API_BASE}/transcriptions`, {
         method: 'POST',
