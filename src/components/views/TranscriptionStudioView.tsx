@@ -6,6 +6,7 @@ import {
 import { storageService } from '../../services/storageService';
 import { audioSignalService } from '../../services/audioSignalService';
 import { AudioPlayer } from '../common/AudioPlayer';
+import { RealTranscription } from '../common/RealTranscription';
 import { Call, UserRole, TranscriptionSegment } from '../../types';
 
 interface TranscriptionStudioViewProps {
@@ -342,51 +343,26 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
         </div>
       )}
 
-      {/* Modal Démo Import Audio */}
+      {/* Modal Import Audio : transcription réelle (Whisper-small, signal brut) */}
       {showImportModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50
         }}>
-          <div className="glass-panel" style={{ width: '480px', maxWidth: '90%', padding: '24px' }}>
+          <div className="glass-panel" style={{ width: '680px', maxWidth: '92%', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Importer un nouvel enregistrement</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Transcrire un enregistrement</h3>
               <button className="btn btn-secondary btn-sm" onClick={() => setShowImportModal(false)}>
                 <X size={14} />
               </button>
             </div>
 
-            <div style={{
-              border: '2px dashed var(--border-active)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '36px 20px',
-              textAlign: 'center',
-              background: 'rgba(74, 111, 165, 0.04)',
-              cursor: 'pointer',
-              marginBottom: '16px'
-            }}>
-              <UploadCloud size={40} color="var(--primary-light)" style={{ marginBottom: '10px' }} />
-              <div style={{ fontWeight: 600, fontSize: '14px' }}>Glissez-déposez un fichier WAV, MP3 ou FLAC</div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Prise en charge des audios téléphoniques échantillonnés de 8 kHz à 48 kHz.
-              </div>
-            </div>
+            <RealTranscription />
 
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
-              <strong>Transcription non disponible :</strong> le pipeline de transcription réel n'est pas encore branché. Aucun résultat ne sera généré à partir de ce fichier.
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
               <button className="btn btn-secondary" onClick={() => setShowImportModal(false)}>
-                Annuler
-              </button>
-              <button 
-                className="btn btn-primary"
-                disabled
-                title="Le pipeline de transcription réel n'est pas encore branché"
-              >
-                Transcription bientôt disponible
+                Fermer
               </button>
             </div>
           </div>

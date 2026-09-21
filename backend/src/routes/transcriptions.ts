@@ -2,8 +2,10 @@
 // Route Transcriptions — proxy vers le service ASR local (Whisper-small)
 // Le fichier audio reste en mémoire le temps de la requête : il n'est pas conservé.
 // =============================================================================
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
+import http from 'node:http';
 import { requireAuth } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 
@@ -36,6 +38,31 @@ const handleUpload = (req: Request, res: Response, next: NextFunction): void => 
   });
 };
 
+// Appel HTTP interne sans délai maximal : sur CPU, un appel de plusieurs minutes
+// peut dépasser les 300 s d'attente par défaut du fetch de Node.
+async function postToAsr(form: FormData): Promise<{ status: number; body: any }> {
+  const encoded = new globalThis.Response(form);
+  const payload = Buffer.from(await encoded.arrayBuffer());
+  const url = new URL(ASR_URL);
+  return new Promise((resolve, reject) => {
+    const r = http.request({
+      hostname: url.hostname, port: url.port, path: url.pathname, method: 'POST',
+      headers: { 'Content-Type': encoded.headers.get('content-type') ?? '', 'Content-Length': payload.length },
+    }, (resp) => {
+      const chunks: Buffer[] = [];
+      resp.on('data', (c) => chunks.push(c));
+      resp.on('end', () => {
+        let parsed: any = null;
+        try { parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { /* réponse non JSON */ }
+        resolve({ status: resp.statusCode ?? 502, body: parsed });
+      });
+    });
+    r.setTimeout(0);
+    r.on('error', reject);
+    r.end(payload);
+  });
+}
+
 // POST /api/transcriptions — transcription du signal brut, sans débruitage
 router.post('/', requireAuth, handleUpload, async (req: Request, res: Response): Promise<void> => {
   if (!req.file) {
@@ -49,18 +76,19 @@ router.post('/', requireAuth, handleUpload, async (req: Request, res: Response):
     form.append('reference', req.body.reference);
   }
 
-  let asrRes: globalThis.Response;
+  let asr: { status: number; body: any };
   try {
-    asrRes = await fetch(ASR_URL, { method: 'POST', body: form });
-  } catch {
-    res.status(503).json({ error: 'Service de transcription non démarré.' });
+    asr = await postToAsr(form);
+  } catch (err: any) {
+    const notStarted = err?.code === 'ECONNREFUSED' || err?.code === 'ECONNRESET';
+    res.status(503).json({ error: notStarted ? 'Service de transcription non démarré.' : 'Service de transcription injoignable.' });
     return;
   }
 
-  const body = await asrRes.json().catch(() => null);
-  if (!asrRes.ok || !body) {
+  const body = asr.body;
+  if (asr.status >= 400 || !body) {
     const detail = body && typeof body.detail === 'string' ? body.detail : 'Échec de la transcription.';
-    res.status(asrRes.status >= 400 ? asrRes.status : 502).json({ error: detail });
+    res.status(asr.status >= 400 ? asr.status : 502).json({ error: detail });
     return;
   }
 

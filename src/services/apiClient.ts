@@ -160,3 +160,50 @@ export const experimentsApi = {
   configs:  () => apiCall('/experiments/configs'),
   samples:  () => apiCall('/experiments/samples'),
 };
+
+// ─── Transcriptions API (service ASR local, Whisper-small) ─────────────────────
+export interface TranscriptionSegmentResult {
+  start: number | null;
+  end: number | null;
+  text: string;
+}
+
+export interface TranscriptionResult {
+  text: string;
+  segments: TranscriptionSegmentResult[];
+  duration: number;
+  processing_time: number;
+  model: string;
+}
+
+export const transcriptionsApi = {
+  transcribe: async (file: File): Promise<ApiResponse<TranscriptionResult>> => {
+    const token = tokenStore.get();
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await fetch(`${API_BASE}/transcriptions`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: form,
+      });
+      const isJson = res.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await res.json() : null;
+      if (!res.ok && !isJson) {
+        // Réponse non JSON : le proxy Vite n'a pas pu joindre le backend Express.
+        return { error: 'Serveur KALA injoignable : le backend n\'est pas démarré.', status: res.status, ok: false };
+      }
+      if (res.status === 401) {
+        return { error: 'Session non authentifiée par le serveur : reconnectez-vous avec le backend démarré.', status: 401, ok: false };
+      }
+      return {
+        data: res.ok ? data : undefined,
+        error: !res.ok ? (data?.error ?? `Erreur ${res.status}`) : undefined,
+        status: res.status,
+        ok: res.ok,
+      };
+    } catch {
+      return { error: 'Serveur KALA injoignable : le backend n\'est pas démarré.', status: 0, ok: false };
+    }
+  },
+};
