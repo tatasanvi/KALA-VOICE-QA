@@ -18,10 +18,10 @@ interface CallDetailModalProps {
 
 const SentimentBadge: React.FC<{ sentiment: string }> = ({ sentiment }) => {
   const map: Record<string, { color: string; emoji: string }> = {
-    POSITIF: { color: '#34d399', emoji: '😊' },
+    POSITIF: { color: '#6db89a', emoji: '😊' },
     NEUTRE: { color: '#94a3b8', emoji: '😐' },
-    MITIGÉ: { color: '#fbbf24', emoji: '😕' },
-    NÉGATIF: { color: '#f87171', emoji: '😠' },
+    MITIGÉ: { color: '#d9ae55', emoji: '😕' },
+    NÉGATIF: { color: '#d98383', emoji: '😠' },
     TRÈS_FRUSTRÉ: { color: '#ef4444', emoji: '😡' },
   };
   const c = map[sentiment] || { color: '#94a3b8', emoji: '❓' };
@@ -77,18 +77,18 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
     }}>
       <div style={{
         width: '100%', maxWidth: '960px', maxHeight: '90vh',
-        background: 'linear-gradient(135deg, rgba(15,20,40,0.98) 0%, rgba(20,15,45,0.98) 100%)',
-        border: '1px solid rgba(99,102,241,0.3)',
+        background: 'rgba(15,20,40,0.98)',
+        border: '1px solid rgba(74, 111, 165,0.3)',
         borderRadius: '20px', display: 'flex', flexDirection: 'column',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.15)',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
         overflow: 'hidden'
       }}>
 
         {/* ─── Header ─── */}
         <div style={{
           padding: '20px 28px 16px',
-          background: 'linear-gradient(90deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.06) 100%)',
-          borderBottom: '1px solid rgba(99,102,241,0.2)',
+          background: 'rgba(255, 255, 255, 0.03)',
+          borderBottom: '1px solid rgba(74, 111, 165,0.2)',
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px',
           flexShrink: 0
         }}>
@@ -104,9 +104,9 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   background: call.status === 'EVALUE' ? 'rgba(52,211,153,0.15)' :
                     call.status === 'A_REVOIR' ? 'rgba(251,191,36,0.15)' :
                     call.status === 'COACHING_RECOMMANDE' ? 'rgba(239,68,68,0.15)' : 'rgba(148,163,184,0.15)',
-                  color: call.status === 'EVALUE' ? '#34d399' :
-                    call.status === 'A_REVOIR' ? '#fbbf24' :
-                    call.status === 'COACHING_RECOMMANDE' ? '#f87171' : '#94a3b8',
+                  color: call.status === 'EVALUE' ? '#6db89a' :
+                    call.status === 'A_REVOIR' ? '#d9ae55' :
+                    call.status === 'COACHING_RECOMMANDE' ? '#d98383' : '#94a3b8',
                 }}>
                   {call.status.replace(/_/g, ' ')}
                 </span>
@@ -115,7 +115,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 <span style={{
                   display: 'flex', alignItems: 'center', gap: '3px',
                   padding: '2px 8px', borderRadius: '20px', fontSize: '10.5px', fontWeight: 700,
-                  background: 'rgba(239,68,68,0.15)', color: '#f87171'
+                  background: 'rgba(239,68,68,0.15)', color: '#d98383'
                 }}>
                   <AlertTriangle size={10} /> Revue Urgente
                 </span>
@@ -131,7 +131,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               <span>🏢 {call.campaignName.split('—')[0]}</span>
               <span>👤 {call.customerNameMasked}</span>
               <span>📞 {call.customerPhoneMasked}</span>
-              <span style={{ color: call.direction === 'ENTRANT' ? '#34d399' : '#60a5fa' }}>
+              <span style={{ color: call.direction === 'ENTRANT' ? '#6db89a' : '#9fb7d6' }}>
                 {call.direction === 'ENTRANT' ? '↙ Entrant' : '↗ Sortant'}
               </span>
             </div>
@@ -175,7 +175,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
             {audio.waveformSamples.slice(0, 80).map((amp, i) => (
               <div key={i} style={{
                 flex: '0 0 3px', height: `${Math.max(4, amp * 28)}px`,
-                background: i < 40 && isPlaying ? 'var(--primary-light)' : 'rgba(99,102,241,0.5)',
+                background: i < 40 && isPlaying ? 'var(--primary-light)' : 'rgba(74, 111, 165,0.5)',
                 borderRadius: '2px', transition: 'background 0.3s'
               }} />
             ))}
@@ -191,7 +191,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 {audio.estimatedNoiseLevel} • SNR {audio.snrDb} dB
               </span>
             </span>
-            <span>Qualité audio : <strong style={{ color: audio.audioQualityScore >= 80 ? '#34d399' : '#fbbf24' }}>{audio.audioQualityScore}/100</strong></span>
+            <span>Qualité audio : <strong style={{ color: audio.audioQualityScore >= 80 ? '#6db89a' : '#d9ae55' }}>{audio.audioQualityScore}/100</strong></span>
             <span>{audio.noiseType.replace(/_/g, ' ')}</span>
           </div>
         </div>
@@ -210,7 +210,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 onClick={() => setActiveTab(tab.id)}
                 style={{
                   flex: 1, padding: '12px 16px',
-                  background: isActive ? 'rgba(99,102,241,0.12)' : 'transparent',
+                  background: isActive ? 'rgba(74, 111, 165,0.12)' : 'transparent',
                   border: 'none', borderBottom: isActive ? '2px solid var(--primary-light)' : '2px solid transparent',
                   color: isActive ? 'var(--primary-light)' : 'var(--text-muted)',
                   cursor: 'pointer', fontSize: '13px', fontWeight: isActive ? 700 : 500,
@@ -234,11 +234,11 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* KPI Row */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
                 {[
-                  { label: 'Score Qualité', value: call.qualityScore ? `${call.qualityScore}/100` : 'Non évalué', color: call.qualityScore && call.qualityScore >= 80 ? '#34d399' : call.qualityScore ? '#fbbf24' : '#94a3b8' },
-                  { label: 'Résolution', value: a.resolutionStatus, color: a.resolutionStatus === 'RÉSOLU' ? '#34d399' : a.resolutionStatus === 'EN_COURS' ? '#fbbf24' : '#f87171' },
-                  { label: 'Confiance ASR', value: `${t.globalConfidenceScore}%`, color: t.globalConfidenceScore >= 85 ? '#34d399' : '#fbbf24' },
-                  { label: 'Robustesse Bruit', value: `${t.noiseRobustnessScore}%`, color: t.noiseRobustnessScore >= 80 ? '#34d399' : '#fbbf24' },
-                  { label: 'Modèle ASR', value: t.asrModelUsed, color: '#60a5fa' },
+                  { label: 'Score Qualité', value: call.qualityScore ? `${call.qualityScore}/100` : 'Non évalué', color: call.qualityScore && call.qualityScore >= 80 ? '#6db89a' : call.qualityScore ? '#d9ae55' : '#94a3b8' },
+                  { label: 'Résolution', value: a.resolutionStatus, color: a.resolutionStatus === 'RÉSOLU' ? '#6db89a' : a.resolutionStatus === 'EN_COURS' ? '#d9ae55' : '#d98383' },
+                  { label: 'Confiance ASR', value: `${t.globalConfidenceScore}%`, color: t.globalConfidenceScore >= 85 ? '#6db89a' : '#d9ae55' },
+                  { label: 'Robustesse Bruit', value: `${t.noiseRobustnessScore}%`, color: t.noiseRobustnessScore >= 80 ? '#6db89a' : '#d9ae55' },
+                  { label: 'Modèle ASR', value: t.asrModelUsed, color: '#9fb7d6' },
                 ].map((kpi, i) => (
                   <div key={i} style={{
                     background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
@@ -251,7 +251,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               </div>
 
               {/* Summary */}
-              <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '16px 20px' }}>
+              <div style={{ background: 'rgba(74, 111, 165,0.06)', border: '1px solid rgba(74, 111, 165,0.2)', borderRadius: '12px', padding: '16px 20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                   <Sparkles size={14} color="var(--primary-light)" />
                   <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary-light)', textTransform: 'uppercase' }}>Résumé IA de l'appel</span>
@@ -288,7 +288,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                         <span>{Math.floor(a.agentTalkTimeSeconds / 60)}m {a.agentTalkTimeSeconds % 60}s</span>
                       </div>
                       <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${agentTalkPct}%`, background: '#60a5fa', borderRadius: '3px' }} />
+                        <div style={{ height: '100%', width: `${agentTalkPct}%`, background: '#9fb7d6', borderRadius: '3px' }} />
                       </div>
                     </div>
                     <div>
@@ -297,7 +297,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                         <span>{Math.floor(a.clientTalkTimeSeconds / 60)}m {a.clientTalkTimeSeconds % 60}s</span>
                       </div>
                       <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${clientTalkPct}%`, background: '#34d399', borderRadius: '3px' }} />
+                        <div style={{ height: '100%', width: `${clientTalkPct}%`, background: '#6db89a', borderRadius: '3px' }} />
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '16px', fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -312,16 +312,16 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* Actions & Moments Critiques */}
               {a.criticalMoments.length > 0 && (
                 <div style={{ background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '12px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px', color: '#fbbf24' }}>⚡ Moments Critiques Détectés</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px', color: '#d9ae55' }}>⚡ Moments Critiques Détectés</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {a.criticalMoments.slice(0, 5).map((m, i) => (
                       <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', fontSize: '12.5px' }}>
-                        <span style={{ fontFamily: 'JetBrains Mono', color: '#fbbf24', flexShrink: 0 }}>
+                        <span style={{ fontFamily: 'JetBrains Mono', color: '#d9ae55', flexShrink: 0 }}>
                           {Math.floor(m.timestamp / 60)}:{String(m.timestamp % 60).padStart(2, '0')}
                         </span>
                         <span style={{ 
                           padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700,
-                          background: 'rgba(251,191,36,0.15)', color: '#fbbf24', flexShrink: 0
+                          background: 'rgba(251,191,36,0.15)', color: '#d9ae55', flexShrink: 0
                         }}>{m.type}</span>
                         <span style={{ color: '#e2e8f0', lineHeight: 1.4 }}>{m.description}</span>
                       </div>
@@ -379,26 +379,26 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   display: 'flex', gap: '12px', alignItems: 'flex-start',
                   padding: '12px 14px', borderRadius: '10px',
                   background: seg.speaker === 'AGENT' 
-                    ? 'rgba(99,102,241,0.08)' 
+                    ? 'rgba(74, 111, 165,0.08)' 
                     : 'rgba(52,211,153,0.06)',
-                  border: `1px solid ${seg.speaker === 'AGENT' ? 'rgba(99,102,241,0.2)' : 'rgba(52,211,153,0.15)'}`,
-                  borderLeft: `3px solid ${seg.speaker === 'AGENT' ? 'var(--primary-light)' : '#34d399'}`,
+                  border: `1px solid ${seg.speaker === 'AGENT' ? 'rgba(74, 111, 165,0.2)' : 'rgba(52,211,153,0.15)'}`,
+                  borderLeft: `3px solid ${seg.speaker === 'AGENT' ? 'var(--primary-light)' : '#6db89a'}`,
                 }}>
                   {seg.speaker === 'AGENT' 
                     ? <User size={15} color="var(--primary-light)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    : <Bot size={15} color="#34d399" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    : <Bot size={15} color="#6db89a" style={{ flexShrink: 0, marginTop: '2px' }} />
                   }
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <span style={{ 
                         fontSize: '11px', fontWeight: 700, 
-                        color: seg.speaker === 'AGENT' ? 'var(--primary-light)' : '#34d399'
+                        color: seg.speaker === 'AGENT' ? 'var(--primary-light)' : '#6db89a'
                       }}>
                         {seg.speakerLabel}
                       </span>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         {seg.isNoisyPassage && (
-                          <span style={{ fontSize: '10px', color: '#f87171', fontWeight: 600 }}>🔊 BRUIT {seg.noiseImpactLevel}</span>
+                          <span style={{ fontSize: '10px', color: '#d98383', fontWeight: 600 }}>🔊 BRUIT {seg.noiseImpactLevel}</span>
                         )}
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--text-muted)' }}>
                           {Math.floor(seg.startTime / 60)}:{String(Math.round(seg.startTime) % 60).padStart(2, '0')} → {Math.floor(seg.endTime / 60)}:{String(Math.round(seg.endTime) % 60).padStart(2, '0')}
@@ -406,7 +406,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                         <span style={{ 
                           fontSize: '10px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px',
                           background: seg.confidenceScore >= 0.9 ? 'rgba(52,211,153,0.15)' : seg.confidenceScore >= 0.75 ? 'rgba(251,191,36,0.15)' : 'rgba(239,68,68,0.15)',
-                          color: seg.confidenceScore >= 0.9 ? '#34d399' : seg.confidenceScore >= 0.75 ? '#fbbf24' : '#f87171'
+                          color: seg.confidenceScore >= 0.9 ? '#6db89a' : seg.confidenceScore >= 0.75 ? '#d9ae55' : '#d98383'
                         }}>
                           {Math.round(seg.confidenceScore * 100)}%
                         </span>
@@ -420,7 +420,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                         onClick={() => toggleSegment(seg.id)}
                         style={{ 
                           background: 'none', border: 'none', cursor: 'pointer',
-                          color: '#fbbf24', fontSize: '11px', marginTop: '4px',
+                          color: '#d9ae55', fontSize: '11px', marginTop: '4px',
                           display: 'flex', alignItems: 'center', gap: '3px'
                         }}
                       >
@@ -448,8 +448,8 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               {/* Transparence IA Banner */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.05) 100%)',
-                border: '1px solid rgba(99,102,241,0.3)', borderRadius: '12px', padding: '14px 18px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(74, 111, 165,0.3)', borderRadius: '12px', padding: '14px 18px',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   <Eye size={14} color="var(--primary-light)" />
@@ -460,8 +460,8 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                   <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: '8px', padding: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
-                      <CheckCircle2 size={12} color="#34d399" />
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#34d399' }}>INFORMATIONS DÉTECTÉES</span>
+                      <CheckCircle2 size={12} color="#6db89a" />
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#6db89a' }}>INFORMATIONS DÉTECTÉES</span>
                     </div>
                     <ul style={{ paddingLeft: '14px', fontSize: '12px', lineHeight: 1.6, color: '#d1fae5', margin: 0 }}>
                       {(a.groundTruthDetected || a.importantInformation).slice(0, 4).map((item, i) => (
@@ -471,8 +471,8 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   </div>
                   <div style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '8px', padding: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
-                      <Sparkles size={12} color="#fbbf24" />
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#fbbf24' }}>SUGGESTIONS IA</span>
+                      <Sparkles size={12} color="#d9ae55" />
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#d9ae55' }}>SUGGESTIONS IA</span>
                     </div>
                     <ul style={{ paddingLeft: '14px', fontSize: '12px', lineHeight: 1.6, color: '#fef3c7', margin: 0 }}>
                       {(a.aiSuggestions || a.unresolvedIssues).slice(0, 4).map((item: string, i: number) => (
@@ -498,14 +498,14 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {a.objectionsDetected.length > 0 && (
                   <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '14px' }}>
-                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#f87171', marginBottom: '8px' }}>🚧 Objections Détectées</h4>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#d98383', marginBottom: '8px' }}>🚧 Objections Détectées</h4>
                     <ul style={{ paddingLeft: '16px', fontSize: '12.5px', lineHeight: 1.6, color: '#fecaca', margin: 0 }}>
                       {a.objectionsDetected.map((obj, i) => <li key={i}>{obj}</li>)}
                     </ul>
                   </div>
                 )}
                 {a.actionItemsRequested.length > 0 && (
-                  <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px', padding: '14px' }}>
+                  <div style={{ background: 'rgba(74, 111, 165,0.05)', border: '1px solid rgba(74, 111, 165,0.2)', borderRadius: '12px', padding: '14px' }}>
                     <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary-light)', marginBottom: '8px' }}>✅ Actions Demandées</h4>
                     <ul style={{ paddingLeft: '16px', fontSize: '12.5px', lineHeight: 1.6, color: '#c7d2fe', margin: 0 }}>
                       {a.actionItemsRequested.map((act, i) => <li key={i}>{act}</li>)}
@@ -517,12 +517,12 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* Communication Issues */}
               {a.detectedCommunicationIssues.length > 0 && (
                 <div style={{ background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '12px', padding: '14px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#fbbf24', marginBottom: '8px' }}>⚠️ Problèmes de Communication Identifiés</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#d9ae55', marginBottom: '8px' }}>⚠️ Problèmes de Communication Identifiés</h4>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {a.detectedCommunicationIssues.map((issue, i) => (
                       <span key={i} style={{
                         padding: '3px 10px', borderRadius: '20px', fontSize: '12px',
-                        background: 'rgba(251,191,36,0.12)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.25)'
+                        background: 'rgba(251,191,36,0.12)', color: '#d9ae55', border: '1px solid rgba(251,191,36,0.25)'
                       }}>{issue}</span>
                     ))}
                   </div>
@@ -538,12 +538,12 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               }}
                 onClick={() => { onSelectCall(call.id); onNavigate('coaching'); onClose(); }}
               >
-                <Target size={18} color="#10b981" />
+                <Target size={18} color="#3f9a7a" />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#10b981' }}>Générer un Plan de Coaching depuis cette analyse</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#3f9a7a' }}>Générer un Plan de Coaching depuis cette analyse</div>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Basé sur les lacunes et objections détectées dans cet appel</div>
                 </div>
-                <ArrowRight size={16} color="#10b981" />
+                <ArrowRight size={16} color="#3f9a7a" />
               </div>
             </div>
           )}
@@ -562,7 +562,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 700 }}>Score Qualité</div>
                   <div style={{ 
                     fontSize: '42px', fontWeight: 900,
-                    color: call.qualityScore && call.qualityScore >= 80 ? '#34d399' : '#fbbf24'
+                    color: call.qualityScore && call.qualityScore >= 80 ? '#6db89a' : '#d9ae55'
                   }}>
                     {call.qualityScore ?? '—'}
                   </div>
@@ -603,8 +603,8 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                     {a.mainTopics.map((topic, i) => (
                       <span key={i} style={{
                         padding: '4px 12px', borderRadius: '20px', fontSize: '12.5px',
-                        background: 'rgba(99,102,241,0.12)', color: 'var(--primary-light)',
-                        border: '1px solid rgba(99,102,241,0.25)'
+                        background: 'rgba(74, 111, 165,0.12)', color: 'var(--primary-light)',
+                        border: '1px solid rgba(74, 111, 165,0.25)'
                       }}>{topic}</span>
                     ))}
                   </div>

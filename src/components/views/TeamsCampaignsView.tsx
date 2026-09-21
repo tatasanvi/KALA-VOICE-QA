@@ -307,7 +307,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Cible QA</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#34d399' }}>{camp.targetQualityScore}%</div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#6db89a' }}>{camp.targetQualityScore}%</div>
                   </div>
                 </div>
               </div>
@@ -458,7 +458,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
           <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Wifi size={18} color="#34d399" />
+                <Wifi size={18} color="#6db89a" />
                 <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>Simulateur de Flux Téléphonique Live</h3>
               </div>
               <button 
@@ -485,7 +485,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
               padding: '14px',
               fontFamily: 'JetBrains Mono, monospace',
               fontSize: '11.5px',
-              color: '#a7f3d0',
+              color: '#b9d6c8',
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
@@ -517,7 +517,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
             style={{
               background: 'var(--surface-2)', border: '1px solid var(--border-active)',
               borderRadius: 'var(--radius-xl)', width: '100%', maxWidth: '520px',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.6)', overflow: 'hidden'
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflow: 'hidden'
             }}
             onClick={e => e.stopPropagation()}
           >

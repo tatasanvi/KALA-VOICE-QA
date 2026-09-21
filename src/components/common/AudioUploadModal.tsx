@@ -98,7 +98,7 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
         style={{
           background: 'var(--surface-2)', border: '1px solid var(--border-active)',
           borderRadius: 'var(--radius-xl)', width: '100%', maxWidth: '640px',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.6)', overflow: 'hidden'
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflow: 'hidden'
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -106,7 +106,7 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
         <div style={{
           padding: '20px 24px', borderBottom: '1px solid var(--border-subtle)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(59, 130, 246, 0.1))'
+          background: 'rgba(255, 255, 255, 0.03)'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -135,11 +135,11 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
             onDragOver={handleDrag}
             onDrop={handleDrop}
             style={{
-              border: `2px dashed ${dragActive ? 'var(--primary)' : selectedFile ? '#10b981' : 'var(--border-subtle)'}`,
+              border: `2px dashed ${dragActive ? 'var(--primary)' : selectedFile ? '#3f9a7a' : 'var(--border-subtle)'}`,
               borderRadius: 'var(--radius-lg)',
               padding: '24px',
               textAlign: 'center',
-              background: dragActive ? 'rgba(99, 102, 241, 0.08)' : selectedFile ? 'rgba(16, 185, 129, 0.05)' : 'rgba(0,0,0,0.2)',
+              background: dragActive ? 'rgba(74, 111, 165, 0.08)' : selectedFile ? 'rgba(16, 185, 129, 0.05)' : 'rgba(0,0,0,0.2)',
               cursor: 'pointer',
               transition: 'all 0.2s'
             }}
@@ -156,9 +156,9 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
             {selectedFile ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                 <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <FileAudio size={22} color="#34d399" />
+                  <FileAudio size={22} color="#6db89a" />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: '14px', color: '#a7f3d0' }}>{selectedFile.name}</div>
+                <div style={{ fontWeight: 700, fontSize: '14px', color: '#b9d6c8' }}>{selectedFile.name}</div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   Taille : {(selectedFile.size / (1024 * 1024)).toFixed(2)} Mo • Durée estimée : {audioDuration}s
                 </div>

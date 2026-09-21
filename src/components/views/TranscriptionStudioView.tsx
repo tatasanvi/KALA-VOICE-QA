@@ -118,7 +118,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
       <div className="kpi-grid" style={{ marginBottom: 0 }}>
         <div className="kpi-card" style={{ padding: '14px 18px' }}>
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Clock size={14} color="#60a5fa" /> Durée Audio
+            <Clock size={14} color="#9fb7d6" /> Durée Audio
           </div>
           <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px' }}>
             {Math.floor(meta.durationSeconds / 60)}m {meta.durationSeconds % 60}s
@@ -128,9 +128,9 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
 
         <div className="kpi-card" style={{ padding: '14px 18px' }}>
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Volume2 size={14} color="#34d399" /> Qualité & Bruit Estimé
+            <Volume2 size={14} color="#6db89a" /> Qualité & Bruit Estimé
           </div>
-          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px', color: meta.snrDb > 15 ? '#34d399' : '#fbbf24' }}>
+          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px', color: meta.snrDb > 15 ? '#6db89a' : '#d9ae55' }}>
             {meta.estimatedNoiseLevel}
           </div>
           <div className="kpi-subtext">SNR mesuré : {meta.snrDb} dB</div>
@@ -138,7 +138,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
 
         <div className="kpi-card" style={{ padding: '14px 18px' }}>
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Activity size={14} color="#c084fc" /> Mots & Temps Traitement
+            <Activity size={14} color="#b3aed1" /> Mots & Temps Traitement
           </div>
           <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px' }}>
             {trans.totalWords} mots
@@ -148,9 +148,9 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
 
         <div className="kpi-card" style={{ padding: '14px 18px' }}>
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <CheckCircle size={14} color="#60a5fa" /> Confiance Globale
+            <CheckCircle size={14} color="#9fb7d6" /> Confiance Globale
           </div>
-          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px', color: '#60a5fa' }}>
+          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px', color: '#9fb7d6' }}>
             {trans.globalConfidenceScore} %
           </div>
           <div className="kpi-subtext">Robustesse bruit : {trans.noiseRobustnessScore}%</div>
@@ -197,7 +197,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
                       <span style={{ 
                         fontWeight: 700, 
                         fontSize: '13px', 
-                        color: seg.speaker === 'AGENT' ? 'var(--primary-light)' : '#34d399' 
+                        color: seg.speaker === 'AGENT' ? 'var(--primary-light)' : '#6db89a' 
                       }}>
                         {seg.speakerLabel}
                       </span>
@@ -362,7 +362,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
               borderRadius: 'var(--radius-lg)',
               padding: '36px 20px',
               textAlign: 'center',
-              background: 'rgba(59, 130, 246, 0.04)',
+              background: 'rgba(74, 111, 165, 0.04)',
               cursor: 'pointer',
               marginBottom: '16px'
             }}>

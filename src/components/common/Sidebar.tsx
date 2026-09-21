@@ -51,11 +51,11 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   };
 
   const roleLabels: Record<UserRole, { label: string; badge: string; color: string }> = {
-    ADMIN:      { label: 'Administrateur', badge: 'badge-red',    color: '#f87171' },
+    ADMIN:      { label: 'Administrateur', badge: 'badge-red',    color: '#d98383' },
     MANAGER:    { label: 'Manager Ops',    badge: 'badge-orange', color: '#fb923c' },
-    SUPERVISOR: { label: 'Superviseur',    badge: 'badge-blue',   color: '#60a5fa' },
-    QA_MANAGER: { label: 'Resp. Qualité',  badge: 'badge-purple', color: '#c084fc' },
-    TRAINER:    { label: 'Formateur',      badge: 'badge-green',  color: '#34d399' },
+    SUPERVISOR: { label: 'Superviseur',    badge: 'badge-blue',   color: '#9fb7d6' },
+    QA_MANAGER: { label: 'Resp. Qualité',  badge: 'badge-purple', color: '#b3aed1' },
+    TRAINER:    { label: 'Formateur',      badge: 'badge-green',  color: '#6db89a' },
     AGENT:      { label: 'Conseiller',     badge: 'badge-gray',   color: '#94a3b8' },
   };
 
@@ -199,14 +199,14 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         {/* 5. RECHERCHE SCIENTIFIQUE (MASTER 2) */}
         {showExperimentation && (
           <div className="nav-section">
-            <div className="nav-section-title" style={{ color: '#c084fc' }}>Recherche Scientifique</div>
+            <div className="nav-section-title" style={{ color: '#b3aed1' }}>Recherche Scientifique</div>
 
             <button 
               className={`nav-item ${isActive('/experimentation') ? 'active' : ''}`}
               onClick={() => handleNavigate('/experimentation')}
               style={{ width: '100%', background: 'none', textAlign: 'left' }}
             >
-              <FlaskConical size={18} color="#c084fc" />
+              <FlaskConical size={18} color="#b3aed1" />
               <span style={{ color: '#e9d5ff', fontWeight: 600 }}>Expérimentation ASR</span>
               <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: '10px' }}>WER/CER</span>
             </button>
@@ -216,14 +216,14 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         {/* 6. ADMINISTRATION & SÉCURITÉ */}
         {showAdminSection && (
           <div className="nav-section">
-            <div className="nav-section-title" style={{ color: '#f87171' }}>Administration</div>
+            <div className="nav-section-title" style={{ color: '#d98383' }}>Administration</div>
 
             <button 
               className={`nav-item ${isActive('/admin/users') ? 'active' : ''}`}
               onClick={() => handleNavigate('/admin/users')}
               style={{ width: '100%', background: 'none', textAlign: 'left' }}
             >
-              <Shield size={18} color="#f87171" />
+              <Shield size={18} color="#d98383" />
               <span>Gestion Utilisateurs</span>
             </button>
 
@@ -291,7 +291,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
               background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.25)',
               borderRadius: '8px',
-              color: '#f87171',
+              color: '#d98383',
               padding: '7px',
               cursor: 'pointer',
               display: 'flex',

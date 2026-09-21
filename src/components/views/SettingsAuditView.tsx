@@ -64,7 +64,7 @@ export const SettingsAuditView: React.FC<SettingsAuditViewProps> = ({ currentRol
       </div>
 
       {resetMessage && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', padding: '12px 18px', borderRadius: 'var(--radius-md)', color: '#a7f3d0', fontSize: '13px', fontWeight: 600 }}>
+        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #3f9a7a', padding: '12px 18px', borderRadius: 'var(--radius-md)', color: '#b9d6c8', fontSize: '13px', fontWeight: 600 }}>
           {resetMessage}
         </div>
       )}
@@ -102,7 +102,7 @@ export const SettingsAuditView: React.FC<SettingsAuditViewProps> = ({ currentRol
             )}
             {tab.id === 'users' && (
               <span style={{
-                background: 'rgba(192,132,252,0.3)', color: '#c084fc',
+                background: 'rgba(148, 163, 184,0.3)', color: '#b3aed1',
                 fontSize: '10px', fontWeight: 800, padding: '1px 6px', borderRadius: '10px'
               }}>
                 {storageService.getUsers().length}
@@ -121,7 +121,7 @@ export const SettingsAuditView: React.FC<SettingsAuditViewProps> = ({ currentRol
       {activeTab === 'privacy' && (
         <div className="glass-panel">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-            <ShieldCheck size={18} color="#34d399" />
+            <ShieldCheck size={18} color="#6db89a" />
             <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Confidentialité des Données & Protection de la Vie Privée</h3>
           </div>
 
@@ -240,7 +240,7 @@ export const SettingsAuditView: React.FC<SettingsAuditViewProps> = ({ currentRol
         <div className="glass-panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <History size={18} color="#c084fc" />
+              <History size={18} color="#b3aed1" />
               <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Journal d'Audit & Traçabilité des Opérations</h3>
             </div>
             <span className="badge badge-purple">{auditLogs.length} Événements Journalisés</span>

@@ -10,11 +10,11 @@ import { User, UserRole } from '../../types';
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
 const ROLES: { value: UserRole; label: string; badge: string; color: string }[] = [
-  { value: 'ADMIN',      label: 'Administrateur',       badge: 'badge-red',    color: '#f87171' },
+  { value: 'ADMIN',      label: 'Administrateur',       badge: 'badge-red',    color: '#d98383' },
   { value: 'MANAGER',    label: 'Manager',              badge: 'badge-orange', color: '#fb923c' },
-  { value: 'SUPERVISOR', label: 'Superviseur',          badge: 'badge-blue',   color: '#60a5fa' },
-  { value: 'QA_MANAGER', label: 'Responsable QA',       badge: 'badge-purple', color: '#c084fc' },
-  { value: 'TRAINER',    label: 'Formateur',            badge: 'badge-green',  color: '#34d399' },
+  { value: 'SUPERVISOR', label: 'Superviseur',          badge: 'badge-blue',   color: '#9fb7d6' },
+  { value: 'QA_MANAGER', label: 'Responsable QA',       badge: 'badge-purple', color: '#b3aed1' },
+  { value: 'TRAINER',    label: 'Formateur',            badge: 'badge-green',  color: '#6db89a' },
   { value: 'AGENT',      label: 'Conseiller',           badge: 'badge-gray',   color: '#94a3b8' },
 ];
 
@@ -92,15 +92,15 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
           placeholder={placeholder}
           style={{
             width: '100%', padding: '10px 12px 10px 38px', boxSizing: 'border-box',
-            background: 'rgba(0,0,0,0.3)', border: `1px solid ${errors[key] ? '#f87171' : 'rgba(255,255,255,0.1)'}`,
+            background: 'rgba(0,0,0,0.3)', border: `1px solid ${errors[key] ? '#d98383' : 'rgba(255,255,255,0.1)'}`,
             borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', fontSize: '14px',
             outline: 'none', transition: 'border-color 0.2s'
           }}
           onFocus={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
-          onBlur={e => (e.currentTarget.style.borderColor = errors[key] ? '#f87171' : 'rgba(255,255,255,0.1)')}
+          onBlur={e => (e.currentTarget.style.borderColor = errors[key] ? '#d98383' : 'rgba(255,255,255,0.1)')}
         />
       </div>
-      {errors[key] && <span style={{ fontSize: '11px', color: '#f87171' }}>{errors[key]}</span>}
+      {errors[key] && <span style={{ fontSize: '11px', color: '#d98383' }}>{errors[key]}</span>}
     </div>
   );
 
@@ -113,17 +113,17 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
       <div style={{
         background: 'var(--surface-2)', borderRadius: 'var(--radius-xl)',
         border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '560px',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.5)', overflow: 'hidden'
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflow: 'hidden'
       }} onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div style={{
           padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           borderBottom: '1px solid rgba(255,255,255,0.07)',
-          background: mode === 'create' ? 'linear-gradient(135deg, rgba(59,130,246,0.15), transparent)' : 'linear-gradient(135deg, rgba(168,85,247,0.15), transparent)'
+          background: mode === 'create' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.03)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {mode === 'create' ? <Plus size={20} color="#60a5fa" /> : <Pencil size={20} color="#c084fc" />}
+            {mode === 'create' ? <Plus size={20} color="#9fb7d6" /> : <Pencil size={20} color="#b3aed1" />}
             <div>
               <h3 style={{ fontSize: '17px', fontWeight: 800, margin: 0 }}>
                 {mode === 'create' ? 'Créer un nouveau compte' : 'Modifier le compte'}
@@ -240,7 +240,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ user, onConfirm, onClose }) =
     <div style={{
       background: 'var(--surface-2)', borderRadius: 'var(--radius-xl)',
       border: '1px solid rgba(248,113,113,0.3)', maxWidth: '440px', width: '100%',
-      boxShadow: '0 25px 60px rgba(0,0,0,0.5)', overflow: 'hidden'
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflow: 'hidden'
     }} onClick={e => e.stopPropagation()}>
       <div style={{ padding: '24px', textAlign: 'center' }}>
         <div style={{
@@ -249,7 +249,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ user, onConfirm, onClose }) =
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 16px'
         }}>
-          <AlertTriangle size={28} color="#f87171" />
+          <AlertTriangle size={28} color="#d98383" />
         </div>
         <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '8px' }}>
           Supprimer ce compte ?
@@ -257,7 +257,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ user, onConfirm, onClose }) =
         <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
           Vous êtes sur le point de supprimer définitivement le compte de
         </p>
-        <p style={{ fontSize: '15px', fontWeight: 700, color: '#f87171', marginBottom: '16px' }}>
+        <p style={{ fontSize: '15px', fontWeight: 700, color: '#d98383', marginBottom: '16px' }}>
           {user.name} ({user.email})
         </p>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '24px' }}>
@@ -267,7 +267,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ user, onConfirm, onClose }) =
           <button className="btn btn-secondary" onClick={onClose}>Annuler</button>
           <button
             className="btn btn-sm"
-            style={{ background: 'rgba(248,113,113,0.2)', color: '#f87171', border: '1px solid rgba(248,113,113,0.4)', padding: '8px 20px' }}
+            style={{ background: 'rgba(248,113,113,0.2)', color: '#d98383', border: '1px solid rgba(248,113,113,0.4)', padding: '8px 20px' }}
             onClick={onConfirm}
           >
             <Trash2 size={14} />
@@ -386,9 +386,9 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       {/* Notification */}
       {successMsg && (
         <div style={{
-          background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981',
+          background: 'rgba(16,185,129,0.15)', border: '1px solid #3f9a7a',
           padding: '12px 18px', borderRadius: 'var(--radius-md)',
-          color: '#a7f3d0', fontSize: '13px', fontWeight: 600,
+          color: '#b9d6c8', fontSize: '13px', fontWeight: 600,
           animation: 'slideIn 0.3s ease'
         }}>
           {successMsg}
@@ -404,8 +404,8 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--text-muted)' }}>
             <span>Total : <strong style={{ color: 'var(--text-primary)' }}>{stats.total}</strong></span>
-            <span style={{ color: '#34d399' }}>● Actifs : <strong>{stats.active}</strong></span>
-            <span style={{ color: '#f87171' }}>● Inactifs : <strong>{stats.inactive}</strong></span>
+            <span style={{ color: '#6db89a' }}>● Actifs : <strong>{stats.active}</strong></span>
+            <span style={{ color: '#d98383' }}>● Inactifs : <strong>{stats.inactive}</strong></span>
           </div>
         </div>
         <button
@@ -488,7 +488,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{
                           width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
-                          background: `linear-gradient(135deg, ${roleMeta.color}55, ${roleMeta.color}22)`,
+                          background: `${roleMeta.color}33`,
                           border: `2px solid ${roleMeta.color}44`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '16px', overflow: 'hidden'
@@ -537,7 +537,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                         <button
                           title="Modifier"
                           className="btn btn-ghost btn-sm"
-                          style={{ padding: '6px', color: '#c084fc' }}
+                          style={{ padding: '6px', color: '#b3aed1' }}
                           onClick={() => setModal({ mode: 'edit', user })}
                         >
                           <Pencil size={14} />
@@ -548,7 +548,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                           <button
                             title={user.isActive ? 'Désactiver' : 'Activer'}
                             className="btn btn-ghost btn-sm"
-                            style={{ padding: '6px', color: user.isActive ? '#fb923c' : '#34d399' }}
+                            style={{ padding: '6px', color: user.isActive ? '#fb923c' : '#6db89a' }}
                             onClick={() => handleToggle(user)}
                           >
                             {user.isActive ? <UserX size={14} /> : <UserCheck size={14} />}
@@ -560,7 +560,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                           <button
                             title="Supprimer"
                             className="btn btn-ghost btn-sm"
-                            style={{ padding: '6px', color: '#f87171' }}
+                            style={{ padding: '6px', color: '#d98383' }}
                             onClick={() => setDeleteTarget(user)}
                           >
                             <Trash2 size={14} />

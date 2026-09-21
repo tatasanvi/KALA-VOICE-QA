@@ -107,7 +107,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
       {/* Sélecteur d'Appel & Actions */}
       <div className="glass-panel" style={{ padding: '16px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <CheckCircle2 size={20} color="#34d399" />
+          <CheckCircle2 size={20} color="#6db89a" />
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>Évaluation de l'appel :</span>
           <select 
             value={currentCall.id}
@@ -135,7 +135,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           <button 
             className="btn btn-secondary btn-sm"
             onClick={() => onNavigate('coaching')}
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(251,191,36,0.12)', borderColor: 'rgba(251,191,36,0.35)', color: '#fbbf24' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(251,191,36,0.12)', borderColor: 'rgba(251,191,36,0.35)', color: '#d9ae55' }}
           >
             <Target size={14} />
             <span>Générer Plan Coaching</span>
@@ -144,7 +144,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           <button 
             className="btn btn-primary btn-sm"
             onClick={handleFinalValidation}
-            style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+            style={{ background: '#3f9a7a' }}
           >
             <Save size={14} />
             <span>Valider Définitivement</span>
@@ -154,8 +154,8 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
 
       {/* ─── Bannière Transparence IA ─────────────────────────────── */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.05) 100%)',
-        border: '1px solid rgba(99,102,241,0.3)', borderRadius: 'var(--radius-md)',
+        background: 'rgba(255, 255, 255, 0.03)',
+        border: '1px solid rgba(74, 111, 165,0.3)', borderRadius: 'var(--radius-md)',
         padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '10px'
       }}>
         <Eye size={16} color="var(--primary-light)" style={{ flexShrink: 0 }} />
@@ -168,11 +168,11 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             L'IA ne doit jamais remplacer le jugement du responsable qualité.
           </span>
         </div>
-        <Sparkles size={14} color="#8b5cf6" style={{ flexShrink: 0 }} />
+        <Sparkles size={14} color="#7d7aa6" style={{ flexShrink: 0 }} />
       </div>
 
       {notification && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', padding: '12px 18px', borderRadius: 'var(--radius-md)', color: '#a7f3d0', fontSize: '13.5px', fontWeight: 600 }}>
+        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #3f9a7a', padding: '12px 18px', borderRadius: 'var(--radius-md)', color: '#b9d6c8', fontSize: '13.5px', fontWeight: 600 }}>
           {notification}
         </div>
       )}
@@ -187,7 +187,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             Contrôle Qualité — Agent : {currentCall.agentName}
           </h2>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Statut : <strong style={{ color: evaluation.status === 'VALIDÉE_RESPONSABLE' ? '#34d399' : '#fbbf24' }}>{evaluation.status}</strong>
+            Statut : <strong style={{ color: evaluation.status === 'VALIDÉE_RESPONSABLE' ? '#6db89a' : '#d9ae55' }}>{evaluation.status}</strong>
             {evaluation.validatedAt && ` • Validé le ${evaluation.validatedAt}`}
           </div>
         </div>
@@ -196,17 +196,17 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           {/* Suggestion IA */}
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
-              <Sparkles size={12} color="#60a5fa" /> Suggestion IA
+              <Sparkles size={12} color="#9fb7d6" /> Suggestion IA
             </div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#93c5fd' }}>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: '#b4c6de' }}>
               {evaluation.aiSuggestedScore} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>/ 100</span>
             </div>
           </div>
 
           {/* Score Officiel */}
           <div style={{ 
-            background: 'rgba(59, 130, 246, 0.1)', 
-            border: '2px solid rgba(59, 130, 246, 0.4)', 
+            background: 'rgba(74, 111, 165, 0.1)', 
+            border: '2px solid rgba(74, 111, 165, 0.4)', 
             borderRadius: 'var(--radius-lg)', 
             padding: '12px 24px', 
             textAlign: 'center' 
@@ -214,7 +214,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
               Score Qualité Global
             </div>
-            <div style={{ fontSize: '38px', fontWeight: 900, color: evaluation.overallScore >= 80 ? '#34d399' : evaluation.overallScore >= 70 ? '#fbbf24' : '#f87171' }}>
+            <div style={{ fontSize: '38px', fontWeight: 900, color: evaluation.overallScore >= 80 ? '#6db89a' : evaluation.overallScore >= 70 ? '#d9ae55' : '#d98383' }}>
               {evaluation.overallScore} <span style={{ fontSize: '18px', color: 'var(--text-muted)' }}>/ 100</span>
             </div>
           </div>
@@ -223,8 +223,8 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
 
       {/* Synthèse Forces, Axes & Recommandations */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '18px' }}>
-        <div className="glass-panel" style={{ borderLeft: '4px solid #10b981' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#34d399', marginBottom: '8px' }}>
+        <div className="glass-panel" style={{ borderLeft: '4px solid #3f9a7a' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#6db89a', marginBottom: '8px' }}>
             Points Forts Observés
           </h3>
           <ul style={{ paddingLeft: '18px', fontSize: '13px', lineHeight: 1.6, color: '#d1fae5' }}>
@@ -235,7 +235,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
         </div>
 
         <div className="glass-panel" style={{ borderLeft: '4px solid #f59e0b' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fbbf24', marginBottom: '8px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#d9ae55', marginBottom: '8px' }}>
             Points Faibles & Axes d'Amélioration
           </h3>
           <ul style={{ paddingLeft: '18px', fontSize: '13px', lineHeight: 1.6, color: '#fef3c7' }}>
@@ -245,9 +245,9 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           </ul>
         </div>
 
-        <div className="glass-panel" style={{ borderLeft: '4px solid #8b5cf6' }}>
+        <div className="glass-panel" style={{ borderLeft: '4px solid #7d7aa6' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#c084fc' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#b3aed1' }}>
               Plan d'Action & Coaching
             </h3>
           </div>
@@ -260,7 +260,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             <button 
               className="btn btn-primary btn-sm"
               onClick={() => onNavigate('coaching')}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%', justifyContent: 'center', background: '#6a6796' }}
             >
               <Target size={14} />
               <span>Générer Plan de Coaching & Assigner Formation</span>
@@ -358,7 +358,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
                           borderRadius: 'var(--radius-sm)',
                           fontSize: '14px',
                           fontWeight: 800,
-                          color: currentScore >= 8 ? '#34d399' : currentScore >= 6 ? '#fbbf24' : '#f87171'
+                          color: currentScore >= 8 ? '#6db89a' : currentScore >= 6 ? '#d9ae55' : '#d98383'
                         }}
                       >
                         {[...Array(crit.maxScore + 1)].map((_, n) => (
@@ -371,8 +371,8 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
 
                 {/* Preuves textuelles / Citations du transcript */}
                 {evidence.length > 0 && (
-                  <div style={{ background: 'rgba(59, 130, 246, 0.06)', borderLeft: '3px solid var(--primary-light)', padding: '8px 12px', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', fontSize: '12.5px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#93c5fd', fontWeight: 600, marginBottom: '2px' }}>
+                  <div style={{ background: 'rgba(74, 111, 165, 0.06)', borderLeft: '3px solid var(--primary-light)', padding: '8px 12px', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', fontSize: '12.5px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#b4c6de', fontWeight: 600, marginBottom: '2px' }}>
                       <Quote size={12} />
                       <span>Extrait probant de transcription :</span>
                     </div>

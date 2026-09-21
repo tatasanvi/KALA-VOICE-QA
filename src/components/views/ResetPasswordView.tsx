@@ -23,10 +23,10 @@ export const ResetPasswordView: React.FC = () => {
     if (/[0-9]/.test(pwd)) score += 1;
     if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
 
-    if (score <= 1) return { score: 1, label: 'Faible', color: '#f87171' };
+    if (score <= 1) return { score: 1, label: 'Faible', color: '#d98383' };
     if (score === 2) return { score: 2, label: 'Moyen', color: '#fb923c' };
-    if (score === 3) return { score: 3, label: 'Fort', color: '#60a5fa' };
-    return { score: 4, label: 'Très Robuste', color: '#34d399' };
+    if (score === 3) return { score: 3, label: 'Fort', color: '#9fb7d6' };
+    return { score: 4, label: 'Très Robuste', color: '#6db89a' };
   };
 
   const strength = calculateStrength(password);
@@ -60,7 +60,7 @@ export const ResetPasswordView: React.FC = () => {
     <div style={{
       minHeight: '100vh',
       width: '100%',
-      background: 'radial-gradient(ellipse at 50% -20%, rgba(59, 130, 246, 0.18) 0%, rgba(15, 23, 42, 0.6) 45%, #050505 85%)',
+      background: 'rgba(255, 255, 255, 0.03)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -74,7 +74,7 @@ export const ResetPasswordView: React.FC = () => {
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: 'var(--radius-xl)',
         padding: '36px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
         backdropFilter: 'blur(20px)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
@@ -82,11 +82,11 @@ export const ResetPasswordView: React.FC = () => {
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+            background: '#3f9a7a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 15px rgba(16, 185, 129, 0.4)'
+            boxShadow: 'none'
           }}>
             <Lock size={20} color="#ffffff" />
           </div>
@@ -116,7 +116,7 @@ export const ResetPasswordView: React.FC = () => {
               justifyContent: 'center',
               margin: '0 auto 16px auto'
             }}>
-              <CheckCircle2 size={28} color="#34d399" />
+              <CheckCircle2 size={28} color="#6db89a" />
             </div>
 
             <h3 style={{ fontSize: '17px', fontWeight: 700, margin: '0 0 8px 0' }}>
@@ -146,7 +146,7 @@ export const ResetPasswordView: React.FC = () => {
                 fontSize: '12.5px',
                 marginBottom: '18px'
               }}>
-                <AlertCircle size={16} color="#f87171" style={{ flexShrink: 0 }} />
+                <AlertCircle size={16} color="#d98383" style={{ flexShrink: 0 }} />
                 <div>{errorMessage}</div>
               </div>
             )}

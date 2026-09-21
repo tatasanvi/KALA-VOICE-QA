@@ -35,7 +35,7 @@ export const ForgotPasswordView: React.FC = () => {
     <div style={{
       minHeight: '100vh',
       width: '100%',
-      background: 'radial-gradient(ellipse at 50% -20%, rgba(59, 130, 246, 0.18) 0%, rgba(15, 23, 42, 0.6) 45%, #050505 85%)',
+      background: 'rgba(255, 255, 255, 0.03)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -50,7 +50,7 @@ export const ForgotPasswordView: React.FC = () => {
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: 'var(--radius-xl)',
         padding: '36px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
         backdropFilter: 'blur(20px)'
       }}>
         {/* Logo */}
@@ -59,11 +59,11 @@ export const ForgotPasswordView: React.FC = () => {
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+            background: '#4a6fa5',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
+            boxShadow: 'none'
           }}>
             <KeyRound size={20} color="#ffffff" />
           </div>
@@ -93,7 +93,7 @@ export const ForgotPasswordView: React.FC = () => {
               justifyContent: 'center',
               margin: '0 auto 16px auto'
             }}>
-              <CheckCircle2 size={28} color="#34d399" />
+              <CheckCircle2 size={28} color="#6db89a" />
             </div>
 
             <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
@@ -153,7 +153,7 @@ export const ForgotPasswordView: React.FC = () => {
                 fontSize: '12.5px',
                 marginBottom: '18px'
               }}>
-                <AlertCircle size={16} color="#f87171" style={{ flexShrink: 0 }} />
+                <AlertCircle size={16} color="#d98383" style={{ flexShrink: 0 }} />
                 <div>{errorMessage}</div>
               </div>
             )}

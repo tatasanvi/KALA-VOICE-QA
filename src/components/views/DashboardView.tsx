@@ -78,10 +78,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
   // ── Répartition des scores ───────────────────────────────────────────────────
   const scoreDistrib = useMemo(() => {
     const ranges = [
-      { label: '≥ 90', min: 90, max: 100, color: '#34d399' },
-      { label: '80–90', min: 80, max: 90, color: '#60a5fa' },
-      { label: '70–80', min: 70, max: 80, color: '#fbbf24' },
-      { label: '< 70', min: 0, max: 70, color: '#f87171' },
+      { label: '≥ 90', min: 90, max: 100, color: '#6db89a' },
+      { label: '80–90', min: 80, max: 90, color: '#9fb7d6' },
+      { label: '70–80', min: 70, max: 80, color: '#d9ae55' },
+      { label: '< 70', min: 0, max: 70, color: '#d98383' },
     ];
     const total = evaluatedCalls.length || 1;
     return ranges.map(r => ({
@@ -194,7 +194,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             <span className="kpi-title">En Attente d'Analyse</span>
             <div className="kpi-icon-wrap kpi-icon-amber"><Clock size={20} /></div>
           </div>
-          <div className="kpi-value" style={{ color: pendingCalls > 10 ? '#fbbf24' : '#34d399' }}>{pendingCalls}</div>
+          <div className="kpi-value" style={{ color: pendingCalls > 10 ? '#d9ae55' : '#6db89a' }}>{pendingCalls}</div>
           <div className="kpi-subtext">
             <span style={{ color: 'var(--text-muted)' }}>{Math.round((pendingCalls / Math.max(filteredCalls.length, 1)) * 100)}% du volume total</span>
           </div>
@@ -205,7 +205,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             <span className="kpi-title">Score Qualité Moyen</span>
             <div className="kpi-icon-wrap kpi-icon-green"><Award size={20} /></div>
           </div>
-          <div className="kpi-value" style={{ color: avgQuality >= 80 ? '#34d399' : '#fbbf24' }}>
+          <div className="kpi-value" style={{ color: avgQuality >= 80 ? '#6db89a' : '#d9ae55' }}>
             {avgQuality} <span style={{ fontSize: '16px', color: 'var(--text-muted)' }}>/ 100</span>
           </div>
           <div className="kpi-subtext">
@@ -231,7 +231,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             <span className="kpi-title">Appels Urgents / Litiges</span>
             <div className="kpi-icon-wrap kpi-icon-red"><AlertOctagon size={20} /></div>
           </div>
-          <div className="kpi-value" style={{ color: '#f87171' }}>{urgentCalls}</div>
+          <div className="kpi-value" style={{ color: '#d98383' }}>{urgentCalls}</div>
           <div className="kpi-subtext">
             <span className="trend-down"><ArrowDownRight size={13} style={{ display: 'inline' }} /> Revue QA requise</span>
           </div>
@@ -256,7 +256,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             <span className="kpi-title">Agents en Coaching</span>
             <div className="kpi-icon-wrap kpi-icon-amber"><Target size={20} /></div>
           </div>
-          <div className="kpi-value" style={{ color: '#fbbf24' }}>{agentsNeedCoaching}</div>
+          <div className="kpi-value" style={{ color: '#d9ae55' }}>{agentsNeedCoaching}</div>
           <div className="kpi-subtext">
             <span style={{ color: 'var(--text-muted)' }}>{activeCoachingPlans} plans actifs</span>
           </div>
@@ -278,7 +278,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             <span className="kpi-title">Progression Post-Formation</span>
             <div className="kpi-icon-wrap kpi-icon-green"><TrendingUp size={20} /></div>
           </div>
-          <div className="kpi-value" style={{ color: '#34d399' }}>+{avgUplift}%</div>
+          <div className="kpi-value" style={{ color: '#6db89a' }}>+{avgUplift}%</div>
           <div className="kpi-subtext">
             <span className="trend-up">Uplift moyen coaching</span>
           </div>
@@ -289,7 +289,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             <span className="kpi-title">Qualité Audio Moy. (SNR)</span>
             <div className="kpi-icon-wrap kpi-icon-blue"><Mic size={20} /></div>
           </div>
-          <div className="kpi-value" style={{ color: avgSnr >= 20 ? '#34d399' : '#fbbf24' }}>{avgSnr} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>dB</span></div>
+          <div className="kpi-value" style={{ color: avgSnr >= 20 ? '#6db89a' : '#d9ae55' }}>{avgSnr} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>dB</span></div>
           <div className="kpi-subtext">
             <span style={{ color: 'var(--text-muted)' }}>Qualité audio : {avgAudioQuality}/100</span>
           </div>
@@ -317,10 +317,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
               { month: 'Avr', score: 84, count: 810 }
             ].map((m, idx) => (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '22%' }}>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: idx === 3 ? '#60a5fa' : 'var(--text-primary)' }}>{m.score}%</span>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: idx === 3 ? '#9fb7d6' : 'var(--text-primary)' }}>{m.score}%</span>
                 <div style={{ 
                   width: '100%', height: `${(m.score - 50) * 3.5}px`, 
-                  background: idx === 3 ? 'var(--primary-gradient)' : 'rgba(59,130,246,0.35)', 
+                  background: idx === 3 ? 'var(--primary-gradient)' : 'rgba(74, 111, 165,0.35)', 
                   borderRadius: '6px 6px 0 0', transition: 'all 0.3s'
                 }} />
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{m.month}</span>
@@ -353,14 +353,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                 <div key={t.id} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px' }}>
                     <span style={{ fontWeight: 600 }}>{t.name.split('—')[0]}</span>
-                    <span style={{ fontWeight: 800, color: teamAvg >= 85 ? '#34d399' : teamAvg >= 75 ? '#60a5fa' : '#fbbf24' }}>
+                    <span style={{ fontWeight: 800, color: teamAvg >= 85 ? '#6db89a' : teamAvg >= 75 ? '#9fb7d6' : '#d9ae55' }}>
                       {teamAvg}%
                     </span>
                   </div>
                   <div style={{ height: '8px', width: '100%', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{ 
                       height: '100%', width: `${teamAvg}%`,
-                      background: teamAvg >= 85 ? 'var(--success)' : teamAvg >= 75 ? 'var(--primary)' : '#fbbf24',
+                      background: teamAvg >= 85 ? 'var(--success)' : teamAvg >= 75 ? 'var(--primary)' : '#d9ae55',
                       borderRadius: '4px', transition: 'width 0.8s ease'
                     }} />
                   </div>
@@ -397,19 +397,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{
                       width: '18px', height: '18px', borderRadius: '50%', fontSize: '10px', fontWeight: 700,
-                      background: i === 0 ? '#f87171' : i === 1 ? '#fbbf24' : i === 2 ? '#60a5fa' : 'rgba(255,255,255,0.1)',
+                      background: i === 0 ? '#d98383' : i === 1 ? '#d9ae55' : i === 2 ? '#9fb7d6' : 'rgba(255,255,255,0.1)',
                       color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}>
                       {i + 1}
                     </span>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{lacune}</span>
                   </div>
-                  <span style={{ fontWeight: 700, color: '#fbbf24' }}>{count} agents</span>
+                  <span style={{ fontWeight: 700, color: '#d9ae55' }}>{count} agents</span>
                 </div>
                 <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden' }}>
                   <div style={{ 
                     height: '100%', width: `${(count / maxLacune) * 100}%`,
-                    background: i === 0 ? '#f87171' : i === 1 ? '#fbbf24' : i === 2 ? '#60a5fa' : 'rgba(148,163,184,0.5)',
+                    background: i === 0 ? '#d98383' : i === 1 ? '#d9ae55' : i === 2 ? '#9fb7d6' : 'rgba(148,163,184,0.5)',
                     borderRadius: '3px'
                   }} />
                 </div>
@@ -457,19 +457,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
           {/* Boucle performance Koffi Mensah */}
           <div style={{
             marginTop: '16px', padding: '12px 14px',
-            background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)',
+            background: 'rgba(74, 111, 165,0.07)', border: '1px solid rgba(74, 111, 165,0.2)',
             borderRadius: '10px'
           }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 700, textTransform: 'uppercase' }}>
               🌟 Focus Coaching — Koffi Mensah
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
-              <span style={{ fontWeight: 700, color: '#f87171' }}>68%</span>
+              <span style={{ fontWeight: 700, color: '#d98383' }}>68%</span>
               <div style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: '0', top: '0', height: '100%', width: '68%', background: '#f87171', borderRadius: '2px' }} />
-                <div style={{ position: 'absolute', left: '68%', top: '0', height: '100%', width: '13%', background: '#34d399', borderRadius: '2px' }} />
+                <div style={{ position: 'absolute', left: '0', top: '0', height: '100%', width: '68%', background: '#d98383', borderRadius: '2px' }} />
+                <div style={{ position: 'absolute', left: '68%', top: '0', height: '100%', width: '13%', background: '#6db89a', borderRadius: '2px' }} />
               </div>
-              <span style={{ fontWeight: 700, color: '#34d399' }}>81%</span>
+              <span style={{ fontWeight: 700, color: '#6db89a' }}>81%</span>
               <span className="badge badge-green" style={{ fontSize: '11px' }}>+13 pts ↑</span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -528,7 +528,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '6px' }}>
                   <div>
                     <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Score Qualité Réel</span>
-                    <div style={{ fontSize: '22px', fontWeight: 900, color: c.realAvgScore >= c.targetQualityScore ? '#34d399' : '#fbbf24' }}>
+                    <div style={{ fontSize: '22px', fontWeight: 900, color: c.realAvgScore >= c.targetQualityScore ? '#6db89a' : '#d9ae55' }}>
                       {c.realAvgScore}%
                     </div>
                   </div>
@@ -545,7 +545,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                   <div style={{
                     height: '100%',
                     width: `${Math.min(c.realAvgScore, 100)}%`,
-                    background: c.isTargetMet ? 'linear-gradient(90deg, #10b981, #34d399)' : 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+                    background: c.isTargetMet ? '#3f9a7a' : '#f59e0b',
                     borderRadius: '3px'
                   }} />
                 </div>
@@ -558,11 +558,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                   </div>
                   <div>
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>FCR Résol.</div>
-                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#60a5fa', marginTop: '2px' }}>{c.realResolutionRate}%</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#9fb7d6', marginTop: '2px' }}>{c.realResolutionRate}%</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Bruit SNR</div>
-                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#34d399', marginTop: '2px' }}>{c.realAvgSnr} dB</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#6db89a', marginTop: '2px' }}>{c.realAvgSnr} dB</div>
                   </div>
                 </div>
               </div>

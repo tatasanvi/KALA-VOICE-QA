@@ -30,8 +30,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         <div style={{
           width: '40px',
           height: '40px',
-          border: '3px solid rgba(59, 130, 246, 0.2)',
-          borderTopColor: '#60a5fa',
+          border: '3px solid rgba(74, 111, 165, 0.2)',
+          borderTopColor: '#9fb7d6',
           borderRadius: '50%',
           animation: 'spin 0.8s linear infinite',
           marginBottom: '16px'

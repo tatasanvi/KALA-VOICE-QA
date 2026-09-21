@@ -86,8 +86,8 @@ const AppLayout: React.FC = () => {
 
         {/* Bannière Démonstration Soutenance Master 2 */}
         <div style={{
-          background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.12), rgba(59, 130, 246, 0.12))',
-          borderBottom: '1px solid rgba(139, 92, 246, 0.25)',
+          background: 'rgba(255, 255, 255, 0.03)',
+          borderBottom: '1px solid rgba(125, 122, 166, 0.25)',
           padding: '6px 24px',
           display: 'flex',
           alignItems: 'center',
@@ -100,7 +100,7 @@ const AppLayout: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ 
               display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', 
-              background: '#34d399', boxShadow: '0 0 8px #34d399' 
+              background: '#6db89a', boxShadow: 'none' 
             }} />
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
               Données de démonstration — Soutenance Master 2 IA & Big Data
