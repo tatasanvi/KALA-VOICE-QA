@@ -6,10 +6,27 @@ import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import http from 'node:http';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import db from '../db/index.js';
 import { requireAuth } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 
 const router = Router();
+const sqlite = () => (db as any).session.client;
+
+// Choix RGPD par défaut, cohérent avec le scénario « traitement en flux » du mémoire :
+// l'audio n'existe qu'en mémoire le temps de la requête, puis il est jeté. Seule la
+// transcription (texte, segments, métriques mesurées) est enregistrée comme appel.
+// L'audio n'est écrit sur disque que si l'option `keep_audio=true` est explicitement demandée.
+const AUDIO_DIR = join(dirname(fileURLToPath(import.meta.url)), '../../storage/audio');
+
+const pad = (n: number) => String(n).padStart(2, '0');
+function newCallNumber(d: Date): string {
+  const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+  return `TR-${stamp}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+}
 
 const ASR_URL = process.env.ASR_URL ?? 'http://127.0.0.1:8500/transcribe';
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -96,11 +113,61 @@ router.post('/', requireAuth, handleUpload, async (req: Request, res: Response):
     return;
   }
 
-  if (req.user) {
-    logAudit(req.user.userId, req.user.name, req.user.role, 'TRANSCRIPTION_AUDIO', '/api/transcriptions',
-      `Fichier transcrit (${req.file.size} octets, ${body.model})`, req.ip);
+  // ─── Enregistrement de l'appel réel ─────────────────────────────────────────
+  const now = new Date();
+  const id = `call-real-${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`;
+  const callNumber = newCallNumber(now);
+  const keepAudio = req.body?.keep_audio === 'true';
+
+  let audioPath: string | null = null;
+  if (keepAudio) {
+    mkdirSync(AUDIO_DIR, { recursive: true });
+    audioPath = join(AUDIO_DIR, `${id}${extname(req.file.originalname).toLowerCase() || '.bin'}`);
+    writeFileSync(audioPath, req.file.buffer);
   }
-  res.json(body);
+
+  const audioMetadata = {
+    filename: req.file.originalname,
+    fileSizeBytes: req.file.size,
+    durationSeconds: body.duration,
+    audioStored: keepAudio,
+  };
+  // Uniquement des valeurs renvoyées par le service ASR : WER/CER à null sans référence.
+  const transcription = {
+    source: 'REAL_ASR',
+    createdByUserId: req.user!.userId,
+    createdByName: req.user!.name,
+    asrModelUsed: body.model,
+    rawText: body.text,
+    segments: body.segments,
+    processingTimeSeconds: body.processing_time,
+    wer: body.wer ?? null,
+    cer: body.cer ?? null,
+    referenceNormalized: body.reference_normalized ?? null,
+    hypothesisNormalized: body.hypothesis_normalized ?? null,
+    denoised: body.denoised ?? null,
+    werDelta: body.wer_delta ?? null,
+    createdAt: now.toISOString(),
+  };
+
+  sqlite().prepare(`
+    INSERT INTO calls (id, call_number, agent_id, agent_name, team_id, campaign_id, campaign_name,
+      customer_phone_masked, customer_name_masked, call_date, duration_seconds, direction, call_type,
+      audio_metadata_json, transcription_json, analytics_json, quality_evaluation_id, quality_score,
+      is_urgent_review_required, notes, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, 0, ?, ?)
+  `).run(
+    id, callNumber, '', 'Non assigné', '', '', 'Non renseignée', 'Non renseigné', 'Non renseigné',
+    now.toISOString().substring(0, 10), Math.round(body.duration ?? 0), 'ENTRANT', 'NON_QUALIFIE',
+    JSON.stringify(audioMetadata), JSON.stringify(transcription), '{}',
+    keepAudio ? 'Audio conservé sur demande explicite' : 'Audio non conservé (traitement en flux)',
+    now.toISOString(),
+  );
+
+  logAudit(req.user!.userId, req.user!.name, req.user!.role, 'TRANSCRIPTION_AUDIO', `Appel ${callNumber}`,
+    `Transcription enregistrée (${req.file.size} octets, ${body.model}, audio ${keepAudio ? 'conservé' : 'non conservé'})`, req.ip);
+
+  res.json({ ...body, callId: id, callNumber, audioStored: keepAudio });
 });
 
 export default router;
