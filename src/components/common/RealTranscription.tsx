@@ -38,7 +38,7 @@ const MeasuredMetrics: React.FC<{ result: Metrics }> = ({ result }) => {
   );
 };
 
-const ResultView: React.FC<{ result: TranscriptionResult | DenoisedResult; header?: React.ReactNode }> = ({ result, header }) => (
+export const ResultView: React.FC<{ result: TranscriptionResult | DenoisedResult; header?: React.ReactNode }> = ({ result, header }) => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minWidth: 0 }}>
     {header ?? (
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -78,7 +78,7 @@ const ResultView: React.FC<{ result: TranscriptionResult | DenoisedResult; heade
 const pts = (x: number) => `${x > 0 ? '+' : ''}${(x * 100).toFixed(1)} points`;
 
 // Deux transcriptions côte à côte : aucune voie n'est présentée comme meilleure, l'écart est affiché tel que mesuré.
-const ComparisonView: React.FC<{ result: TranscriptionResult }> = ({ result }) => {
+export const ComparisonView: React.FC<{ result: TranscriptionResult }> = ({ result }) => {
   const b = result.denoised!;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -121,11 +121,13 @@ const ComparisonView: React.FC<{ result: TranscriptionResult }> = ({ result }) =
 
 // Upload réel -> service ASR local (Whisper-small, signal brut) -> affichage du résultat.
 // N'affiche que des valeurs renvoyées par le service : WER/CER seulement si une référence est saisie.
-export const RealTranscription: React.FC = () => {
+export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [reference, setReference] = useState('');
   const [compareDfn3, setCompareDfn3] = useState(false);
+  // RGPD : l'audio n'est pas conservé par défaut (seule la transcription est enregistrée).
+  const [keepAudio, setKeepAudio] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TranscriptionResult | null>(null);
@@ -147,9 +149,12 @@ export const RealTranscription: React.FC = () => {
     setLoading(true);
     setError(null);
     setResult(null);
-    const res = await transcriptionsApi.transcribe(file, reference, compareDfn3);
+    const res = await transcriptionsApi.transcribe(file, reference, compareDfn3, keepAudio);
     setLoading(false);
-    if (res.ok && res.data) setResult(res.data);
+    if (res.ok && res.data) {
+      setResult(res.data);
+      if (res.data.callId) onSaved?.();
+    }
     else setError(res.error ?? 'Échec de la transcription.');
   };
 
@@ -216,10 +221,17 @@ export const RealTranscription: React.FC = () => {
         Comparer avec débruitage (DeepFilterNet3)
       </label>
 
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: loading ? 'default' : 'pointer' }}>
+        <input type="checkbox" checked={keepAudio} disabled={loading}
+          onChange={e => setKeepAudio(e.target.checked)} />
+        Conserver le fichier audio (désactivé par défaut)
+      </label>
+
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
         {compareDfn3
-          ? "Le fichier est transcrit deux fois par Whisper-small : sur le signal brut, puis après DeepFilterNet3. Le traitement est environ deux fois plus long. Le fichier n'est pas conservé."
-          : "Transcription par Whisper-small sur le signal brut, sans débruitage. Le fichier n'est pas conservé."}
+          ? "Le fichier est transcrit deux fois par Whisper-small : sur le signal brut, puis après DeepFilterNet3. Le traitement est environ deux fois plus long."
+          : "Transcription par Whisper-small sur le signal brut, sans débruitage."}
+        {' '}La transcription est enregistrée comme appel ; {keepAudio ? "le fichier audio sera également conservé." : "le fichier audio n'est pas conservé."}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -244,6 +256,13 @@ export const RealTranscription: React.FC = () => {
         }}>
           <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
           <span>{error}</span>
+        </div>
+      )}
+
+      {result?.callNumber && (
+        <div role="status" style={{ fontSize: '13px', background: 'var(--success-bg)', border: '1px solid var(--success-border)', borderRadius: 'var(--radius-md)', padding: '10px 14px' }}>
+          Enregistré comme appel réel <strong>{result.callNumber}</strong> (liste « Appels transcrits » de la page Appels).
+          {' '}{result.audioStored ? 'Le fichier audio a été conservé.' : "Le fichier audio n'a pas été conservé."}
         </div>
       )}
 

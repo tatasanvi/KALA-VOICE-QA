@@ -182,6 +182,10 @@ export interface TranscriptionResult {
   // Présents uniquement si la comparaison avec débruitage a été demandée.
   denoised?: DenoisedResult | null;
   wer_delta?: number | null;
+  // Renseignés par le backend après l'enregistrement de l'appel réel.
+  callId?: string;
+  callNumber?: string;
+  audioStored?: boolean;
 }
 
 export interface DenoisedResult {
@@ -199,12 +203,13 @@ export interface DenoisedResult {
 }
 
 export const transcriptionsApi = {
-  transcribe: async (file: File, reference?: string, compareDfn3 = false): Promise<ApiResponse<TranscriptionResult>> => {
+  transcribe: async (file: File, reference?: string, compareDfn3 = false, keepAudio = false): Promise<ApiResponse<TranscriptionResult>> => {
     const token = tokenStore.get();
     const form = new FormData();
     form.append('file', file);
     if (reference && reference.trim()) form.append('reference', reference);
     if (compareDfn3) form.append('compare_dfn3', 'true');
+    if (keepAudio) form.append('keep_audio', 'true');
     try {
       const res = await fetch(`${API_BASE}/transcriptions`, {
         method: 'POST',
@@ -229,5 +234,53 @@ export const transcriptionsApi = {
     } catch {
       return { error: 'Serveur KALA injoignable : le backend n\'est pas démarré.', status: 0, ok: false };
     }
+  },
+};
+
+// ─── Appels réels (transcriptions enregistrées en base par le backend) ────────
+export interface RealCall {
+  id: string;
+  callNumber: string;
+  createdAt: string;
+  durationSeconds: number;
+  filename: string;
+  audioStored: boolean;
+  createdByName: string;
+  model: string;
+  text: string;
+  segments: TranscriptionSegmentResult[];
+  processingTime: number;
+  wer: number | null;
+  cer: number | null;
+  referenceNormalized: string | null;
+  hypothesisNormalized: string | null;
+  denoised: DenoisedResult | null;
+  werDelta: number | null;
+}
+
+const toRealCall = (row: any): RealCall => ({
+  id: row.id,
+  callNumber: row.call_number,
+  createdAt: row.created_at,
+  durationSeconds: row.audioMetadata?.durationSeconds ?? row.duration_seconds,
+  filename: row.audioMetadata?.filename ?? '',
+  audioStored: Boolean(row.audioMetadata?.audioStored),
+  createdByName: row.transcription?.createdByName ?? '',
+  model: row.transcription?.asrModelUsed ?? '',
+  text: row.transcription?.rawText ?? '',
+  segments: row.transcription?.segments ?? [],
+  processingTime: row.transcription?.processingTimeSeconds ?? 0,
+  wer: row.transcription?.wer ?? null,
+  cer: row.transcription?.cer ?? null,
+  referenceNormalized: row.transcription?.referenceNormalized ?? null,
+  hypothesisNormalized: row.transcription?.hypothesisNormalized ?? null,
+  denoised: row.transcription?.denoised ?? null,
+  werDelta: row.transcription?.werDelta ?? null,
+});
+
+export const realCallsApi = {
+  list: async (): Promise<ApiResponse<RealCall[]>> => {
+    const res = await apiCall<{ data: any[] }>('/calls?source=real&limit=100');
+    return { ...res, data: res.ok && res.data ? res.data.data.map(toRealCall) : undefined };
   },
 };

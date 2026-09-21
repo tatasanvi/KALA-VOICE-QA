@@ -1,93 +1,16 @@
-import React, { useState, useRef } from 'react';
-import { 
-  UploadCloud, FileAudio, CheckCircle2, AlertCircle, X, Sparkles, 
-  User, Layers, PhoneCall, Sliders, Play, Pause, BarChart2
-} from 'lucide-react';
-import { storageService } from '../../services/storageService';
-import { Call } from '../../types';
+import React from 'react';
+import { UploadCloud, X } from 'lucide-react';
 import { RealTranscription } from './RealTranscription';
 
 interface AudioUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (newCall: Call) => void;
+  // Appelé après l'enregistrement en base d'une vraie transcription.
+  onSaved?: () => void;
 }
 
-export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const agents = storageService.getAgents();
-  const campaigns = storageService.getCampaigns();
-
-  const [dragActive, setDragActive] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Formulaire d'assignation
-  const [agentId, setAgentId] = useState(agents[0]?.id || 'agent-1');
-  const [campaignId, setCampaignId] = useState(campaigns[0]?.id || 'camp-1');
-  const [callType, setCallType] = useState('SUPPORT_TECHNIQUE');
-  const [direction, setDirection] = useState<'ENTRANT' | 'SORTANT'>('ENTRANT');
-  const [customerPhone, setCustomerPhone] = useState('+33 6 •• •• 42 19');
-  const [customerName, setCustomerName] = useState('M. Eric Lemaire (Anonymisé)');
-  const [isUrgentReview, setIsUrgentReview] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [audioDuration, setAudioDuration] = useState(184);
-
+export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onClose, onSaved }) => {
   if (!isOpen) return null;
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
-    else if (e.type === 'dragleave') setDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      processFile(e.target.files[0]);
-    }
-  };
-
-  const processFile = (file: File) => {
-    setSelectedFile(file);
-    const url = URL.createObjectURL(file);
-    setAudioUrl(url);
-
-    // Calculer la durée audio réelle si possible
-    const tempAudio = new Audio(url);
-    tempAudio.onloadedmetadata = () => {
-      if (tempAudio.duration && !isNaN(tempAudio.duration)) {
-        setAudioDuration(Math.round(tempAudio.duration));
-      }
-    };
-  };
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  // Aucune transcription n'est fabriquée : le pipeline ASR réel (Whisper) n'est pas encore branché.
-  // Le fichier est seulement lu localement pour l'écoute ; aucun appel, score ou texte n'est généré.
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
 
   return (
     <div style={{
@@ -95,11 +18,11 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
       background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
     }} onClick={onClose}>
-      <div 
+      <div
         style={{
           background: 'var(--surface-2)', border: '1px solid var(--border-active)',
-          borderRadius: 'var(--radius-xl)', width: '100%', maxWidth: '640px',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflow: 'hidden'
+          borderRadius: 'var(--radius-xl)', width: '100%', maxWidth: '760px', maxHeight: '90vh',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflowY: 'auto'
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -129,10 +52,7 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
         </div>
 
         <div style={{ padding: '24px' }}>
-          <RealTranscription />
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '12px' }}>
-            La transcription n'est pas encore enregistrée comme appel : elle s'affiche ici uniquement.
-          </div>
+          <RealTranscription onSaved={onSaved} />
         </div>
       </div>
     </div>
