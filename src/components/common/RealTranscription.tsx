@@ -11,11 +11,72 @@ const fmt = (t: number | null) => {
   return `${m}:${s}`;
 };
 
+const pct = (x: number) => `${(x * 100).toFixed(1)} %`;
+
+const MeasuredMetrics: React.FC<{ result: TranscriptionResult }> = ({ result }) => {
+  if (result.wer === null || result.cer === null) return null;
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <span className="badge badge-blue" style={{ fontSize: '13px', fontWeight: 700 }}>WER mesuré : {pct(result.wer)}</span>
+        <span className="badge badge-gray" style={{ fontSize: '13px' }}>CER mesuré : {pct(result.cer)}</span>
+      </div>
+      <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '8px' }}>
+        Valeurs mesurées sur cet audio, par rapport à la référence saisie, après la même normalisation que dans le mémoire
+        (minuscules, ponctuation, chiffres et tirets retirés).
+      </div>
+      <details style={{ marginTop: '8px', fontSize: '12px' }}>
+        <summary style={{ cursor: 'pointer', color: 'var(--text-secondary)' }}>Textes normalisés utilisés pour le calcul</summary>
+        <div style={{ marginTop: '6px', fontFamily: 'JetBrains Mono, monospace', lineHeight: 1.6 }}>
+          <div><strong>Référence :</strong> {result.reference_normalized}</div>
+          <div><strong>Hypothèse :</strong> {result.hypothesis_normalized}</div>
+        </div>
+      </details>
+    </div>
+  );
+};
+
+const ResultView: React.FC<{ result: TranscriptionResult }> = ({ result }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <span className="badge badge-gray">Modèle : {result.model}</span>
+      <span className="badge badge-gray">Durée audio : {result.duration.toFixed(1)} s</span>
+      <span className="badge badge-gray">Temps de traitement : {result.processing_time.toFixed(1)} s</span>
+    </div>
+
+    <MeasuredMetrics result={result} />
+
+    <div>
+      <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Transcription</div>
+      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 14px', borderRadius: 'var(--radius-md)', fontSize: '14px', lineHeight: 1.6 }}>
+        {result.text || <em style={{ color: 'var(--text-muted)' }}>Aucune parole reconnue.</em>}
+      </div>
+    </div>
+
+    {result.segments.length > 0 && (
+      <div>
+        <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Segments horodatés</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '260px', overflowY: 'auto' }}>
+          {result.segments.map((s, i) => (
+            <div key={i} style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                {fmt(s.start)} → {fmt(s.end)}
+              </span>
+              <span>{s.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+);
+
 // Upload réel -> service ASR local (Whisper-small, signal brut) -> affichage du résultat.
-// N'affiche que des valeurs renvoyées par le service : aucun WER, SNR ni score.
+// N'affiche que des valeurs renvoyées par le service : WER/CER seulement si une référence est saisie.
 export const RealTranscription: React.FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [reference, setReference] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TranscriptionResult | null>(null);
@@ -37,7 +98,7 @@ export const RealTranscription: React.FC = () => {
     setLoading(true);
     setError(null);
     setResult(null);
-    const res = await transcriptionsApi.transcribe(file);
+    const res = await transcriptionsApi.transcribe(file, reference);
     setLoading(false);
     if (res.ok && res.data) setResult(res.data);
     else setError(res.error ?? 'Échec de la transcription.');
@@ -79,6 +140,27 @@ export const RealTranscription: React.FC = () => {
         )}
       </div>
 
+      <div>
+        <label htmlFor="reference-text" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px' }}>
+          Transcription de référence (facultatif)
+        </label>
+        <textarea
+          id="reference-text"
+          value={reference}
+          onChange={e => { setReference(e.target.value); setResult(null); }}
+          disabled={loading}
+          rows={3}
+          placeholder="Saisissez le texte réellement prononcé pour mesurer le WER et le CER."
+          style={{
+            width: '100%', padding: '8px 10px', background: 'rgba(0,0,0,0.3)', color: 'var(--text-primary)',
+            border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', fontFamily: 'inherit', fontSize: '13px', resize: 'vertical'
+          }}
+        />
+        <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
+          Sans référence, aucun WER ni CER n'est calculé.
+        </div>
+      </div>
+
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
         Transcription par Whisper-small sur le signal brut, sans débruitage. Le fichier n'est pas conservé.
       </div>
@@ -108,38 +190,7 @@ export const RealTranscription: React.FC = () => {
         </div>
       )}
 
-      {result && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <span className="badge badge-gray">Modèle : {result.model}</span>
-            <span className="badge badge-gray">Durée audio : {result.duration.toFixed(1)} s</span>
-            <span className="badge badge-gray">Temps de traitement : {result.processing_time.toFixed(1)} s</span>
-          </div>
-
-          <div>
-            <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Transcription</div>
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 14px', borderRadius: 'var(--radius-md)', fontSize: '14px', lineHeight: 1.6 }}>
-              {result.text || <em style={{ color: 'var(--text-muted)' }}>Aucune parole reconnue.</em>}
-            </div>
-          </div>
-
-          {result.segments.length > 0 && (
-            <div>
-              <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Segments horodatés</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '260px', overflowY: 'auto' }}>
-                {result.segments.map((s, i) => (
-                  <div key={i} style={{ display: 'flex', gap: '12px', fontSize: '13px' }}>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                      {fmt(s.start)} → {fmt(s.end)}
-                    </span>
-                    <span>{s.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {result && <ResultView result={result} />}
     </div>
   );
 };

@@ -3,7 +3,8 @@
 Charge openai/whisper-small (transformers, CPU) une seule fois au démarrage et
 expose POST /transcribe. Le signal est transcrit BRUT : aucun débruitage.
 Aucune valeur n'est estimée ou inventée : le service ne renvoie que ce qu'il
-calcule réellement (texte, segments horodatés, durée, temps de traitement).
+calcule réellement (texte, segments horodatés, durée, temps de traitement, et
+WER/CER normalisés comme dans le mémoire lorsqu'une référence est fournie).
 """
 import subprocess
 import time
@@ -12,6 +13,8 @@ import numpy as np
 import torch
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from transformers import pipeline
+
+from metrics import wer_cer
 
 MODEL_ID = "openai/whisper-small"
 MODEL_LABEL = "whisper-small (transformers)"
@@ -47,7 +50,6 @@ def health():
 
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...), reference: str | None = Form(None)):
-    # `reference` est accepté pour la tranche T2 (calcul du WER) mais pas encore utilisé.
     data = await file.read()
     if not data:
         raise HTTPException(status_code=400, detail="Fichier vide.")
@@ -74,10 +76,20 @@ async def transcribe(file: UploadFile = File(...), reference: str | None = Form(
         if text:
             segments.append({"start": s, "end": e, "text": text})
 
-    return {
-        "text": out.get("text", "").strip(),
+    text = out.get("text", "").strip()
+    result = {
+        "text": text,
         "segments": segments,
         "duration": round(duration, 2),
         "processing_time": round(processing_time, 2),
         "model": MODEL_LABEL,
+        "wer": None,
+        "cer": None,
+        "reference_normalized": None,
+        "hypothesis_normalized": None,
     }
+    # WER/CER uniquement si une référence est fournie : jamais estimés.
+    if reference and reference.strip():
+        w, c, ref_n, hyp_n = wer_cer(reference, text)
+        result.update({"wer": w, "cer": c, "reference_normalized": ref_n, "hypothesis_normalized": hyp_n})
+    return result

@@ -174,13 +174,19 @@ export interface TranscriptionResult {
   duration: number;
   processing_time: number;
   model: string;
+  // Présents uniquement si une référence a été fournie (sinon null) : valeurs mesurées.
+  wer: number | null;
+  cer: number | null;
+  reference_normalized: string | null;
+  hypothesis_normalized: string | null;
 }
 
 export const transcriptionsApi = {
-  transcribe: async (file: File): Promise<ApiResponse<TranscriptionResult>> => {
+  transcribe: async (file: File, reference?: string): Promise<ApiResponse<TranscriptionResult>> => {
     const token = tokenStore.get();
     const form = new FormData();
     form.append('file', file);
+    if (reference && reference.trim()) form.append('reference', reference);
     try {
       const res = await fetch(`${API_BASE}/transcriptions`, {
         method: 'POST',
