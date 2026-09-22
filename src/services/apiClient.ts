@@ -286,3 +286,29 @@ export const realCallsApi = {
     return { ...res, data: res.ok && res.data ? res.data.data.map(toRealCall) : undefined };
   },
 };
+
+// ─── Évaluations du conseiller et demandes de révision ───────────────────────
+export interface RevisionRequest {
+  id: string;
+  evaluationId: string;
+  callId: string | null;
+  agentId: string;
+  requestedByName: string;
+  reason: string;
+  status: 'EN_ATTENTE' | 'ACCEPTEE' | 'REFUSEE';
+  createdAt: string;
+  handledByName: string | null;
+  handledAt: string | null;
+  resolutionNote: string | null;
+}
+
+export const revisionsApi = {
+  list:   (status?: string) => apiCall<RevisionRequest[]>(`/revisions${status ? `?status=${status}` : ''}`),
+  create: (evaluationId: string, reason: string) => apiCall<RevisionRequest>('/revisions', 'POST', { evaluationId, reason }),
+  handle: (id: string, status: 'ACCEPTEE' | 'REFUSEE', resolutionNote?: string) =>
+    apiCall<RevisionRequest>(`/revisions/${id}`, 'PATCH', { status, resolutionNote }),
+};
+
+export const myEvaluationsApi = {
+  list: () => apiCall<any[]>('/evaluations/mine'),
+};

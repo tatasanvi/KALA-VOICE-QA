@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite",
     "dev:backend": "npm run dev --prefix backend",
-    "dev:all": "concurrently -n FRONT,BACK -c blue,green \"vite\" \"npm run dev --prefix backend\"",
+    "dev:all": "concurrently -n ASR,BACK,FRONT -c magenta,green,blue \"npm run dev:asr\" \"npm run dev --prefix backend\" \"vite\"",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:asr": "asr-service/.venv/bin/uvicorn main:app --app-dir asr-service --host 127.0.0.1 --port 8500"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",

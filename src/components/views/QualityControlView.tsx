@@ -8,6 +8,7 @@ import { QualityService } from '../../services/qualityService';
 import { ReportService } from '../../services/reportService';
 import { QualityEvaluation, QualityCriterion, Call, UserRole } from '../../types';
 import { EmptyState } from '../common/EmptyState';
+import { MyEvaluationsPanel, RevisionRequestsPanel } from '../common/RevisionPanels';
 
 interface QualityControlViewProps {
   selectedCallId: string;
@@ -19,7 +20,8 @@ interface QualityControlViewProps {
 export const QualityControlView: React.FC<QualityControlViewProps> = ({ 
   selectedCallId, 
   onSelectCall,
-  onNavigate
+  onNavigate,
+  currentRole
 }) => {
   const calls = storageService.getCalls();
   const criteria = storageService.getCriteria();
@@ -37,7 +39,15 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
 
   const [notification, setNotification] = useState<string | null>(null);
 
-  if (calls.length === 0 || !currentCall) return <EmptyState title="Aucun appel à évaluer" />;
+  // Le conseiller ne note personne : il consulte ses évaluations et peut demander une révision.
+  if (currentRole === 'AGENT') return <MyEvaluationsPanel />;
+
+  if (calls.length === 0 || !currentCall) return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+      <RevisionRequestsPanel />
+      <EmptyState title="Aucun appel à évaluer" />
+    </div>
+  );
 
   const handleScoreChange = (criterionId: string, newScore: number) => {
     const updatedItems = evaluation.items.map(item => {
@@ -109,6 +119,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+    <RevisionRequestsPanel />
       {/* Sélecteur d'Appel & Actions */}
       <div className="glass-panel" style={{ padding: '16px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

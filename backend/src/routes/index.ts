@@ -24,6 +24,22 @@ qualityRouter.get('/', requireAuth, requireRole(...QA_UP), (_req, res) => {
   })));
 });
 
+// GET /api/evaluations/mine — les évaluations qui concernent l'utilisateur connecté
+qualityRouter.get('/mine', requireAuth, requireRole(...ALL_ROLES), (req, res) => {
+  const rows = sqlite().prepare(`
+    SELECT * FROM evaluations
+    WHERE agent_id IN (SELECT id FROM agents WHERE user_id = ?)
+    ORDER BY evaluated_at DESC
+  `).all(req.user!.userId);
+  res.json(rows.map((e: any) => ({
+    ...e,
+    items: JSON.parse(e.items_json ?? '[]'),
+    strengths: JSON.parse(e.strengths_json ?? '[]'),
+    weaknesses: JSON.parse(e.weaknesses_json ?? '[]'),
+    recommendations: JSON.parse(e.recommendations_json ?? '[]'),
+  })));
+});
+
 qualityRouter.get('/call/:callId', requireAuth, requireRole(...ALL_ROLES), (req, res) => {
   const call = sqlite().prepare('SELECT agent_id, transcription_json FROM calls WHERE id = ?').get(req.params.callId) as any;
   if (call && !canAccessCall(req.user!, call)) { res.status(404).json({ error: 'Évaluation introuvable.' }); return; }

@@ -61,6 +61,14 @@ export function createTables(): void {
       is_urgent_review_required INTEGER NOT NULL DEFAULT 0,
       notes TEXT, created_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS revision_requests (
+      id TEXT PRIMARY KEY, evaluation_id TEXT NOT NULL, call_id TEXT,
+      agent_id TEXT NOT NULL, requested_by_user_id TEXT NOT NULL,
+      requested_by_name TEXT NOT NULL, reason TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'EN_ATTENTE',
+      created_at TEXT NOT NULL,
+      handled_by_name TEXT, handled_at TEXT, resolution_note TEXT
+    );
     CREATE TABLE IF NOT EXISTS evaluations (
       id TEXT PRIMARY KEY, call_id TEXT NOT NULL, agent_id TEXT NOT NULL,
       evaluator_id TEXT NOT NULL, evaluator_name TEXT NOT NULL,

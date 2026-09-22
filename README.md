@@ -6,6 +6,27 @@
 
 ---
 
+## Lancer la démonstration (3 services)
+
+```bash
+npm run dev:all
+```
+
+Démarre ensemble :
+
+- le service de transcription Python (Whisper-small, port 8500) ;
+- le backend Express + SQLite (port 8000) ;
+- le frontend Vite (port 5173).
+
+Prérequis : `ffmpeg`, et l'environnement Python installé une fois (`asr-service/README.md`).
+Sans le service Python, la transcription renvoie « Service de transcription non démarré » ;
+sans le backend, la connexion bascule en mode local et l'import est indisponible.
+
+Comptes de démonstration (mot de passe `kala2024!`) : `a.moreau@kalavoice.ai` (admin),
+`c.delattre@kalavoice.ai` (responsable qualité), `m.vasseur@kalavoice.ai` (superviseur),
+`j.dupont@kalavoice.ai` (conseiller). L'ingestion audio est réservée aux rôles
+superviseur, responsable qualité, manager et administrateur.
+
 ## 📋 Description du Projet
 
 **KALA VOICE QA** est une plateforme professionnelle SaaS B2B conçue pour les centres d'appels. Elle combine l'amélioration de la transcription vocale en milieux bruités avec l'analyse conversationnelle avancée, le contrôle qualité assisté par IA et le coaching personnalisé des conseillers.
