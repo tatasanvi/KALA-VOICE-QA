@@ -15,7 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   role: UserRole | null;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: (local?: boolean) => void;
   updateUserProfile: (updates: Partial<User>) => void;
   switchRole: (newRole: UserRole) => void;
   hasRole: (allowedRoles: UserRole[]) => boolean;
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Écoute de l'événement global de déconnexion automatique (401 API)
     const handleRemoteLogout = () => {
-      logout();
+      logout(true);
     };
     window.addEventListener('kala:logout', handleRemoteLogout);
     return () => window.removeEventListener('kala:logout', handleRemoteLogout);
@@ -146,11 +146,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = () => {
-    try {
-      authApi.logout();
-    } catch {
-      // Ignorer si hors-ligne
+  // `local` : déconnexion déclenchée par un 401 déjà reçu. On ne rappelle alors
+  // pas l'API (l'appel renverrait 401 et relancerait la déconnexion en boucle).
+  const logout = (local = false) => {
+    if (!local) {
+      try {
+        authApi.logout();
+      } catch {
+        // Ignorer si hors-ligne
+      }
     }
 
     tokenStore.clearAll();

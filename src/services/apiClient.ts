@@ -49,8 +49,10 @@ export async function apiCall<T = any>(
     const isJson = res.headers.get('content-type')?.includes('application/json');
     const data = isJson ? await res.json() : null;
 
-    if (res.status === 401) {
-      // Token expiré → on nettoie
+    // 401 : session invalide. On nettoie localement et on signale une seule fois.
+    // La route de déconnexion elle-même est exclue, sinon l'événement relancerait
+    // un appel qui renverrait 401, et ainsi de suite (boucle infinie).
+    if (res.status === 401 && path !== '/auth/logout') {
       tokenStore.clearAll();
       window.dispatchEvent(new CustomEvent('kala:logout'));
     }

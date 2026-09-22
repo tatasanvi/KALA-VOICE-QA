@@ -28,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   isOnline = true
 }) => {
   const navigate = useNavigate();
-  const { user, role, switchRole, logout } = useAuth();
+  const { user, role, logout } = useAuth();
   const notifications = storageService.getNotifications();
   const unreadCount = storageService.getUnreadNotificationCount();
 
@@ -45,22 +45,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const currentRole = role || 'AGENT';
 
-  const handleRoleChangeInternal = (newRole: UserRole) => {
-    switchRole(newRole);
-
-    // Redirection automatique contextuelle selon le rôle choisi
-    if (newRole === 'QA_MANAGER') {
-      navigate('/qualite');
-    } else if (newRole === 'TRAINER') {
-      navigate('/coaching');
-    } else if (newRole === 'AGENT') {
-      navigate('/agents');
-    } else if (newRole === 'SUPERVISOR') {
-      navigate('/appels');
-    } else {
-      navigate('/dashboard');
-    }
-  };
 
   const handleNotificationClick = (notif: TeamNotification) => {
     storageService.markNotificationAsRead(notif.id);
@@ -249,25 +233,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </div>
           )}
-        </div>
-
-        {/* Switcher de rôle persona */}
-        <div className="role-switcher-container">
-          <UserCheck size={16} color="var(--primary-light)" />
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rôle :</span>
-          <select 
-            value={currentRole} 
-            onChange={(e) => handleRoleChangeInternal(e.target.value as UserRole)}
-            className="role-select"
-            title="Basculez entre les rôles pour tester les permissions et les vues dédiées"
-          >
-            <option value="QA_MANAGER">Claire Delattre (Responsable Qualité)</option>
-            <option value="SUPERVISOR">Marc Vasseur (Superviseur Plateau)</option>
-            <option value="TRAINER">Patrick Simon (Formateur / Coach)</option>
-            <option value="AGENT">Koffi Mensah (Conseiller Client)</option>
-            <option value="MANAGER">Sophie Laurent (Directrice Opérations)</option>
-            <option value="ADMIN">Alexandre Moreau (Administrateur IA)</option>
-          </select>
         </div>
 
         {/* Utilisateur Actif & Déconnexion */}

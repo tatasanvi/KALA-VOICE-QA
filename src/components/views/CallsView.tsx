@@ -53,6 +53,8 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [realCallsRefresh, setRealCallsRefresh] = useState<number>(0);
+  // L'ingestion est réservée aux rôles superviseur et au-dessus (contrôle réel côté backend).
+  const canImport = currentRole !== 'AGENT' && currentRole !== 'TRAINER';
   const [selectedCall, setSelectedCall] = useState<Call | null>(() => {
     if (initialCallId) {
       return calls.find(c => c.id === initialCallId) || null;
@@ -223,14 +225,14 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
               Exporter CSV
             </button>
 
-            <button 
+            {canImport && <button 
               className="btn btn-primary btn-sm"
               onClick={() => setShowUploadModal(true)}
               style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
             >
               <UploadCloud size={13} />
               <span>Ingérer Audio</span>
-            </button>
+            </button>}
           </div>
         </div>
         <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>

@@ -2,7 +2,7 @@
 // KALA VOICE QA — Routes Appels (Calls)
 // =============================================================================
 import { Router, Request, Response } from 'express';
-import { requireAuth, requireRole, SUPERVISOR_UP, ALL_ROLES } from '../middleware/auth.js';
+import { requireAuth, requireRole, SUPERVISOR_UP, QA_UP, ALL_ROLES } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
 import { canAccessCall } from '../middleware/callAccess.js';
@@ -93,7 +93,7 @@ router.post('/', requireAuth, requireRole(...SUPERVISOR_UP), (req: Request, res:
 });
 
 // PATCH /api/calls/:callId/segments/:segId  — Corriger un segment de transcription
-router.patch('/:callId/segments/:segId', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Response): void => {
+router.patch('/:callId/segments/:segId', requireAuth, requireRole(...QA_UP), (req: Request, res: Response): void => {
   const { callId, segId } = req.params;
   const { correctedText } = req.body as { correctedText?: string };
 

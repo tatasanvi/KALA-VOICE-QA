@@ -17,8 +17,11 @@ interface TranscriptionStudioViewProps {
 
 export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = ({ 
   selectedCallId, 
-  onSelectCall 
+  onSelectCall,
+  currentRole
 }) => {
+  // Ingestion réservée aux rôles superviseur et au-dessus (contrôle réel côté backend).
+  const canImport = currentRole !== 'AGENT' && currentRole !== 'TRAINER';
   const calls = storageService.getCalls();
   const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
 
@@ -102,13 +105,13 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
             </button>
           </div>
 
-          <button 
+          {canImport && <button 
             className="btn btn-secondary btn-sm"
             onClick={() => setShowImportModal(true)}
           >
             <UploadCloud size={14} />
             <span>Importer un Audio</span>
-          </button>
+          </button>}
         </div>
       </div>
 
