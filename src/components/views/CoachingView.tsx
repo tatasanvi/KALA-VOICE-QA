@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { CoachingPlan, UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface CoachingViewProps {
   onNavigate: (view: any) => void;
@@ -17,10 +18,13 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
   const coachingPlans = storageService.getCoachingPlans();
   const trainingSessions = storageService.getTrainingSessions();
 
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0].id);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? '');
+
   const selectedAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+  if (agents.length === 0 || !selectedAgent) return <EmptyState title="Aucun plan de coaching" />;
   const activePlan = coachingPlans.find(cp => cp.agentId === selectedAgent.id);
   const agentSessions = trainingSessions.filter(ts => ts.agentId === selectedAgent.id);
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>

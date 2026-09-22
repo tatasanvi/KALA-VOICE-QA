@@ -8,6 +8,7 @@ import { audioSignalService } from '../../services/audioSignalService';
 import { AudioPlayer } from '../common/AudioPlayer';
 import { RealTranscription } from '../common/RealTranscription';
 import { Call, UserRole, TranscriptionSegment } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface TranscriptionStudioViewProps {
   selectedCallId: string;
@@ -38,6 +39,8 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
     return () => unsub();
   }, []);
 
+  if (calls.length === 0 || !currentCall) return <EmptyState title="Aucune transcription à afficher" />;
+
   const handleStartEdit = (segment: TranscriptionSegment) => {
     setEditingSegmentId(segment.id);
     setEditedText(segment.correctedText || segment.text);
@@ -59,6 +62,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
 
   const trans = currentCall.transcription;
   const meta = currentCall.audioMetadata;
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
@@ -134,10 +138,10 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Volume2 size={14} color="#6db89a" /> Qualité & Bruit Estimé
           </div>
-          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px', color: meta.snrDb > 15 ? '#6db89a' : '#d9ae55' }}>
+          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px' }}>
             {meta.estimatedNoiseLevel}
           </div>
-          <div className="kpi-subtext">SNR mesuré : {meta.snrDb} dB</div>
+          {meta.snrDb !== undefined && <div className="kpi-subtext">SNR mesuré : {meta.snrDb} dB</div>}
         </div>
 
         <div className="kpi-card" style={{ padding: '14px 18px' }}>

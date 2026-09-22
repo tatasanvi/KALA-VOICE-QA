@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { Call, UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface NlpAnalyticsViewProps {
   selectedCallId: string;
@@ -19,12 +20,14 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
 }) => {
   const calls = storageService.getCalls();
   const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
+  if (calls.length === 0 || !currentCall) return <EmptyState title="Aucune analyse disponible" />;
   const analytics = currentCall.analytics;
 
   // Calcul des pourcentages de temps de parole
   const totalTalk = analytics.agentTalkTimeSeconds + analytics.clientTalkTimeSeconds;
   const agentPercent = totalTalk > 0 ? Math.round((analytics.agentTalkTimeSeconds / totalTalk) * 100) : 50;
   const clientPercent = 100 - agentPercent;
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

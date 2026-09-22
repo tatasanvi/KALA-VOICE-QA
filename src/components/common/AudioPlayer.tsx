@@ -156,9 +156,11 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
 
         {/* Badges Acoustiques & Bruit */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span className="badge badge-gray" title="Rapport Signal sur Bruit mesuré">
-            SNR : <strong style={{ color: metadata.snrDb > 15 ? '#6db89a' : '#f59e0b' }}>{metadata.snrDb} dB</strong>
-          </span>
+          {metadata.snrDb !== undefined && (
+            <span className="badge badge-gray" title="Rapport signal sur bruit, uniquement s'il a été mesuré">
+              SNR : <strong>{metadata.snrDb} dB</strong>
+            </span>
+          )}
 
           <span 
             className={`badge ${

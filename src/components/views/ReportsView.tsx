@@ -6,6 +6,7 @@ import {
 import { storageService } from '../../services/storageService';
 import { ReportService } from '../../services/reportService';
 import { UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface ReportsViewProps {
   currentRole: UserRole;
@@ -19,11 +20,13 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
   const sessions = storageService.getTrainingSessions();
 
   const [selectedReportType, setSelectedReportType] = useState<string>('CALL');
-  const [selectedCallId, setSelectedCallId] = useState<string>(calls[0].id);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0].id);
+  const [selectedCallId, setSelectedCallId] = useState<string>(calls[0]?.id ?? '');
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? '');
+
 
   const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
   const currentAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+  if (calls.length === 0 || agents.length === 0 || !currentCall || !currentAgent) return <EmptyState title="Aucun rapport disponible" />;
 
   const handlePrintCurrentReport = () => {
     if (selectedReportType === 'CALL') {
@@ -36,6 +39,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
   const handleExportCSV = () => {
     ReportService.exportCallsToCSV(calls);
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -141,7 +145,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               </div>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Environnement Acoustique</div>
-                <div style={{ fontSize: '14px', fontWeight: 700 }}>Bruit {currentCall.audioMetadata.estimatedNoiseLevel} ({currentCall.audioMetadata.snrDb} dB)</div>
+                <div style={{ fontSize: '14px', fontWeight: 700 }}>Bruit {currentCall.audioMetadata.estimatedNoiseLevel}</div>
               </div>
             </div>
 

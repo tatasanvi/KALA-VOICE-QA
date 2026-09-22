@@ -56,7 +56,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
     : 13;
 
   const avgSnr = filteredCalls.length > 0
-    ? Math.round(filteredCalls.reduce((sum, c) => sum + c.audioMetadata.snrDb, 0) / filteredCalls.length * 10) / 10
+    ? Math.round(filteredCalls.reduce((sum, c) => sum + (c.audioMetadata.snrDb ?? 0), 0) / filteredCalls.length * 10) / 10
     : 0;
   const avgAudioQuality = filteredCalls.length > 0
     ? Math.round(filteredCalls.reduce((sum, c) => sum + c.audioMetadata.audioQualityScore, 0) / filteredCalls.length)
@@ -626,7 +626,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                   </td>
                   <td>
                     <span className={`badge ${call.audioMetadata.estimatedNoiseLevel === 'FAIBLE' ? 'badge-green' : call.audioMetadata.estimatedNoiseLevel === 'MODÉRÉ' ? 'badge-amber' : 'badge-red'}`} style={{ fontSize: '10.5px' }}>
-                      {call.audioMetadata.estimatedNoiseLevel} ({call.audioMetadata.snrDb} dB)
+                      {call.audioMetadata.estimatedNoiseLevel}
                     </span>
                   </td>
                   <td>

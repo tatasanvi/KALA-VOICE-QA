@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { UserRole, TrainingSession } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface TrainingViewProps {
   onNavigate: (view: any) => void;
@@ -18,7 +19,9 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
 
   const [showAssignModal, setShowAssignModal] = useState<boolean>(false);
   const [selectedModuleId, setSelectedModuleId] = useState<string>(modules[0].id);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0].id);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? '');
+
+  if (agents.length === 0) return <EmptyState title="Aucune session de formation" />;
   const [sessionDate, setSessionDate] = useState<string>('2024-04-22');
 
   const handleAssignSession = () => {
@@ -44,6 +47,7 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
     storageService.addTrainingSession(newSession);
     setShowAssignModal(false);
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

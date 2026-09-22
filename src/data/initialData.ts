@@ -862,7 +862,6 @@ export const INITIAL_CALLS: Call[] = [
       durationSeconds: 125,
       sampleRateHz: 16000,
       channels: 1,
-      snrDb: 12.4, // Bruit de plateau significatif
       estimatedNoiseLevel: 'MODÉRÉ',
       noiseType: 'PLATEAU_CALL_CENTER',
       audioQualityScore: 74,
@@ -1114,7 +1113,6 @@ export const INITIAL_CALLS: Call[] = [
       durationSeconds: 160,
       sampleRateHz: 16000,
       channels: 1,
-      snrDb: 8.5, // Fort parasitage GSM
       estimatedNoiseLevel: 'SÉVÈRE',
       noiseType: 'GSM_COMPRESSION',
       audioQualityScore: 61,
@@ -1292,7 +1290,6 @@ export const INITIAL_CALLS: Call[] = [
       durationSeconds: 190,
       sampleRateHz: 16000,
       channels: 1,
-      snrDb: 18.2,
       estimatedNoiseLevel: 'FAIBLE',
       noiseType: 'PLATEAU_CALL_CENTER',
       audioQualityScore: 88,
@@ -1449,7 +1446,6 @@ export const INITIAL_CALLS: Call[] = [
       durationSeconds: 110,
       sampleRateHz: 16000,
       channels: 1,
-      snrDb: 24.8, // Signal d'excellente qualité
       estimatedNoiseLevel: 'FAIBLE',
       noiseType: 'AUCUN',
       audioQualityScore: 96,
@@ -2125,12 +2121,7 @@ export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
     audioPreprocessingMethod: 'Aucun (Signal audio direct non filtré)',
     asrModel: 'Whisper-Small-v3 / Wav2Vec2-FR',
     denoiserAlgorithm: 'Aucun',
-    postProcessingApplied: 'Découpage standard par énergie',
-    estimatedRtf: 0.18, // 0.18x temps réel
-    averageWer: 24.8, // 24.8% d'erreurs mots en milieu bruité
-    averageCer: 14.2,
-    snrImprovementDb: 0.0,
-    confidenceScoreAvg: 68.5
+    postProcessingApplied: 'Découpage standard par énergie'
   },
   {
     id: 'cfg-preprocessed',
@@ -2139,12 +2130,7 @@ export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
     audioPreprocessingMethod: 'Spectral Subtraction (Boll 1979) + Filtre Passe-Bande 300-3400Hz',
     asrModel: 'Whisper-Small-v3',
     denoiserAlgorithm: 'Soustraction Spectrale Adaptative',
-    postProcessingApplied: 'Normalisation RMS',
-    estimatedRtf: 0.22,
-    averageWer: 18.3,
-    averageCer: 10.6,
-    snrImprovementDb: 4.8,
-    confidenceScoreAvg: 76.2
+    postProcessingApplied: 'Normalisation RMS'
   },
   {
     id: 'cfg-acoustic-tuned',
@@ -2153,12 +2139,7 @@ export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
     audioPreprocessingMethod: 'Filtrage Wiener Adaptatif + Débruiteur RNNoise',
     asrModel: 'Conformer-CTC Fine-tuned sur corpus audio centre d\'appels bruité',
     denoiserAlgorithm: 'Wiener Filtering',
-    postProcessingApplied: 'Rescoring avec modèle de langage n-gram 4-gram',
-    estimatedRtf: 0.29,
-    averageWer: 13.1,
-    averageCer: 7.4,
-    snrImprovementDb: 7.5,
-    confidenceScoreAvg: 84.0
+    postProcessingApplied: 'Rescoring avec modèle de langage n-gram 4-gram'
   },
   {
     id: 'cfg-kala-full',
@@ -2167,12 +2148,7 @@ export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
     audioPreprocessingMethod: 'Deep Complex UNet (DCUNet) Débruitage Neuronal + Masquage de phase',
     asrModel: 'Whisper-Large-v3 enrichi avec Prompting Métier & Vocabulaire Télécom/Assurance',
     denoiserAlgorithm: 'Réseau Récurrent Débruiteur KALA-Denoiser',
-    postProcessingApplied: 'Alignement dynamique Viterbi + Re-ponctuation par Transformer RoBERTa-FR',
-    estimatedRtf: 0.35,
-    averageWer: 6.8, // Baisse spectaculaire à 6.8%
-    averageCer: 3.2,
-    snrImprovementDb: 11.2,
-    confidenceScoreAvg: 92.4
+    postProcessingApplied: 'Alignement dynamique Viterbi + Re-ponctuation par Transformer RoBERTa-FR'
   }
 ];
 
@@ -2326,7 +2302,7 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     userRole: 'ADMIN',
     action: 'IMPORT_AUDIO',
     targetResource: 'Fichier rec_call_20240412_fibretel_dupont.wav',
-    details: 'Import et détection automatique de bruit (SNR 12.4 dB, niveau Modéré).',
+    details: 'Import d’un fichier audio.',
     ipAddress: '192.168.1.10'
   },
   {

@@ -8,7 +8,6 @@ import { ReportService } from '../../services/reportService';
 import { AudioUploadModal } from '../common/AudioUploadModal';
 import { CallDetailModal } from '../common/CallDetailModal';
 import { RealCallsPanel } from '../common/RealCallsPanel';
-import { DemoDataBadge } from '../common/DemoDataBanner';
 import { Call, UserRole, CallStatus } from '../../types';
 
 interface CallsViewProps {
@@ -109,11 +108,6 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
 
       {/* Appels réellement transcrits (backend SQLite), distincts des données de démonstration */}
       <RealCallsPanel refreshKey={realCallsRefresh} />
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Appels de démonstration</h3>
-        <DemoDataBadge />
-      </div>
 
       {/* Bandeau de statuts rapides */}
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -334,7 +328,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
                       c.audioMetadata.estimatedNoiseLevel === 'MODÉRÉ' ? 'badge-amber' : 'badge-red'
                     }`} style={{ fontSize: '10.5px' }}>
                       <Volume2 size={10} style={{ display: 'inline', marginRight: '2px' }} />
-                      {c.audioMetadata.estimatedNoiseLevel} ({c.audioMetadata.snrDb} dB)
+                      {c.audioMetadata.estimatedNoiseLevel}{c.audioMetadata.snrDb !== undefined ? ` (${c.audioMetadata.snrDb} dB)` : ''}
                     </span>
                     <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
                       Qualité : {c.audioMetadata.audioQualityScore}/100

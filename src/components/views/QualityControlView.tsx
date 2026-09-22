@@ -7,6 +7,7 @@ import { storageService } from '../../services/storageService';
 import { QualityService } from '../../services/qualityService';
 import { ReportService } from '../../services/reportService';
 import { QualityEvaluation, QualityCriterion, Call, UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface QualityControlViewProps {
   selectedCallId: string;
@@ -25,15 +26,18 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   const currentUser = storageService.getCurrentUser();
 
   const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
-  const existingEval = storageService.getEvaluationByCallId(currentCall.id);
+  const existingEval = currentCall ? storageService.getEvaluationByCallId(currentCall.id) : undefined;
 
   // Initialisation de l'évaluation si non existante
   const [evaluation, setEvaluation] = useState<QualityEvaluation>(() => {
     if (existingEval) return existingEval;
+    if (!currentCall) return {} as QualityEvaluation;
     return QualityService.generateAiSuggestedEvaluation(currentCall, criteria, currentUser.name);
   });
 
   const [notification, setNotification] = useState<string | null>(null);
+
+  if (calls.length === 0 || !currentCall) return <EmptyState title="Aucun appel à évaluer" />;
 
   const handleScoreChange = (criterionId: string, newScore: number) => {
     const updatedItems = evaluation.items.map(item => {
@@ -101,6 +105,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
     setNotification("Évaluation validée avec succès ! Le score officiel a été enregistré et archivé dans le dossier agent.");
     setTimeout(() => setNotification(null), 5000);
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>

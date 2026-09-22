@@ -31,7 +31,7 @@ export class ReportService {
       c.durationSeconds,
       `"${c.callType}"`,
       `"${c.audioMetadata.estimatedNoiseLevel}"`,
-      c.audioMetadata.snrDb,
+      c.audioMetadata.snrDb ?? '',
       c.qualityScore ?? "N/A",
       `"${c.analytics.resolutionStatus}"`,
       c.analytics.interruptionCount
@@ -112,7 +112,7 @@ export class ReportService {
           <div class="card">
             <h3>Qualité Signal & Environnement</h3>
             <p><strong>Niveau de bruit ambiant :</strong> ${call.audioMetadata.estimatedNoiseLevel}</p>
-            <p><strong>Rapport Signal/Bruit (SNR) :</strong> ${call.audioMetadata.snrDb} dB</p>
+            <p><strong>Rapport Signal/Bruit (SNR) :</strong> ${call.audioMetadata.snrDb ?? 'non mesuré'}</p>
             <p><strong>Interruptions de parole :</strong> ${call.analytics.interruptionCount}</p>
             <p><strong>Ratio de parole Agent/Client :</strong> ${call.analytics.talkToListenRatio}x</p>
           </div>

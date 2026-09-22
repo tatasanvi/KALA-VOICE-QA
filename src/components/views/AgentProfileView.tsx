@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface AgentProfileViewProps {
   selectedAgentId: string;
@@ -22,6 +23,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
 }) => {
   const agents = storageService.getAgents();
   const currentAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+  if (agents.length === 0 || !currentAgent) return <EmptyState title="Aucun conseiller enregistré" />;
   const calls = storageService.getCalls().filter(c => c.agentId === currentAgent.id);
   const coachingPlan = storageService.getCoachingPlanByAgentId(currentAgent.id);
   const sessions = storageService.getTrainingSessions().filter(s => s.agentId === currentAgent.id);
@@ -29,6 +31,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
   const firstScore = currentAgent.monthlyScores[0]?.score ?? Math.round(currentAgent.averageQualityScore);
   const lastScore = currentAgent.monthlyScores[currentAgent.monthlyScores.length - 1]?.score ?? Math.round(currentAgent.averageQualityScore);
   const scoreDiff = lastScore - firstScore;
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

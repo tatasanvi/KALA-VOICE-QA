@@ -11,6 +11,15 @@ import {
   INITIAL_AUDIT_LOGS, INITIAL_METRICS, SCIENTIFIC_EXPERIMENT_CONFIGS, BENCHMARK_SAMPLES 
 } from '../data/initialData';
 
+// Aucune donnée fictive n'est chargée : les listes restent vides tant qu'aucun
+// appel réel n'a été transcrit (les vrais appels viennent du backend).
+const EMPTY_METRICS: DashboardMetrics = {
+  totalCalls: 0, analyzedCalls: 0, transcriptionsCompleted: 0,
+  averageQualityScore: 0, complianceRate: 0, totalAgentsCount: 0,
+  totalTeamsCount: 0, urgentReviewCallsCount: 0,
+  coachingNeededAgentsCount: 0, averageProgressionPercentage: 0,
+};
+
 class StorageService {
   private users: User[];
   private currentUser: User;
@@ -34,55 +43,22 @@ class StorageService {
   constructor() {
     this.users = this.load('kala_users', INITIAL_USERS);
     this.currentUser = this.load('kala_current_user', INITIAL_USERS[3]); // Default: Claire Delattre (QA_MANAGER)
-    this.campaigns = this.load('kala_campaigns', INITIAL_CAMPAIGNS);
-    this.teams = this.load('kala_teams', INITIAL_TEAMS);
-    this.agents = this.load('kala_agents', INITIAL_AGENTS);
+    this.campaigns = this.load('kala_campaigns_v2', []);
+    this.teams = this.load('kala_teams_v2', []);
+    this.agents = this.load('kala_agents_v2', []);
     this.criteria = this.load('kala_criteria', QUALITY_CRITERIA_LIST);
-    this.calls = this.load('kala_calls', INITIAL_CALLS);
-    this.evaluations = this.load('kala_evaluations', INITIAL_EVALUATIONS);
-    this.coachingPlans = this.load('kala_coaching_plans', INITIAL_COACHING_PLANS);
+    this.calls = this.load('kala_calls_v2', []);
+    this.evaluations = this.load('kala_evaluations_v2', []);
+    this.coachingPlans = this.load('kala_coaching_plans_v2', []);
     this.trainingModules = this.load('kala_training_modules', INITIAL_TRAINING_MODULES);
-    this.trainingSessions = this.load('kala_training_sessions', INITIAL_TRAINING_SESSIONS);
-    this.auditLogs = this.load('kala_audit_logs', INITIAL_AUDIT_LOGS);
-    this.metrics = this.load('kala_metrics', INITIAL_METRICS);
+    this.trainingSessions = this.load('kala_training_sessions_v2', []);
+    this.auditLogs = this.load('kala_audit_logs_v2', []);
+    this.metrics = this.load('kala_metrics_v2', EMPTY_METRICS);
     this.experimentConfigs = this.load('kala_experiment_configs_v2', SCIENTIFIC_EXPERIMENT_CONFIGS);
     this.benchmarkSamples = this.load('kala_benchmark_samples_v2', BENCHMARK_SAMPLES);
     
     // Initialiser les notifications d'équipe
-    this.notifications = this.load('kala_notifications', [
-      {
-        id: 'notif-1',
-        type: 'URGENT_CALL',
-        title: 'Appel critique en attente de revue QA',
-        message: 'L\'appel CALL-2024-001 (Marc Vasseur) a déclenché une alerte conformité et nécessite une validation prioritaire.',
-        timestamp: 'Il y a 10 min',
-        read: false,
-        targetId: 'call-101',
-        targetView: 'calls',
-        priority: 'HAUTE'
-      },
-      {
-        id: 'notif-2',
-        type: 'LOW_QUALITY',
-        title: 'Score sous le seuil d\'alerte (<75%)',
-        message: 'L\'évaluation de l\'appel CALL-2024-002 (Julie Mercier) a obtenu 68.5/100. Plan de coaching recommandé.',
-        timestamp: 'Il y a 35 min',
-        read: false,
-        targetId: 'agent-2',
-        targetView: 'coaching',
-        priority: 'HAUTE'
-      },
-      {
-        id: 'notif-3',
-        type: 'TRAINING_DUE',
-        title: 'Session de formation planifiée',
-        message: 'Module MOD-REL : Traitement des objections & litiges prévu demain pour 3 conseillers.',
-        timestamp: 'Hier',
-        read: true,
-        targetView: 'training',
-        priority: 'MOYENNE'
-      }
-    ]);
+    this.notifications = this.load('kala_notifications_v2', []);
 
     this.ctiConfig = this.load('kala_cti_config', {
       provider: 'GENESYS_CLOUD',

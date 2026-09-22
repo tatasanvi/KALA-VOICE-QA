@@ -83,7 +83,7 @@ export interface AudioMetadata {
   durationSeconds: number;
   sampleRateHz: number;
   channels: number;
-  snrDb: number; // Signal-to-Noise Ratio en dB
+  snrDb?: number; // SNR : uniquement si réellement mesuré
   estimatedNoiseLevel: NoiseLevel;
   noiseType: 'PLATEAU_CALL_CENTER' | 'GSM_COMPRESSION' | 'RUE_URBAIN' | 'ECHO_ACOUSTIQUE' | 'AUCUN';
   audioQualityScore: number; // / 100
@@ -322,11 +322,6 @@ export interface ExperimentConfiguration {
   asrModel: string;
   denoiserAlgorithm: string;
   postProcessingApplied: string;
-  estimatedRtf: number; // Real-Time Factor (temps calcul / durée audio)
-  averageWer: number; // Word Error Rate %
-  averageCer: number; // Character Error Rate %
-  snrImprovementDb: number; // Gain en SNR
-  confidenceScoreAvg: number; // Confiance moyenne
 }
 
 export interface BenchmarkSample {
