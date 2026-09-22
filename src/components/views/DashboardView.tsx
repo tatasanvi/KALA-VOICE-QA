@@ -184,8 +184,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
           </div>
           <div className="kpi-value">{filteredCalls.length.toLocaleString()}</div>
           <div className="kpi-subtext">
-            <span className="trend-up"><ArrowUpRight size={13} style={{ display: 'inline' }} /> +8.4%</span>
-            <span>vs mois précédent</span>
+            <span>Appels réellement transcrits</span>
           </div>
         </div>
 
@@ -209,8 +208,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             {avgQuality} <span style={{ fontSize: '16px', color: 'var(--text-muted)' }}>/ 100</span>
           </div>
           <div className="kpi-subtext">
-            <span className="trend-up"><ArrowUpRight size={13} style={{ display: 'inline' }} /> +3.2 pts</span>
-            <span>Objectif cible : 85</span>
+            <span>Évaluations enregistrées</span>
           </div>
         </div>
 

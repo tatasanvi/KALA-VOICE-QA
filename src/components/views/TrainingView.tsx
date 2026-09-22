@@ -81,11 +81,11 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
             </div>
             <div>
               <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Uplift Moyen Post-Formation</div>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: '#6db89a' }}>+14.8%</div>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-muted)' }}>non mesuré</div>
             </div>
           </div>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            Progression moyenne constatée sur la note QA des appels réels dans les 30 jours suivant la validation d'un module.
+            Cet indicateur sera calculé à partir des évaluations réelles avant et après la validation d'un module.
           </p>
         </div>
 

@@ -36,8 +36,11 @@ router.post('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Res
   const evaluation = sqlite().prepare('SELECT * FROM evaluations WHERE id = ?').get(evaluationId) as any;
   if (!evaluation) { res.status(404).json({ error: 'Évaluation introuvable.' }); return; }
 
-  // Un agent ne peut contester qu'une évaluation qui le concerne.
-  if (req.user!.role === 'AGENT' && !evaluationConcernsUser(evaluation, req.user!.userId)) {
+  // Seul l'agent concerné peut contester (les rôles QA et au-dessus peuvent
+  // ouvrir une révision à sa place, par exemple après un signalement oral).
+  const isConcerned = evaluationConcernsUser(evaluation, req.user!.userId);
+  const isQaUp = QA_UP.includes(req.user!.role);
+  if (!isConcerned && !isQaUp) {
     res.status(403).json({ error: 'Vous ne pouvez contester qu’une évaluation qui vous concerne.' });
     return;
   }
