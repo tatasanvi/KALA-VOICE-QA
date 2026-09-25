@@ -63,14 +63,24 @@ export const LoginView: React.FC = () => {
     }
   };
 
-  // Raccourcis de connexion 1-clic pour le jury de soutenance
-  const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string }[] = [
-    { role: 'ADMIN', title: 'Administrateur', email: 'a.moreau@kalavoice.ai', color: '#d98383', desc: 'Accès total système, utilisateurs & paramètres' },
-    { role: 'QA_MANAGER', title: 'Responsable QA', email: 'c.delattre@kalavoice.ai', color: '#b3aed1', desc: 'Évaluations qualité, critères & grilles d\'audit' },
-    { role: 'MANAGER', title: 'Manager', email: 's.laurent@kalavoice.ai', color: '#fb923c', desc: 'Pilotage global, équipes, campagnes & ROI' },
-    { role: 'SUPERVISOR', title: 'Superviseur', email: 'm.vasseur@kalavoice.ai', color: '#9fb7d6', desc: 'Gestion du plateau, suivi temps réel des appels' },
-    { role: 'TRAINER', title: 'Formateur', email: 'p.simon@kalavoice.ai', color: '#6db89a', desc: 'Académie, coaching ciblé & mesure d\'uplift' },
-    { role: 'AGENT', title: 'Conseiller Client', email: 'j.dupont@kalavoice.ai', color: '#94a3b8', desc: 'Espace personnel du conseiller (Jean Dupont)' },
+  // Deux profils de démonstration ciblés pour la soutenance Master 2
+  const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string; badge: string }[] = [
+    { 
+      role: 'QA_MANAGER', 
+      title: 'Responsable QA & Superviseur Plateau', 
+      email: 'c.delattre@kalavoice.ai', 
+      color: '#6db89a', 
+      badge: 'Vue Opérationnelle Plateau',
+      desc: 'Supervision des appels à froid : agents en ligne/pause, DMT, écoute des enregistrements et grilles d\'évaluation.' 
+    },
+    { 
+      role: 'ADMIN', 
+      title: 'Chercheur IA — Démonstrateur ASR (Master 2)', 
+      email: 'a.moreau@kalavoice.ai', 
+      color: '#b3aed1', 
+      badge: 'Vue Recherche Scientifique',
+      desc: 'Laboratoire expérimental : Whisper vs Wav2Vec 2.0, simulation de bruit SNR, courbes WER/CER et gain DeepFilterNet3.' 
+    },
   ];
 
   const handleQuickLogin = (demoEmail: string) => {
@@ -372,56 +382,56 @@ export const LoginView: React.FC = () => {
           </p>
 
           {/* Grille des profils démo */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
             {demoAccounts.map((acc) => (
               <div
                 key={acc.email}
                 onClick={() => handleQuickLogin(acc.email)}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  background: email === acc.email ? 'rgba(74, 111, 165, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                  border: `1px solid ${email === acc.email ? 'rgba(74, 111, 165, 0.4)' : 'rgba(255, 255, 255, 0.06)'}`,
+                  flexDirection: 'column',
+                  gap: '8px',
+                  padding: '16px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: email === acc.email ? 'rgba(74, 111, 165, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                  border: `1.5px solid ${email === acc.email ? acc.color : 'rgba(255, 255, 255, 0.08)'}`,
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: acc.color,
-                    boxShadow: 'none'
-                  }} />
-                  <div>
-                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: acc.color,
+                      boxShadow: `0 0 8px ${acc.color}`
+                    }} />
+                    <span style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
                       {acc.title}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      {acc.email} • {acc.desc}
-                    </div>
+                    </span>
                   </div>
+                  <span className={`badge ${acc.role === 'ADMIN' ? 'badge-purple' : 'badge-green'}`} style={{ fontSize: '10.5px' }}>
+                    {acc.badge}
+                  </span>
                 </div>
 
-                <button
-                  type="button"
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    padding: '4px 10px',
-                    borderRadius: 'var(--radius-full)',
-                    background: email === acc.email ? '#4a6fa5' : 'rgba(255, 255, 255, 0.06)',
-                    color: email === acc.email ? '#ffffff' : 'var(--text-secondary)',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {email === acc.email ? 'Sélectionné' : 'Choisir'}
-                </button>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                  {acc.desc}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <code style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{acc.email}</code>
+                  <span style={{ 
+                    fontSize: '11px', 
+                    fontWeight: 700, 
+                    color: email === acc.email ? acc.color : 'var(--text-muted)' 
+                  }}>
+                    {email === acc.email ? '✓ Profil Sélectionné' : 'Cliquer pour charger →'}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

@@ -185,7 +185,7 @@ export interface Call {
   callDate: string;
   durationSeconds: number;
   direction: 'ENTRANT' | 'SORTANT';
-  callType: 'SUPPORT_TECHNIQUE' | 'RÉTENTION' | 'RÉCLAMATION' | 'COMMERCIAL' | 'ENQUÊTE';
+  callType: 'SUPPORT_TECHNIQUE' | 'RÉTENTION' | 'RÉCLAMATION' | 'COMMERCIAL' | 'ENQUÊTE' | 'PROSPECTION';
   status?: CallStatus;
   audioMetadata: AudioMetadata;
   transcription: Transcription;

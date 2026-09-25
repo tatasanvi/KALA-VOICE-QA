@@ -178,12 +178,18 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
           onChange={e => pick(e.target.files?.[0])}
         />
         {file ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
             <FileAudio size={28} color="var(--primary-light)" />
             <div style={{ fontWeight: 600, fontSize: '14px' }}>{file.name}</div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              {(file.size / (1024 * 1024)).toFixed(2)} Mo
+              {(file.size / (1024 * 1024)).toFixed(2)} Mo • Fichier audio prêt à être transcrit
             </div>
+            <audio 
+              controls 
+              src={URL.createObjectURL(file)} 
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: '450px', height: '38px', marginTop: '6px' }} 
+            />
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
@@ -228,10 +234,8 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
       </label>
 
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-        {compareDfn3
-          ? "Le fichier est transcrit deux fois par Whisper-small : sur le signal brut, puis après DeepFilterNet3. Le traitement est environ deux fois plus long."
-          : "Transcription par Whisper-small sur le signal brut, sans débruitage."}
-        {' '}La transcription est enregistrée comme appel ; {keepAudio ? "le fichier audio sera également conservé." : "le fichier audio n'est pas conservé."}
+        Transcription par <strong>Groq Whisper large-v3-turbo</strong> (cloud, gratuit).
+        {' '}Le fichier audio est envoyé à Groq et n'est pas conservé.
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -244,7 +248,7 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
 
       {loading && (
         <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-          Le calcul se fait en local sur processeur : comptez environ la durée de l'audio, parfois davantage.
+          Transcription en cours via Groq Whisper (cloud) — généralement en quelques secondes…
         </div>
       )}
 

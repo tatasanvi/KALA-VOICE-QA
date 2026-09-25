@@ -161,7 +161,11 @@ export const experimentsApi = {
   samples:  () => apiCall('/experiments/samples'),
 };
 
-// ─── Transcriptions API (service ASR local, Whisper-small) ─────────────────────
+// ─── Transcriptions API (Groq Whisper via Vercel Serverless Function) ──────────
+// En production (Vercel) : appel direct à /api/transcribe (serverless → Groq).
+// En développement local : le proxy Vite redirige /api → Express sur :8000,
+// mais /api/transcribe est servi par la Vercel CLI (`vercel dev`) ou Groq.
+// Les champs compare_dfn3 / keepAudio sont désactivés (non supportés par Groq).
 export interface TranscriptionSegmentResult {
   start: number | null;
   end: number | null;
@@ -202,38 +206,159 @@ export interface DenoisedResult {
   enh_ok: boolean;
 }
 
+// ─── Fonctions utilitaires métriques ASR pour fallback direct ────────────────
+function normalizeTextForMetrics(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/'/g, "'")
+    .replace(/-/g, '')
+    .replace(/\d/g, ' ')
+    .replace(/[^\w\s]|_/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function levenshteinDistance(a: string[] | string, b: string[] | string) {
+  const m = a.length;
+  const n = b.length;
+  let d = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const p = [...d];
+    d[0] = i;
+    for (let j = 1; j <= n; j++) {
+      d[j] = Math.min(p[j] + 1, d[j - 1] + 1, p[j - 1] + (a[i - 1] !== b[j - 1] ? 1 : 0));
+    }
+  }
+  return d[n];
+}
+
+function calculateWerCer(reference: string, hypothesis: string) {
+  const ref = normalizeTextForMetrics(reference);
+  const hyp = normalizeTextForMetrics(hypothesis);
+  if (!ref) return { wer: null, cer: null, reference_normalized: ref, hypothesis_normalized: hyp };
+  const refWords = ref.split(' ').filter(Boolean);
+  const hypWords = hyp.split(' ').filter(Boolean);
+  const wer = refWords.length > 0 ? levenshteinDistance(refWords, hypWords) / refWords.length : null;
+  const cer = ref.length > 0 ? levenshteinDistance([...ref], [...hyp]) / ref.length : null;
+  return { wer, cer, reference_normalized: ref, hypothesis_normalized: hyp };
+}
+
+async function transcribeDirectGroq(file: File, reference?: string): Promise<ApiResponse<TranscriptionResult>> {
+  const apiKey = (import.meta as any).env?.VITE_GROQ_API_KEY || (typeof localStorage !== 'undefined' ? localStorage.getItem('groq_api_key') : '');
+  if (!apiKey) {
+    return {
+      error: "Service de transcription injoignable et clé GROQ_API_KEY introuvable. Vérifiez votre fichier .env.local ou les variables Vercel.",
+      status: 503,
+      ok: false,
+    };
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('model', 'whisper-large-v3-turbo');
+  formData.append('language', 'fr');
+  formData.append('response_format', 'verbose_json');
+  formData.append('timestamp_granularities[]', 'segment');
+
+  const startTime = Date.now();
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      let msg = `Erreur Groq (${res.status})`;
+      try {
+        const errJson = await res.json();
+        if (errJson?.error?.message) msg = errJson.error.message;
+      } catch { /* ignore */ }
+      return { error: msg, status: res.status, ok: false };
+    }
+
+    const data = await res.json();
+    const duration = Math.round((data.duration || 0) * 100) / 100;
+    const processingTime = Math.round(((Date.now() - startTime) / 1000) * 100) / 100;
+    const text = (data.text || '').trim();
+
+    const segments: TranscriptionSegmentResult[] = (data.segments || []).map((s: any) => ({
+      start: s.start ?? null,
+      end: s.end ?? null,
+      text: (s.text || '').trim(),
+    })).filter((s: any) => s.text);
+
+    let wer = null;
+    let cer = null;
+    let refNorm = null;
+    let hypNorm = null;
+
+    if (reference && reference.trim()) {
+      const metrics = calculateWerCer(reference, text);
+      wer = metrics.wer;
+      cer = metrics.cer;
+      refNorm = metrics.reference_normalized;
+      hypNorm = metrics.hypothesis_normalized;
+    }
+
+    return {
+      data: {
+        text,
+        segments,
+        duration,
+        processing_time: processingTime,
+        model: 'whisper-large-v3-turbo (Groq)',
+        wer,
+        cer,
+        reference_normalized: refNorm,
+        hypothesis_normalized: hypNorm,
+        denoised: null,
+        wer_delta: null,
+      },
+      status: 200,
+      ok: true,
+    };
+  } catch (err: any) {
+    return {
+      error: `Service de transcription injoignable : ${err?.message || 'Erreur réseau'}`,
+      status: 0,
+      ok: false,
+    };
+  }
+}
+
 export const transcriptionsApi = {
-  transcribe: async (file: File, reference?: string, compareDfn3 = false, keepAudio = false): Promise<ApiResponse<TranscriptionResult>> => {
-    const token = tokenStore.get();
-    const form = new FormData();
-    form.append('file', file);
-    if (reference && reference.trim()) form.append('reference', reference);
-    if (compareDfn3) form.append('compare_dfn3', 'true');
-    if (keepAudio) form.append('keep_audio', 'true');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  transcribe: async (file: File, reference?: string, _compareDfn3 = false, _keepAudio = false): Promise<ApiResponse<TranscriptionResult>> => {
+    // 1. Essai via la Vercel Serverless Function (/api/transcribe)
     try {
-      const res = await fetch(`${API_BASE}/transcriptions`, {
+      const form = new FormData();
+      form.append('file', file);
+      if (reference && reference.trim()) form.append('reference', reference);
+
+      const res = await fetch('/api/transcribe', {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: form,
       });
+
       const isJson = res.headers.get('content-type')?.includes('application/json');
       const data = isJson ? await res.json() : null;
-      if (!res.ok && !isJson) {
-        // Réponse non JSON : le proxy Vite n'a pas pu joindre le backend Express.
-        return { error: 'Serveur KALA injoignable : le backend n\'est pas démarré.', status: res.status, ok: false };
+
+      if (res.ok && data) {
+        return { data, status: res.status, ok: true };
       }
-      if (res.status === 401) {
-        return { error: 'Session non authentifiée par le serveur : reconnectez-vous avec le backend démarré.', status: 401, ok: false };
+
+      if (res.status === 400 || res.status === 413) {
+        return { error: data?.error ?? `Erreur ${res.status}`, status: res.status, ok: false };
       }
-      return {
-        data: res.ok ? data : undefined,
-        error: !res.ok ? (data?.error ?? `Erreur ${res.status}`) : undefined,
-        status: res.status,
-        ok: res.ok,
-      };
     } catch {
-      return { error: 'Serveur KALA injoignable : le backend n\'est pas démarré.', status: 0, ok: false };
+      // Route /api/transcribe locale indisponible, on tente Groq direct
     }
+
+    // 2. Fallback direct vers l'API Groq (infaillible en dev et prod)
+    return transcribeDirectGroq(file, reference);
   },
 };
 
