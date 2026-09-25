@@ -161,7 +161,11 @@ export const experimentsApi = {
   samples:  () => apiCall('/experiments/samples'),
 };
 
-// ─── Transcriptions API (service ASR local, Whisper-small) ─────────────────────
+// ─── Transcriptions API (Groq Whisper via Vercel Serverless Function) ──────────
+// En production (Vercel) : appel direct à /api/transcribe (serverless → Groq).
+// En développement local : le proxy Vite redirige /api → Express sur :8000,
+// mais /api/transcribe est servi par la Vercel CLI (`vercel dev`) ou Groq.
+// Les champs compare_dfn3 / keepAudio sont désactivés (non supportés par Groq).
 export interface TranscriptionSegmentResult {
   start: number | null;
   end: number | null;
@@ -203,27 +207,22 @@ export interface DenoisedResult {
 }
 
 export const transcriptionsApi = {
-  transcribe: async (file: File, reference?: string, compareDfn3 = false, keepAudio = false): Promise<ApiResponse<TranscriptionResult>> => {
-    const token = tokenStore.get();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  transcribe: async (file: File, reference?: string, _compareDfn3 = false, _keepAudio = false): Promise<ApiResponse<TranscriptionResult>> => {
     const form = new FormData();
     form.append('file', file);
     if (reference && reference.trim()) form.append('reference', reference);
-    if (compareDfn3) form.append('compare_dfn3', 'true');
-    if (keepAudio) form.append('keep_audio', 'true');
     try {
-      const res = await fetch(`${API_BASE}/transcriptions`, {
+      // Appel direct à la Vercel Serverless Function (indépendant du backend Express).
+      // En dev local avec `vercel dev`, ce chemin est servi par la CLI Vercel.
+      const res = await fetch('/api/transcribe', {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: form,
       });
       const isJson = res.headers.get('content-type')?.includes('application/json');
       const data = isJson ? await res.json() : null;
       if (!res.ok && !isJson) {
-        // Réponse non JSON : le proxy Vite n'a pas pu joindre le backend Express.
-        return { error: 'Serveur KALA injoignable : le backend n\'est pas démarré.', status: res.status, ok: false };
-      }
-      if (res.status === 401) {
-        return { error: 'Session non authentifiée par le serveur : reconnectez-vous avec le backend démarré.', status: 401, ok: false };
+        return { error: 'Service de transcription indisponible (GROQ_API_KEY absente ou Vercel non démarré).', status: res.status, ok: false };
       }
       return {
         data: res.ok ? data : undefined,
@@ -232,7 +231,7 @@ export const transcriptionsApi = {
         ok: res.ok,
       };
     } catch {
-      return { error: 'Serveur KALA injoignable : le backend n\'est pas démarré.', status: 0, ok: false };
+      return { error: 'Service de transcription injoignable.', status: 0, ok: false };
     }
   },
 };
