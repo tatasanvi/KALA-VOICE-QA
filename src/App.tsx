@@ -84,42 +84,7 @@ const AppLayout: React.FC = () => {
           isOnline={isApiOnline}
         />
 
-        {/* Bannière Démonstration Soutenance Master 2 */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.03)',
-          borderBottom: '1px solid rgba(125, 122, 166, 0.25)',
-          padding: '6px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: '11.5px',
-          color: 'var(--text-secondary)',
-          flexWrap: 'wrap',
-          gap: '8px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ 
-              display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', 
-              background: '#6db89a', boxShadow: 'none' 
-            }} />
-            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-              Données de démonstration — Soutenance Master 2 IA & Big Data
-            </span>
-            <span style={{ color: 'var(--text-muted)' }}>•</span>
-            <span style={{ color: 'var(--text-muted)' }}>
-              20 conseillers • 4 équipes • 3 campagnes métiers • 100+ conversations transcrites & analysées
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge badge-purple" style={{ fontSize: '10px', padding: '2px 8px' }}>
-              Pipeline : Audio Bruité → Dénoyautage Spectral → ASR → QA & Coaching
-            </span>
-          </div>
-        </div>
-
         <main className="content-area">
-          <DemoDataBanner />
           <Outlet />
         </main>
       </div>

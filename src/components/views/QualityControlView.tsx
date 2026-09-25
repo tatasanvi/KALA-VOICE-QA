@@ -24,16 +24,53 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   const criteria = storageService.getCriteria();
   const currentUser = storageService.getCurrentUser();
 
-  const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
-  const existingEval = storageService.getEvaluationByCallId(currentCall.id);
+  const currentCall = (calls.find(c => c.id === selectedCallId) || calls[0]) as Call | undefined;
+  const existingEval = currentCall ? storageService.getEvaluationByCallId(currentCall.id) : undefined;
 
   // Initialisation de l'évaluation si non existante
-  const [evaluation, setEvaluation] = useState<QualityEvaluation>(() => {
+  const [evaluation, setEvaluation] = useState<QualityEvaluation | null>(() => {
     if (existingEval) return existingEval;
-    return QualityService.generateAiSuggestedEvaluation(currentCall, criteria, currentUser.name);
+    if (currentCall) return QualityService.generateAiSuggestedEvaluation(currentCall, criteria, currentUser.name);
+    return null;
   });
 
   const [notification, setNotification] = useState<string | null>(null);
+
+  if (!currentCall || !evaluation) {
+    return (
+      <div className="glass-panel" style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        textAlign: 'center', padding: '64px 32px', gap: '20px',
+        border: '2px dashed rgba(74, 111, 165, 0.3)',
+        background: 'rgba(74, 111, 165, 0.04)'
+      }}>
+        <div style={{
+          width: '72px', height: '72px', borderRadius: '50%',
+          background: 'rgba(74, 111, 165, 0.12)',
+          border: '2px solid rgba(74, 111, 165, 0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <Award size={32} color="var(--primary-light)" />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0' }}>
+            Aucun appel à évaluer
+          </h2>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.6, margin: '0 auto' }}>
+            Pour démarrer un contrôle qualité assisté par IA, importez d'abord un enregistrement audio depuis le registre des appels.
+          </p>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={() => onNavigate('/appels')}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', padding: '10px 24px' }}
+        >
+          <ArrowRight size={16} />
+          <span>Accéder au registre des appels</span>
+        </button>
+      </div>
+    );
+  }
 
   const handleScoreChange = (criterionId: string, newScore: number) => {
     const updatedItems = evaluation.items.map(item => {

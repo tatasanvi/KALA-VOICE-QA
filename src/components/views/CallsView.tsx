@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, Play, Sparkles, CheckCircle2, 
   Printer, Volume2, ShieldAlert, UploadCloud, Eye, ChevronDown
@@ -7,8 +7,6 @@ import { storageService } from '../../services/storageService';
 import { ReportService } from '../../services/reportService';
 import { AudioUploadModal } from '../common/AudioUploadModal';
 import { CallDetailModal } from '../common/CallDetailModal';
-import { RealCallsPanel } from '../common/RealCallsPanel';
-import { DemoDataBadge } from '../common/DemoDataBanner';
 import { Call, UserRole, CallStatus } from '../../types';
 
 interface CallsViewProps {
@@ -41,9 +39,17 @@ const StatusBadge: React.FC<{ status?: CallStatus }> = ({ status }) => {
 };
 
 export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, currentRole, initialCallId }) => {
-  const calls = storageService.getCalls();
+  const [calls, setCalls] = useState<Call[]>(() => storageService.getCalls());
   const campaigns = storageService.getCampaigns();
   const teams = storageService.getTeams();
+  
+  // Écouter les mises à jour de storageService (import audio, nouvelle évaluation...)
+  useEffect(() => {
+    const unsubscribe = storageService.subscribe(() => {
+      setCalls([...storageService.getCalls()]);
+    });
+    return () => unsubscribe();
+  }, []);
   
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCampaign, setSelectedCampaign] = useState<string>('ALL');
@@ -52,7 +58,6 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
   const [selectedResolution, setSelectedResolution] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
-  const [realCallsRefresh, setRealCallsRefresh] = useState<number>(0);
   const [selectedCall, setSelectedCall] = useState<Call | null>(() => {
     if (initialCallId) {
       return calls.find(c => c.id === initialCallId) || null;
@@ -105,12 +110,37 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
-      {/* Appels réellement transcrits (backend SQLite), distincts des données de démonstration */}
-      <RealCallsPanel refreshKey={realCallsRefresh} />
+      {/* En-tête de la vue Appels avec Action d'import */}
+      <div className="glass-panel" style={{ 
+        padding: '18px 24px', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: '14px' 
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+              Registre des Appels
+            </h2>
+            <span className="badge badge-purple" style={{ fontSize: '11px', fontWeight: 700 }}>
+              {calls.length} appel{calls.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+            Supervision des enregistrements audio, transcription Whisper et audits de conformité
+          </p>
+        </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Appels de démonstration</h3>
-        <DemoDataBadge />
+        <button 
+          className="btn btn-primary"
+          onClick={() => setShowUploadModal(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 18px', fontSize: '13px' }}
+        >
+          <UploadCloud size={16} />
+          <span>Importer un enregistrement audio</span>
+        </button>
       </div>
 
       {/* Bandeau de statuts rapides */}
@@ -242,7 +272,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
       <AudioUploadModal 
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
-        onSaved={() => setRealCallsRefresh(k => k + 1)}
+        onSaved={() => setShowUploadModal(false)}
       />
 
       {/* Modal Fiche Appel Détaillée */}
@@ -256,11 +286,59 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
         />
       )}
 
-      {/* Tableau des Appels */}
-      <div className="data-table-container">
-        <table className="data-table">
-          <thead>
-            <tr>
+      {/* Tableau des Appels — ou état vide */}
+      {calls.length === 0 ? (
+        /* ── ÉTAT VIDE : Aucun appel — invitation à importer ── */
+        <div className="glass-panel" style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          textAlign: 'center', padding: '64px 32px', gap: '20px',
+          border: '2px dashed rgba(74, 111, 165, 0.3)',
+          background: 'rgba(74, 111, 165, 0.04)'
+        }}>
+          <div style={{
+            width: '72px', height: '72px', borderRadius: '50%',
+            background: 'rgba(74, 111, 165, 0.12)',
+            border: '2px solid rgba(74, 111, 165, 0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <UploadCloud size={32} color="var(--primary-light)" />
+          </div>
+          <div>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+              Aucun appel enregistré
+            </h2>
+            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.6, margin: '0 auto 4px' }}>
+              Importez vos fichiers audio pour démarrer. KALA transcrit automatiquement l'appel via{' '}
+              <strong style={{ color: 'var(--primary-light)' }}>Whisper large-v3-turbo</strong> et
+              prépare la fiche pour l'évaluation qualité.
+            </p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 auto' }}>
+              Formats acceptés : WAV, MP3, M4A, OGG, FLAC • 25 Mo maximum
+            </p>
+          </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowUploadModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', padding: '10px 24px' }}
+          >
+            <UploadCloud size={16} />
+            <span>Importer un enregistrement audio</span>
+          </button>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>
+            Les données sont stockées localement dans votre navigateur.
+          </p>
+        </div>
+      ) : filteredCalls.length === 0 ? (
+        <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
+            Aucun appel ne correspond aux filtres sélectionnés.
+          </p>
+        </div>
+      ) : (
+        <div className="data-table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
               <th>
                 <button onClick={() => handleSort('callDate')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
                   Identifiant & Date <ChevronDown size={12} />
@@ -417,6 +495,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 };

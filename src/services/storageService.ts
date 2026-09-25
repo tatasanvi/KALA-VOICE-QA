@@ -38,8 +38,21 @@ class StorageService {
     this.teams = this.load('kala_teams', INITIAL_TEAMS);
     this.agents = this.load('kala_agents', INITIAL_AGENTS);
     this.criteria = this.load('kala_criteria', QUALITY_CRITERIA_LIST);
-    this.calls = this.load('kala_calls', INITIAL_CALLS);
-    this.evaluations = this.load('kala_evaluations', INITIAL_EVALUATIONS);
+    // ── Versioning du schéma de données ────────────────────────────────────────
+    // Si la version en cache est différente, on vide les calls/évaluations
+    // pour s'assurer qu'on repart de zéro (les appels viennent de l'import).
+    const SCHEMA_VERSION = '2.0.0';
+    const storedVersion = localStorage.getItem('kala_schema_version');
+    if (storedVersion !== SCHEMA_VERSION) {
+      localStorage.removeItem('kala_calls');
+      localStorage.removeItem('kala_evaluations');
+      localStorage.removeItem('kala_notifications');
+      localStorage.setItem('kala_schema_version', SCHEMA_VERSION);
+    }
+    // ───────────────────────────────────────────────────────────────────────────
+
+    this.calls = this.load('kala_calls', []);         // Démarre vide : les appels arrivent via import audio
+    this.evaluations = this.load('kala_evaluations', []); // Démarre vide : évaluations créées après import
     this.coachingPlans = this.load('kala_coaching_plans', INITIAL_COACHING_PLANS);
     this.trainingModules = this.load('kala_training_modules', INITIAL_TRAINING_MODULES);
     this.trainingSessions = this.load('kala_training_sessions', INITIAL_TRAINING_SESSIONS);
@@ -48,41 +61,8 @@ class StorageService {
     this.experimentConfigs = this.load('kala_experiment_configs_v2', SCIENTIFIC_EXPERIMENT_CONFIGS);
     this.benchmarkSamples = this.load('kala_benchmark_samples_v2', BENCHMARK_SAMPLES);
     
-    // Initialiser les notifications d'équipe
-    this.notifications = this.load('kala_notifications', [
-      {
-        id: 'notif-1',
-        type: 'URGENT_CALL',
-        title: 'Appel critique en attente de revue QA',
-        message: 'L\'appel CALL-2024-001 (Marc Vasseur) a déclenché une alerte conformité et nécessite une validation prioritaire.',
-        timestamp: 'Il y a 10 min',
-        read: false,
-        targetId: 'call-101',
-        targetView: 'calls',
-        priority: 'HAUTE'
-      },
-      {
-        id: 'notif-2',
-        type: 'LOW_QUALITY',
-        title: 'Score sous le seuil d\'alerte (<75%)',
-        message: 'L\'évaluation de l\'appel CALL-2024-002 (Julie Mercier) a obtenu 68.5/100. Plan de coaching recommandé.',
-        timestamp: 'Il y a 35 min',
-        read: false,
-        targetId: 'agent-2',
-        targetView: 'coaching',
-        priority: 'HAUTE'
-      },
-      {
-        id: 'notif-3',
-        type: 'TRAINING_DUE',
-        title: 'Session de formation planifiée',
-        message: 'Module MOD-REL : Traitement des objections & litiges prévu demain pour 3 conseillers.',
-        timestamp: 'Hier',
-        read: true,
-        targetView: 'training',
-        priority: 'MOYENNE'
-      }
-    ]);
+    // Notifications : démarrage propre, générées dynamiquement depuis les vrais appels importés
+    this.notifications = this.load('kala_notifications', []);
 
     this.ctiConfig = this.load('kala_cti_config', {
       provider: 'GENESYS_CLOUD',
@@ -413,8 +393,8 @@ class StorageService {
     this.teams = INITIAL_TEAMS;
     this.agents = INITIAL_AGENTS;
     this.criteria = QUALITY_CRITERIA_LIST;
-    this.calls = INITIAL_CALLS;
-    this.evaluations = INITIAL_EVALUATIONS;
+    this.calls = [];         // Réinitialisation : aucun appel prédéfini
+    this.evaluations = []; // Réinitialisation : aucune évaluation prédéfinie
     this.coachingPlans = INITIAL_COACHING_PLANS;
     this.trainingModules = INITIAL_TRAINING_MODULES;
     this.trainingSessions = INITIAL_TRAINING_SESSIONS;

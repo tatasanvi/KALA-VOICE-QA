@@ -8,7 +8,7 @@ import { UserRole, TeamNotification } from '../../types';
 import { storageService } from '../../services/storageService';
 import { useAuth } from '../../context/AuthContext';
 import { 
-  ShieldCheck, UserCheck, Sparkles, Bell, LogOut, Check, 
+  ShieldCheck, Sparkles, Bell, LogOut, Check, 
   Wifi, WifiOff, X
 } from 'lucide-react';
 
@@ -28,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   isOnline = true
 }) => {
   const navigate = useNavigate();
-  const { user, role, switchRole, logout } = useAuth();
+  const { user, role, logout } = useAuth();
   const notifications = storageService.getNotifications();
   const unreadCount = storageService.getUnreadNotificationCount();
 
@@ -44,23 +44,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const currentRole = role || 'AGENT';
-
-  const handleRoleChangeInternal = (newRole: UserRole) => {
-    switchRole(newRole);
-
-    // Redirection automatique contextuelle selon le rôle choisi
-    if (newRole === 'QA_MANAGER') {
-      navigate('/qualite');
-    } else if (newRole === 'TRAINER') {
-      navigate('/coaching');
-    } else if (newRole === 'AGENT') {
-      navigate('/agents');
-    } else if (newRole === 'SUPERVISOR') {
-      navigate('/appels');
-    } else {
-      navigate('/dashboard');
-    }
-  };
 
   const handleNotificationClick = (notif: TeamNotification) => {
     storageService.markNotificationAsRead(notif.id);
@@ -87,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div>
           <h1 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>{activeViewTitle}</h1>
           <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            Plateforme KALA VOICE QA • Soutenance Master 2 IA & Big Data
+            Plateforme d'Assurance Qualité & Intelligence Vocale
           </div>
         </div>
       </div>
@@ -107,17 +90,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             fontWeight: 600,
             color: isOnline ? '#6db89a' : '#d98383'
           }}
-          title={isOnline ? "API Backend Express & Base SQLite connectés (:8000)" : "Mode Fallback Local Storage actif"}
+          title={isOnline ? "API connectée et opérationnelle" : "Mode autonome actif"}
         >
           {isOnline ? <Wifi size={13} /> : <WifiOff size={13} />}
           <span>{isOnline ? 'API Connectée' : 'Hors-Ligne'}</span>
         </div>
 
-        {/* Statut Moteur IA & Débruiteur */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(74, 111, 165, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(74, 111, 165, 0.2)' }}>
-          <Sparkles size={14} color="#9fb7d6" />
-          <span style={{ fontSize: '11.5px', color: '#b4c6de', fontWeight: 600 }}>
-            ASR : <strong style={{ color: '#ffffff' }}>non branché</strong> (démonstration)
+        {/* Statut Moteur IA ASR */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+          <Sparkles size={14} color="#10b981" />
+          <span style={{ fontSize: '11.5px', color: '#6ee7b7', fontWeight: 600 }}>
+            Moteur ASR : <strong style={{ color: '#ffffff' }}>Whisper V3 Turbo</strong>
           </span>
         </div>
 
@@ -249,25 +232,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </div>
           )}
-        </div>
-
-        {/* Switcher de rôle persona */}
-        <div className="role-switcher-container">
-          <UserCheck size={16} color="var(--primary-light)" />
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rôle :</span>
-          <select 
-            value={currentRole} 
-            onChange={(e) => handleRoleChangeInternal(e.target.value as UserRole)}
-            className="role-select"
-            title="Basculez entre les rôles pour tester les permissions et les vues dédiées"
-          >
-            <option value="QA_MANAGER">Claire Delattre (Responsable Qualité)</option>
-            <option value="SUPERVISOR">Marc Vasseur (Superviseur Plateau)</option>
-            <option value="TRAINER">Patrick Simon (Formateur / Coach)</option>
-            <option value="AGENT">Koffi Mensah (Conseiller Client)</option>
-            <option value="MANAGER">Sophie Laurent (Directrice Opérations)</option>
-            <option value="ADMIN">Alexandre Moreau (Administrateur IA)</option>
-          </select>
         </div>
 
         {/* Utilisateur Actif & Déconnexion */}

@@ -18,7 +18,36 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
   onSelectCall 
 }) => {
   const calls = storageService.getCalls();
-  const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
+  const currentCall = (calls.find(c => c.id === selectedCallId) || calls[0]) as Call | undefined;
+
+  if (!currentCall) {
+    return (
+      <div className="glass-panel" style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        textAlign: 'center', padding: '64px 32px', gap: '20px',
+        border: '2px dashed rgba(74, 111, 165, 0.3)',
+        background: 'rgba(74, 111, 165, 0.04)'
+      }}>
+        <div style={{
+          width: '72px', height: '72px', borderRadius: '50%',
+          background: 'rgba(74, 111, 165, 0.12)',
+          border: '2px solid rgba(74, 111, 165, 0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <Sparkles size={32} color="var(--primary-light)" />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0' }}>
+            Aucune analyse conversationnelle
+          </h2>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.6, margin: '0 auto' }}>
+            Importez des enregistrements audio pour déclencher l'analyse sémantique, la détection des sentiments et l'extraction des signaux faibles.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const analytics = currentCall.analytics;
 
   // Calcul des pourcentages de temps de parole
