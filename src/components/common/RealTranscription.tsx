@@ -178,12 +178,18 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
           onChange={e => pick(e.target.files?.[0])}
         />
         {file ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
             <FileAudio size={28} color="var(--primary-light)" />
             <div style={{ fontWeight: 600, fontSize: '14px' }}>{file.name}</div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              {(file.size / (1024 * 1024)).toFixed(2)} Mo
+              {(file.size / (1024 * 1024)).toFixed(2)} Mo • Fichier audio prêt à être transcrit
             </div>
+            <audio 
+              controls 
+              src={URL.createObjectURL(file)} 
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: '450px', height: '38px', marginTop: '6px' }} 
+            />
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
