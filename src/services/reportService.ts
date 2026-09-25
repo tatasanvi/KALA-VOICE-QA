@@ -2,7 +2,7 @@
 // Service d'Export & de Génération de Rapports (CSV & PDF / Print)
 // ============================================================================
 
-import { Call, QualityEvaluation, Agent, BenchmarkSample, ExperimentConfiguration } from '../types';
+import { Call, QualityEvaluation, Agent } from '../types';
 
 export class ReportService {
   /**
@@ -41,58 +41,6 @@ export class ReportService {
       + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
 
     this.downloadFile(csvContent, `KALA_Export_Appels_${Date.now()}.csv`);
-  }
-
-  /**
-   * Export CSV des résultats scientifiques de débruitage et d'ASR (Mémoire Master)
-   */
-  public static exportBenchmarksToCSV(
-    samples: BenchmarkSample[], 
-    configs: ExperimentConfiguration[]
-  ): void {
-    const headers = [
-      "Echantillon",
-      "Type_Bruit",
-      "SNR_Entree_dB",
-      "Configuration_Pipeline",
-      "Modele_ASR",
-      "Methode_Debruitage",
-      "WER_Pourcent",
-      "CER_Pourcent",
-      "RTF",
-      "Score_Confiance",
-      "Substitutions",
-      "Suppressions",
-      "Insertions"
-    ];
-
-    const rows: string[] = [];
-
-    samples.forEach(sample => {
-      sample.results.forEach(res => {
-        const cfg = configs.find(c => c.id === res.configId);
-        rows.push([
-          `"${sample.sampleName}"`,
-          `"${sample.noiseType}"`,
-          sample.inputSnrDb,
-          `"${res.configName}"`,
-          `"${cfg?.asrModel || 'N/A'}"`,
-          `"${cfg?.denoiserAlgorithm || 'N/A'}"`,
-          res.wer,
-          res.cer,
-          res.rtf,
-          res.confidenceScore,
-          res.wordSubstitutions,
-          res.wordDeletions,
-          res.wordInsertions
-        ].join(';'));
-      });
-    });
-
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
-      + [headers.join(';'), ...rows].join('\n');
-
-    this.downloadFile(csvContent, `KALA_Benchmark_Scientifique_${Date.now()}.csv`);
   }
 
   /**

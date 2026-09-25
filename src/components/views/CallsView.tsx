@@ -7,6 +7,8 @@ import { storageService } from '../../services/storageService';
 import { ReportService } from '../../services/reportService';
 import { AudioUploadModal } from '../common/AudioUploadModal';
 import { CallDetailModal } from '../common/CallDetailModal';
+import { RealCallsPanel } from '../common/RealCallsPanel';
+import { DemoDataBadge } from '../common/DemoDataBanner';
 import { Call, UserRole, CallStatus } from '../../types';
 
 interface CallsViewProps {
@@ -18,10 +20,10 @@ interface CallsViewProps {
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   A_ANALYSER:           { label: 'À Analyser',           color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
-  TRANSCRIT:            { label: 'Transcrit',             color: '#60a5fa', bg: 'rgba(96,165,250,0.12)'  },
-  EVALUE:               { label: 'Évalué',                color: '#34d399', bg: 'rgba(52,211,153,0.12)'  },
-  A_REVOIR:             { label: 'À Revoir',              color: '#fbbf24', bg: 'rgba(251,191,36,0.12)'  },
-  COACHING_RECOMMANDE:  { label: 'Coaching Recommandé',   color: '#f87171', bg: 'rgba(248,113,113,0.12)' },
+  TRANSCRIT:            { label: 'Transcrit',             color: '#9fb7d6', bg: 'rgba(96,165,250,0.12)'  },
+  EVALUE:               { label: 'Évalué',                color: '#6db89a', bg: 'rgba(52,211,153,0.12)'  },
+  A_REVOIR:             { label: 'À Revoir',              color: '#d9ae55', bg: 'rgba(251,191,36,0.12)'  },
+  COACHING_RECOMMANDE:  { label: 'Coaching Recommandé',   color: '#d98383', bg: 'rgba(248,113,113,0.12)' },
 };
 
 const StatusBadge: React.FC<{ status?: CallStatus }> = ({ status }) => {
@@ -50,6 +52,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
   const [selectedResolution, setSelectedResolution] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
+  const [realCallsRefresh, setRealCallsRefresh] = useState<number>(0);
   const [selectedCall, setSelectedCall] = useState<Call | null>(() => {
     if (initialCallId) {
       return calls.find(c => c.id === initialCallId) || null;
@@ -101,15 +104,23 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-      
+
+      {/* Appels réellement transcrits (backend SQLite), distincts des données de démonstration */}
+      <RealCallsPanel refreshKey={realCallsRefresh} />
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Appels de démonstration</h3>
+        <DemoDataBadge />
+      </div>
+
       {/* Bandeau de statuts rapides */}
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <button
           onClick={() => setSelectedStatus('ALL')}
           style={{
             padding: '7px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
-            background: selectedStatus === 'ALL' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${selectedStatus === 'ALL' ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.1)'}`,
+            background: selectedStatus === 'ALL' ? 'rgba(74, 111, 165,0.2)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${selectedStatus === 'ALL' ? 'rgba(74, 111, 165,0.5)' : 'rgba(255,255,255,0.1)'}`,
             color: selectedStatus === 'ALL' ? 'var(--primary-light)' : 'var(--text-muted)',
             cursor: 'pointer', transition: 'all 0.2s'
           }}
@@ -231,10 +242,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
       <AudioUploadModal 
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
-        onSuccess={(newCall) => {
-          onSelectCall(newCall.id);
-          onNavigate('transcriptions');
-        }}
+        onSaved={() => setRealCallsRefresh(k => k + 1)}
       />
 
       {/* Modal Fiche Appel Détaillée */}
@@ -280,7 +288,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
               <tr 
                 key={c.id}
                 style={{ cursor: 'pointer', transition: 'background 0.15s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.06)')}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(74, 111, 165,0.06)')}
                 onMouseLeave={e => (e.currentTarget.style.background = '')}
                 onClick={() => setSelectedCall(c)}
               >
@@ -310,7 +318,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
                   <StatusBadge status={c.status} />
                   {c.isUrgentReviewRequired && (
                     <div style={{ marginTop: '3px' }}>
-                      <span style={{ fontSize: '10px', color: '#f87171', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      <span style={{ fontSize: '10px', color: '#d98383', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '2px' }}>
                         <ShieldAlert size={10} /> Urgent
                       </span>
                     </div>
@@ -357,7 +365,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
                       className="btn btn-secondary btn-sm"
                       onClick={() => setSelectedCall(c)}
                       title="Ouvrir la fiche appel détaillée"
-                      style={{ background: 'rgba(99,102,241,0.12)', borderColor: 'rgba(99,102,241,0.3)', color: 'var(--primary-light)' }}
+                      style={{ background: 'rgba(74, 111, 165,0.12)', borderColor: 'rgba(74, 111, 165,0.3)', color: 'var(--primary-light)' }}
                     >
                       <Eye size={12} />
                     </button>

@@ -49,3 +49,9 @@ lerna-debug.log*
 *.db-shm
 backend/dist/
 backend/node_modules/
+
+# Audio conservé uniquement sur demande explicite (option keep_audio)
+backend/storage/
+
+# Captures et enregistrement d'un outil tiers (données personnelles) : jamais versionnés
+AUDIOLIZ/

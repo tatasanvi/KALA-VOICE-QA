@@ -85,7 +85,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
           borderRadius: 'var(--radius-xl)',
           width: '100%',
           maxWidth: '520px',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
           overflow: 'hidden'
         }}
         onClick={e => e.stopPropagation()}
@@ -97,7 +97,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.1))'
+          background: 'rgba(255, 255, 255, 0.03)'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -160,7 +160,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
                       alignItems: 'center',
                       gap: '8px',
                       padding: '8px 10px',
-                      background: isSelected ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255,255,255,0.04)',
+                      background: isSelected ? 'rgba(74, 111, 165, 0.2)' : 'rgba(255,255,255,0.04)',
                       border: `1px solid ${isSelected ? 'var(--primary)' : 'var(--border-subtle)'}`,
                       borderRadius: 'var(--radius-md)',
                       cursor: 'pointer',

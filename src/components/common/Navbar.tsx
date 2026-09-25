@@ -105,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             border: `1px solid ${isOnline ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}`,
             fontSize: '11px',
             fontWeight: 600,
-            color: isOnline ? '#34d399' : '#f87171'
+            color: isOnline ? '#6db89a' : '#d98383'
           }}
           title={isOnline ? "API Backend Express & Base SQLite connectés (:8000)" : "Mode Fallback Local Storage actif"}
         >
@@ -114,10 +114,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Statut Moteur IA & Débruiteur */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-          <Sparkles size={14} color="#60a5fa" />
-          <span style={{ fontSize: '11.5px', color: '#93c5fd', fontWeight: 600 }}>
-            ASR & Dénosing : <strong style={{ color: '#ffffff' }}>KALA-Whisper-v3</strong> (+11.2 dB SNR)
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(74, 111, 165, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(74, 111, 165, 0.2)' }}>
+          <Sparkles size={14} color="#9fb7d6" />
+          <span style={{ fontSize: '11.5px', color: '#b4c6de', fontWeight: 600 }}>
+            ASR : <strong style={{ color: '#ffffff' }}>non branché</strong> (démonstration)
           </span>
         </div>
 
@@ -170,7 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               background: 'rgba(15, 23, 42, 0.95)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: 'var(--radius-lg)',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
               backdropFilter: 'blur(16px)',
               zIndex: 1000,
               overflow: 'hidden'
@@ -183,13 +183,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 alignItems: 'center'
               }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Bell size={14} color="#60a5fa" />
+                  <Bell size={14} color="#9fb7d6" />
                   <span>Alertes Opérationnelles</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button 
                     onClick={() => storageService.markAllNotificationsAsRead()}
-                    style={{ background: 'none', border: 'none', color: '#60a5fa', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    style={{ background: 'none', border: 'none', color: '#9fb7d6', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
                   >
                     <Check size={12} />
                     Tout marquer lu
@@ -216,7 +216,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       style={{
                         padding: '12px 16px',
                         borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                        background: n.read ? 'transparent' : 'rgba(99, 102, 241, 0.08)',
+                        background: n.read ? 'transparent' : 'rgba(74, 111, 165, 0.08)',
                         cursor: 'pointer',
                         transition: 'background 0.2s',
                         display: 'flex',
@@ -230,8 +230,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                           fontWeight: 700, 
                           padding: '1px 6px', 
                           borderRadius: '4px',
-                          background: n.priority === 'HAUTE' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                          color: n.priority === 'HAUTE' ? '#f87171' : '#60a5fa'
+                          background: n.priority === 'HAUTE' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(74, 111, 165, 0.2)',
+                          color: n.priority === 'HAUTE' ? '#d98383' : '#9fb7d6'
                         }}>
                           {n.priority}
                         </span>

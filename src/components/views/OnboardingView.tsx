@@ -47,7 +47,7 @@ export const OnboardingView: React.FC = () => {
     <div style={{
       minHeight: '100vh',
       width: '100%',
-      background: 'radial-gradient(ellipse at 50% -20%, rgba(59, 130, 246, 0.18) 0%, rgba(15, 23, 42, 0.6) 45%, #050505 85%)',
+      background: 'rgba(255, 255, 255, 0.03)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -61,13 +61,13 @@ export const OnboardingView: React.FC = () => {
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: 'var(--radius-xl)',
         padding: '36px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
         backdropFilter: 'blur(20px)'
       }}>
         {/* Stepper Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
           <div>
-            <div style={{ fontSize: '11px', color: '#60a5fa', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '11px', color: '#9fb7d6', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
               Étape {step} sur 3 • Bienvenue sur KALA VOICE QA
             </div>
             <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '4px 0 0 0' }}>
@@ -85,7 +85,7 @@ export const OnboardingView: React.FC = () => {
                   width: '28px',
                   height: '6px',
                   borderRadius: '3px',
-                  background: s <= step ? '#3b82f6' : 'rgba(255, 255, 255, 0.1)',
+                  background: s <= step ? '#4a6fa5' : 'rgba(255, 255, 255, 0.1)',
                   transition: 'background 0.3s'
                 }}
               />
@@ -131,8 +131,8 @@ export const OnboardingView: React.FC = () => {
                       borderRadius: '50%',
                       objectFit: 'cover',
                       cursor: 'pointer',
-                      border: `2px solid ${selectedAvatar === av ? '#3b82f6' : 'transparent'}`,
-                      boxShadow: selectedAvatar === av ? '0 0 12px rgba(59, 130, 246, 0.5)' : 'none',
+                      border: `2px solid ${selectedAvatar === av ? '#4a6fa5' : 'transparent'}`,
+                      boxShadow: selectedAvatar === av ? '0 0 0 2px rgba(148, 163, 184, 0.6)' : 'none',
                       transition: 'all 0.2s'
                     }}
                   />
@@ -223,7 +223,7 @@ export const OnboardingView: React.FC = () => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Bell size={16} color="#60a5fa" />
+                  <Bell size={16} color="#9fb7d6" />
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 600 }}>Alertes Critiques en Direct</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Notifier dès qu'un appel obtient un score inférieur à 75%</div>
@@ -233,13 +233,13 @@ export const OnboardingView: React.FC = () => {
                   type="checkbox"
                   checked={notificationsEnabled}
                   onChange={(e) => setNotificationsEnabled(e.target.checked)}
-                  style={{ accentColor: '#3b82f6', width: '16px', height: '16px', cursor: 'pointer' }}
+                  style={{ accentColor: '#4a6fa5', width: '16px', height: '16px', cursor: 'pointer' }}
                 />
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Sparkles size={16} color="#c084fc" />
+                  <Sparkles size={16} color="#b3aed1" />
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 600 }}>Assistance IA Pré-remplie</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Afficher les suggestions d'évaluation automatique</div>
@@ -249,7 +249,7 @@ export const OnboardingView: React.FC = () => {
                   type="checkbox"
                   checked={soundFeedback}
                   onChange={(e) => setSoundFeedback(e.target.checked)}
-                  style={{ accentColor: '#a855f7', width: '16px', height: '16px', cursor: 'pointer' }}
+                  style={{ accentColor: '#7d7aa6', width: '16px', height: '16px', cursor: 'pointer' }}
                 />
               </div>
             </div>
@@ -267,7 +267,7 @@ export const OnboardingView: React.FC = () => {
                   alignItems: 'center',
                   gap: '8px',
                   fontWeight: 700,
-                  boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)'
+                  boxShadow: 'none'
                 }}
               >
                 <Check size={16} />

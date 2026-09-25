@@ -92,8 +92,8 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
 
         {activePlan && (
           <div style={{ 
-            background: 'rgba(59, 130, 246, 0.08)', 
-            border: '1px solid rgba(59, 130, 246, 0.3)', 
+            background: 'rgba(74, 111, 165, 0.08)', 
+            border: '1px solid rgba(74, 111, 165, 0.3)', 
             borderRadius: 'var(--radius-lg)', 
             padding: '14px 20px', 
             minWidth: '240px' 
@@ -116,10 +116,10 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
 
       {/* Cartes Forces & Axes d'Amélioration Détectés par l'IA */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '18px' }}>
-        <div className="glass-panel" style={{ borderLeft: '4px solid #10b981' }}>
+        <div className="glass-panel" style={{ borderLeft: '4px solid #3f9a7a' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-            <Award size={18} color="#34d399" />
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#34d399' }}>FORCES DE L'AGENT</h3>
+            <Award size={18} color="#6db89a" />
+            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#6db89a' }}>FORCES DE L'AGENT</h3>
           </div>
           <ul style={{ paddingLeft: '18px', fontSize: '13.5px', lineHeight: 1.6, color: '#d1fae5' }}>
             {selectedAgent.strengths.map((str, i) => (
@@ -130,8 +130,8 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
 
         <div className="glass-panel" style={{ borderLeft: '4px solid #f59e0b' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-            <Target size={18} color="#fbbf24" />
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fbbf24' }}>AXES D'AMÉLIORATION CIBLÉS</h3>
+            <Target size={18} color="#d9ae55" />
+            <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#d9ae55' }}>AXES D'AMÉLIORATION CIBLÉS</h3>
           </div>
           <ul style={{ paddingLeft: '18px', fontSize: '13.5px', lineHeight: 1.6, color: '#fef3c7' }}>
             {selectedAgent.improvementAxes.map((axe, i) => (
@@ -170,7 +170,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
           {/* Grille des Objectifs avec colonnes métier */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {activePlan.objectives.map((obj) => {
-              const statusColor = obj.status === 'VALIDÉ' ? '#34d399' : obj.status === 'EN_COURS' ? '#60a5fa' : '#fbbf24';
+              const statusColor = obj.status === 'VALIDÉ' ? '#6db89a' : obj.status === 'EN_COURS' ? '#9fb7d6' : '#d9ae55';
               const statusBg = obj.status === 'VALIDÉ' ? 'rgba(52,211,153,0.12)' : obj.status === 'EN_COURS' ? 'rgba(96,165,250,0.12)' : 'rgba(251,191,36,0.12)';
               const statusLabel = obj.status === 'VALIDÉ' ? '✅ Objectif Atteint' : obj.status === 'EN_COURS' ? '🔄 En Cours' : '📋 À Faire';
               return (
@@ -211,13 +211,13 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
                   }}>
                     <div>
                       <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Niveau initial</div>
-                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#f87171' }}>{obj.currentLevel}</div>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#d98383' }}>{obj.currentLevel}</div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <ArrowRight size={12} color="var(--text-muted)" style={{ marginTop: '12px' }} />
                       <div>
                         <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Niveau cible</div>
-                        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#34d399' }}>{obj.targetLevel}</div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#6db89a' }}>{obj.targetLevel}</div>
                       </div>
                     </div>
                     {obj.action && (
@@ -244,7 +244,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
                     )}
                     {obj.resultat && (
                       <div>
-                        <div style={{ fontSize: '10px', color: '#34d399', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Résultat</div>
+                        <div style={{ fontSize: '10px', color: '#6db89a', textTransform: 'uppercase', fontWeight: 700, marginBottom: '2px' }}>Résultat</div>
                         <div style={{ fontSize: '12px', color: '#d1fae5', fontWeight: 600 }}>{obj.resultat}</div>
                       </div>
                     )}
@@ -252,8 +252,8 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
 
                   {/* Exercices suggérés */}
                   {obj.suggestedExercises.length > 0 && (
-                    <div style={{ background: 'rgba(99,102,241,0.05)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', borderLeft: '2px solid var(--primary-light)' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#93c5fd', marginBottom: '3px' }}>Exercices & Simulations :</div>
+                    <div style={{ background: 'rgba(74, 111, 165,0.05)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', borderLeft: '2px solid var(--primary-light)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: '#b4c6de', marginBottom: '3px' }}>Exercices & Simulations :</div>
                       <ul style={{ paddingLeft: '14px', fontSize: '12px', color: '#e2e8f0', lineHeight: 1.5, margin: 0 }}>
                         {obj.suggestedExercises.map((ex, i) => (
                           <li key={i}>{ex}</li>
@@ -322,7 +322,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
                     <td style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
                       {sess.preTrainingQualityScore}%
                     </td>
-                    <td style={{ fontWeight: 700, color: sess.postTrainingQualityScore ? '#34d399' : 'var(--text-muted)' }}>
+                    <td style={{ fontWeight: 700, color: sess.postTrainingQualityScore ? '#6db89a' : 'var(--text-muted)' }}>
                       {sess.postTrainingQualityScore ? `${sess.postTrainingQualityScore}%` : 'En attente'}
                     </td>
                     <td>

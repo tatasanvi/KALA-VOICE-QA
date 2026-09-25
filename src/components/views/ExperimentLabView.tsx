@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { ExperimentService, WerDetailedResult } from '../../services/experimentService';
-import { ReportService } from '../../services/reportService';
 import { UserRole } from '../../types';
 
 interface ExperimentLabViewProps {
@@ -34,45 +33,37 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
       {/* En-tête Scientifique Académique */}
-      <div className="glass-panel" style={{ border: '1px solid rgba(192, 132, 252, 0.4)', background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%)' }}>
+      <div className="glass-panel" style={{ border: '1px solid rgba(148, 163, 184, 0.4)', background: 'rgba(30, 27, 75, 0.8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: 'var(--radius-md)', background: '#7d7aa6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FlaskConical size={20} color="#fff" />
               </div>
               <div>
                 <span className="badge badge-purple" style={{ fontSize: '11px', marginBottom: '2px' }}>
                   DÉMONSTRATEUR SCIENTIFIQUE • MÉMOIRE MASTER IA & BIG DATA
                 </span>
-                <h1 style={{ fontSize: '22px', fontWeight: 900, color: '#f3e8ff' }}>
+                <h1 style={{ fontSize: '22px', fontWeight: 900, color: '#e5e9f0' }}>
                   Laboratoire d'Évaluation ASR en Milieux Bruités
                 </h1>
               </div>
             </div>
-            <p style={{ fontSize: '13px', color: '#c4b5fd', marginTop: '8px', maxWidth: '850px', lineHeight: 1.5 }}>
-              Ce module scientifique compare de manière reproductible 4 configurations de chaînes de traitement audio. Les métriques sont calculées selon les protocoles standards de l'évaluation ASR (Word Error Rate, Character Error Rate, Real-Time Factor et rapport signal/bruit).
+            <p style={{ fontSize: '13px', color: '#b7c0cf', marginTop: '8px', maxWidth: '850px', lineHeight: 1.5 }}>
+              Ce module présente 4 configurations de chaînes de traitement envisagées et des exemples textuels illustrant le calcul du WER. Aucune de ces configurations n'a encore été mesurée sur de l'audio réel : seuls les WER et CER calculés à partir des textes affichés sont réels.
             </p>
           </div>
 
-          <button 
-            className="btn btn-secondary btn-sm"
-            onClick={() => ReportService.exportBenchmarksToCSV(samples, configs)}
-            style={{ background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(192, 132, 252, 0.4)' }}
-          >
-            <Download size={14} color="#c084fc" />
-            <span>Exporter Résultats (CSV / LaTeX)</span>
-          </button>
         </div>
       </div>
 
       {/* Tableau Récapitulatif Scientifique : 4 Configurations en Compétition */}
       <div className="glass-panel">
         <h3 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '4px' }}>
-          Tableau de Synthèse des Performances Algorithmiques
+          Configurations de pipeline envisagées
         </h3>
         <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-          Moyenne mesurée sur le banc de test d'enregistrements téléphoniques dégradés (SNR de 6 à 15 dB).
+          Aucune mesure réelle n'a encore été effectuée pour ces configurations : aucun WER, CER, temps de calcul ni gain de SNR n'est affiché.
         </p>
 
         <div className="data-table-container">
@@ -82,16 +73,12 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
                 <th>Configuration de Pipeline</th>
                 <th>Prétraitement & Débruitage</th>
                 <th>Modèle Acoustique / ASR</th>
-                <th>WER (%)</th>
-                <th>CER (%)</th>
-                <th>Temps (RTF)</th>
-                <th>Gain SNR</th>
-                <th>Amélioration WER</th>
+                <th>Mesure</th>
               </tr>
             </thead>
             <tbody>
               {configs.map(cfg => (
-                <tr key={cfg.id} style={{ background: cfg.category === 'PIPELINE_COMPLET_KALA' ? 'rgba(59, 130, 246, 0.08)' : 'transparent' }}>
+                <tr key={cfg.id} style={{ background: cfg.category === 'PIPELINE_COMPLET_KALA' ? 'rgba(74, 111, 165, 0.08)' : 'transparent' }}>
                   <td>
                     <div style={{ fontWeight: 700, color: cfg.category === 'PIPELINE_COMPLET_KALA' ? 'var(--primary-light)' : 'var(--text-primary)' }}>
                       {cfg.name}
@@ -105,28 +92,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
                     {cfg.asrModel}
                   </td>
                   <td>
-                    <span className={`badge ${cfg.averageWer <= 10 ? 'badge-green' : cfg.averageWer <= 20 ? 'badge-amber' : 'badge-red'}`} style={{ fontSize: '13px', fontWeight: 800 }}>
-                      {cfg.averageWer} %
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: 600 }}>
-                    {cfg.averageCer} %
-                  </td>
-                  <td style={{ fontFamily: 'JetBrains Mono', fontSize: '12px' }}>
-                    {cfg.estimatedRtf}x
-                  </td>
-                  <td>
-                    <span className="badge badge-purple">+{cfg.snrImprovementDb} dB</span>
-                  </td>
-                  <td>
-                    {cfg.category === 'BASELINE' ? (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Référence</span>
-                    ) : (
-                      <span className="badge badge-green" style={{ fontWeight: 800 }}>
-                        <TrendingUp size={11} style={{ marginRight: '2px' }} />
-                        -{Math.round(((configs[0].averageWer - cfg.averageWer) / configs[0].averageWer) * 100)}% d'erreurs
-                      </span>
-                    )}
+                    <span className="badge badge-gray">Non mesurée</span>
                   </td>
                 </tr>
               ))}
@@ -140,10 +106,10 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h3 style={{ fontSize: '16px', fontWeight: 800 }}>
-              Analyse Qualitative d'Erreurs par Échantillon Audio
+              Exemples textuels d'erreurs de transcription
             </h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Sélectionnez un cas d'étude audio pour visualiser les substitutions, suppressions et insertions mot-à-mot.
+              Textes d'exemple rédigés à la main, pas des sorties d'un modèle ASR. Le WER et le CER ci-dessous sont calculés en direct à partir de ces textes.
             </p>
           </div>
 
@@ -164,14 +130,11 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
 
         {/* Vérité Terrain (Ground Truth) */}
         <div style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: 'var(--radius-md)', padding: '14px 18px', marginBottom: '20px' }}>
-          <div style={{ fontSize: '11px', color: '#34d399', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
-            Vérité Terrain de Référence (Ground Truth humaine annotée) :
+          <div style={{ fontSize: '11px', color: '#6db89a', textTransform: 'uppercase', fontWeight: 800, marginBottom: '4px' }}>
+            Texte de référence (exemple) :
           </div>
           <div style={{ fontSize: '14.5px', fontWeight: 600, color: '#f0fdf4' }}>
             « {activeSample.groundTruthText} »
-          </div>
-          <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '6px' }}>
-            Type de perturbation : <strong>{activeSample.noiseType}</strong> • SNR d'entrée : <strong>{activeSample.inputSnrDb} dB</strong>
           </div>
         </div>
 
@@ -185,7 +148,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
                 key={res.configId}
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.02)', 
-                  border: res.configId === 'cfg-kala-full' ? '1px solid rgba(59, 130, 246, 0.4)' : '1px solid var(--border-subtle)',
+                  border: res.configId === 'cfg-kala-full' ? '1px solid rgba(74, 111, 165, 0.4)' : '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-md)',
                   padding: '16px 20px'
                 }}
@@ -201,12 +164,10 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span className={`badge ${res.wer === 0 ? 'badge-green' : res.wer <= 15 ? 'badge-amber' : 'badge-red'}`} style={{ fontWeight: 800 }}>
-                      WER : {res.wer}%
+                    <span className={`badge ${detailed.wer === 0 ? 'badge-green' : detailed.wer <= 15 ? 'badge-amber' : 'badge-red'}`} style={{ fontWeight: 800 }}>
+                      WER calculé : {detailed.wer}%
                     </span>
-                    <span className="badge badge-gray">CER : {res.cer}%</span>
-                    <span className="badge badge-gray">Temps : {res.processingTimeMs} ms</span>
-                    <span className="badge badge-purple">Confiance : {res.confidenceScore}%</span>
+                    <span className="badge badge-gray">CER calculé : {detailed.cer}%</span>
                   </div>
                 </div>
 
@@ -250,8 +211,8 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
       </div>
 
       {/* Sandbox Expérimental Interactif (Démonstration Directe Devant le Jury) */}
-      <div className="glass-panel" style={{ borderLeft: '4px solid #8b5cf6' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#c084fc', marginBottom: '4px' }}>
+      <div className="glass-panel" style={{ borderLeft: '4px solid #7d7aa6' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#b3aed1', marginBottom: '4px' }}>
           Calculateur Dynamique de WER & Levenshtein en Temps Réel
         </h3>
         <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '16px' }}>
@@ -260,7 +221,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px' }}>
           <div>
-            <label style={{ fontSize: '12px', fontWeight: 700, color: '#34d399', display: 'block', marginBottom: '4px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#6db89a', display: 'block', marginBottom: '4px' }}>
               Phrase de Référence (Vérité Terrain) :
             </label>
             <textarea 
@@ -279,7 +240,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
           </div>
 
           <div>
-            <label style={{ fontSize: '12px', fontWeight: 700, color: '#60a5fa', display: 'block', marginBottom: '4px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#9fb7d6', display: 'block', marginBottom: '4px' }}>
               Hypothèse ASR Prédite :
             </label>
             <textarea 
@@ -306,10 +267,10 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
         {liveResult && (
           <div style={{ background: 'rgba(0,0,0,0.4)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '18px', fontWeight: 900, color: liveResult.wer === 0 ? '#34d399' : '#fbbf24' }}>
+              <span style={{ fontSize: '18px', fontWeight: 900, color: liveResult.wer === 0 ? '#6db89a' : '#d9ae55' }}>
                 WER : {liveResult.wer}%
               </span>
-              <span style={{ fontSize: '15px', fontWeight: 700, color: '#60a5fa' }}>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: '#9fb7d6' }}>
                 CER : {liveResult.cer}%
               </span>
               <span className="badge badge-gray">Substitutions : {liveResult.substitutions}</span>
@@ -320,7 +281,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
             <div style={{ fontSize: '13px', lineHeight: 1.8 }}>
               {liveResult.alignment.map((tok, idx) => {
                 if (tok.type === 'CORRECT') return <span key={idx} className="diff-token diff-correct">{tok.hypothesisWord} </span>;
-                if (tok.type === 'SUBSTITUTION') return <span key={idx} className="diff-token diff-substitution">[{tok.referenceWord} $\rightarrow$ {tok.hypothesisWord}] </span>;
+                if (tok.type === 'SUBSTITUTION') return <span key={idx} className="diff-token diff-substitution">[{tok.referenceWord} → {tok.hypothesisWord}] </span>;
                 if (tok.type === 'DELETION') return <span key={idx} className="diff-token diff-deletion">[-{tok.referenceWord}] </span>;
                 return <span key={idx} className="diff-token diff-insertion">[+{tok.hypothesisWord}] </span>;
               })}

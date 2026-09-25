@@ -74,152 +74,6 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
     alert('✅ Paramètres CTI enregistrés avec succès !');
   };
 
-  // Simuler un appel entrant CTI en temps réel
-  const handleSimulateCtiCall = () => {
-    setIsSimulating(true);
-    const ts = new Date().toLocaleTimeString();
-    setSimulationLog(prev => [
-      `[${ts}] 📞 Signal RING entrant détecté via Webhook CTI (${ctiProvider})...`,
-      ...prev
-    ]);
-
-    setTimeout(() => {
-      const callNum = `CTI-IN-${Math.floor(1000 + Math.random() * 9000)}`;
-      const assignedAgent = agents[Math.floor(Math.random() * agents.length)];
-      
-      setSimulationLog(prev => [
-        `[${new Date().toLocaleTimeString()}] ✅ Décroché par ${assignedAgent.name} (Poste 104) — Stream audio SIP capturé (G.711 / 16kHz)`,
-        `[${new Date().toLocaleTimeString()}] 🎙️ Pipeline Débruitage KALA actif : WER estimé ~4.1%`,
-        `[${new Date().toLocaleTimeString()}] 💾 Appel ${callNum} enregistré et archivé avec succès`,
-        ...prev
-      ]);
-
-      // Ajouter l'appel simulé
-      storageService.addCall({
-        id: `call-cti-${Date.now()}`,
-        callNumber: callNum,
-        agentId: assignedAgent.id,
-        agentName: assignedAgent.name,
-        teamId: assignedAgent.teamId,
-        campaignId: assignedAgent.campaignId,
-        campaignName: assignedAgent.campaignName,
-        customerPhoneMasked: '+33 6 •• •• 88 12',
-        customerNameMasked: 'Mme Sophie Bernard (Anonymisé)',
-        callDate: new Date().toISOString().substring(0, 10),
-        durationSeconds: 145,
-        direction: 'ENTRANT',
-        callType: 'SUPPORT_TECHNIQUE',
-        audioMetadata: {
-          id: `audio-${callNum}`,
-          filename: `${callNum}.wav`,
-          fileSizeBytes: 1840000,
-          durationSeconds: 145,
-          sampleRateHz: 16000,
-          channels: 1,
-          snrDb: 18.4,
-          estimatedNoiseLevel: 'MODÉRÉ',
-          noiseType: 'PLATEAU_CALL_CENTER',
-          audioQualityScore: 88,
-          waveformSamples: [0.1, 0.4, 0.7, 0.5, 0.8, 0.6, 0.3, 0.7, 0.9, 0.4]
-        },
-        transcription: {
-          id: `trans-${callNum}`,
-          callId: `call-cti-${Date.now()}`,
-          audioFileId: `audio-${callNum}`,
-          versionNumber: 1,
-          isLatest: true,
-          asrModelUsed: 'KALA-Denoiser+Whisper-Large-v3',
-          totalWords: 45,
-          processingTimeMs: 820,
-          globalConfidenceScore: 94,
-          noiseRobustnessScore: 92,
-          rawText: `Bonjour, ${assignedAgent.name} à votre écoute, en quoi puis-je vous être utile ?`,
-          createdAt: new Date().toISOString().substring(0, 10),
-          segments: [
-            {
-              id: 'cti-seg-1',
-              transcriptionId: `trans-${callNum}`,
-              speaker: 'AGENT',
-              speakerLabel: assignedAgent.name,
-              startTime: 1.0,
-              endTime: 4.5,
-              text: `Bonjour, ${assignedAgent.name} à votre écoute, en quoi puis-je vous être utile ?`,
-              confidenceScore: 0.96,
-              isNoisyPassage: false,
-              noiseImpactLevel: 'AUCUN',
-              hasBeenEdited: false
-            },
-            {
-              id: 'cti-seg-2',
-              transcriptionId: `trans-${callNum}`,
-              speaker: 'CLIENT',
-              speakerLabel: 'Client',
-              startTime: 5.2,
-              endTime: 12.0,
-              text: "Bonjour, je vous contacte suite à un message automatique reçu ce matin.",
-              confidenceScore: 0.93,
-              isNoisyPassage: false,
-              noiseImpactLevel: 'AUCUN',
-              hasBeenEdited: false
-            },
-            {
-              id: 'cti-seg-3',
-              transcriptionId: `trans-${callNum}`,
-              speaker: 'AGENT',
-              speakerLabel: assignedAgent.name,
-              startTime: 12.8,
-              endTime: 22.0,
-              text: "Je vous rassure, je prends en charge votre demande immédiatement.",
-              confidenceScore: 0.95,
-              isNoisyPassage: false,
-              noiseImpactLevel: 'AUCUN',
-              hasBeenEdited: false
-            }
-          ]
-        },
-        analytics: {
-          id: `analytics-${callNum}`,
-          callId: `call-cti-${Date.now()}`,
-          summary: `Appel reçu en direct via le connecteur CTI ${ctiProvider}. Prise en charge rapide par ${assignedAgent.name}.`,
-          contactIntent: "Renseignement suite à message automatique",
-          mainTopics: ["Renseignement", "Notification reçue"],
-          keywords: ['message', 'suivi', 'prise en charge'],
-          sentimentAgent: 'POSITIF',
-          sentimentClient: 'POSITIF',
-          sentimentTimeline: [
-            { minute: 0.5, agentSentiment: 0.8, clientSentiment: 0.4 },
-            { minute: 1.0, agentSentiment: 0.9, clientSentiment: 0.8 }
-          ],
-          objectionsDetected: [],
-          unresolvedIssues: [],
-          resolutionStatus: 'RÉSOLU',
-          actionItemsRequested: [],
-          importantInformation: [],
-          criticalMoments: [],
-          agentTalkTimeSeconds: 80,
-          clientTalkTimeSeconds: 65,
-          talkToListenRatio: 1.2,
-          interruptionCount: 0,
-          totalSilenceSeconds: 2,
-          speechRateWpm: 140,
-          detectedCommunicationIssues: [],
-          aiDisclaimer: "Analyse générée automatiquement via le flux CTI KALA à titre indicatif."
-        },
-        isUrgentReviewRequired: false,
-        qualityScore: 92
-      });
-
-      storageService.addNotification({
-        type: 'SYSTEM',
-        title: `Nouvel appel capturé CTI : ${callNum}`,
-        message: `Prise en charge par ${assignedAgent.name} via ${ctiProvider}. Transcription disponible.`,
-        targetView: 'calls',
-        priority: 'INFO'
-      });
-
-      setIsSimulating(false);
-    }, 1800);
-  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -308,7 +162,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Cible QA</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#34d399' }}>{camp.targetQualityScore}%</div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#6db89a' }}>{camp.targetQualityScore}%</div>
                   </div>
                 </div>
               </div>
@@ -438,7 +292,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
               }}>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600 }}>Analyse & Transcription Automatique Immédiate</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Déclenche Whisper-v3 + scoring IA dès la fin de l'appel.</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Déclencherait Whisper-small (non branché en démonstration) dès la fin de l'appel.</div>
                 </div>
                 <input 
                   type="checkbox"
@@ -459,22 +313,22 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
           <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Wifi size={18} color="#34d399" />
+                <Wifi size={18} color="#6db89a" />
                 <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>Simulateur de Flux Téléphonique Live</h3>
               </div>
               <button 
                 className="btn btn-primary btn-sm"
-                onClick={handleSimulateCtiCall}
-                disabled={isSimulating}
+                disabled
+                title="La simulation d'appels est désactivée : elle fabriquait des appels et des scores fictifs"
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                <RefreshCw size={13} className={isSimulating ? 'spin' : ''} />
-                <span>{isSimulating ? 'Réception en cours...' : 'Simuler Appel Entrant'}</span>
+                <RefreshCw size={13} />
+                <span>Indisponible en démonstration</span>
               </button>
             </div>
 
             <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-              Injecte un appel entrant simulé avec ses paquets RTP et déclenche le pipeline complet d'évaluation.
+              Simulation désactivée : aucun appel, aucune transcription ni aucun score n'est généré depuis ce panneau.
             </p>
 
             {/* Console de logs */}
@@ -486,7 +340,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
               padding: '14px',
               fontFamily: 'JetBrains Mono, monospace',
               fontSize: '11.5px',
-              color: '#a7f3d0',
+              color: '#b9d6c8',
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
@@ -495,7 +349,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
             }}>
               {simulationLog.length === 0 ? (
                 <div style={{ color: 'var(--text-muted)', textAlign: 'center', margin: 'auto' }}>
-                  En attente d'événements CTI... Cliquez sur "Simuler Appel Entrant" pour tester le flux.
+                  Aucun événement CTI. La simulation d'appels est indisponible en démonstration.
                 </div>
               ) : (
                 simulationLog.map((log, idx) => (
@@ -518,7 +372,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
             style={{
               background: 'var(--surface-2)', border: '1px solid var(--border-active)',
               borderRadius: 'var(--radius-xl)', width: '100%', maxWidth: '520px',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.6)', overflow: 'hidden'
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflow: 'hidden'
             }}
             onClick={e => e.stopPropagation()}
           >

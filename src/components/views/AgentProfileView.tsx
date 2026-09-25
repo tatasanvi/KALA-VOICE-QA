@@ -83,10 +83,10 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
 
           <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '12px 20px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Score Qualité Moyen</div>
-            <div style={{ fontSize: '26px', fontWeight: 900, color: '#34d399', marginTop: '2px' }}>{currentAgent.averageQualityScore}%</div>
+            <div style={{ fontSize: '26px', fontWeight: 900, color: '#6db89a', marginTop: '2px' }}>{currentAgent.averageQualityScore}%</div>
           </div>
 
-          <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '12px 20px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+          <div style={{ background: 'rgba(74, 111, 165, 0.1)', border: '1px solid rgba(74, 111, 165, 0.3)', padding: '12px 20px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Taux de Conformité</div>
             <div style={{ fontSize: '26px', fontWeight: 900, color: 'var(--primary-light)', marginTop: '2px' }}>{currentAgent.complianceRate}%</div>
           </div>
@@ -95,7 +95,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
 
       {/* Plan de Coaching Actif (si présent) */}
       {coachingPlan && (
-        <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+        <div className="glass-panel" style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(74, 111, 165, 0.3)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Target size={20} color="var(--primary-light)" />
@@ -123,7 +123,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
                 </div>
                 <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.3 }}>{obj.title}</div>
                 {obj.resultat && (
-                  <div style={{ fontSize: '11px', color: '#34d399', marginTop: '4px', fontWeight: 600 }}>
+                  <div style={{ fontSize: '11px', color: '#6db89a', marginTop: '4px', fontWeight: 600 }}>
                     ✓ {obj.resultat}
                   </div>
                 )}
@@ -150,14 +150,14 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
             const isLast = idx === currentAgent.monthlyScores.length - 1;
             return (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '20%' }}>
-                <span style={{ fontSize: '14px', fontWeight: 800, color: isLast ? '#60a5fa' : 'var(--text-primary)' }}>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: isLast ? '#9fb7d6' : 'var(--text-primary)' }}>
                   {ms.score}%
                 </span>
                 <div 
                   style={{ 
                     width: '100%', 
                     height: `${(ms.score - 50) * 4.2}px`, 
-                    background: isLast ? 'var(--primary-gradient)' : 'rgba(59, 130, 246, 0.45)', 
+                    background: isLast ? 'var(--primary-gradient)' : 'rgba(74, 111, 165, 0.45)', 
                     borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0' 
                   }} 
                 />
@@ -172,8 +172,8 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
 
       {/* Forces, Axes & Formations */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
-        <div className="glass-panel" style={{ borderLeft: '4px solid #10b981' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#34d399', marginBottom: '10px' }}>
+        <div className="glass-panel" style={{ borderLeft: '4px solid #3f9a7a' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#6db89a', marginBottom: '10px' }}>
             Principaux Points Forts
           </h3>
           <ul style={{ paddingLeft: '18px', fontSize: '13.5px', lineHeight: 1.7, color: '#d1fae5' }}>
@@ -184,7 +184,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
         </div>
 
         <div className="glass-panel" style={{ borderLeft: '4px solid #f59e0b' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fbbf24', marginBottom: '10px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#d9ae55', marginBottom: '10px' }}>
             Principaux Axes d'Amélioration
           </h3>
           <ul style={{ paddingLeft: '18px', fontSize: '13.5px', lineHeight: 1.7, color: '#fef3c7' }}>
@@ -209,7 +209,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {sessions.filter(s => s.status === 'TERMINÉE').map(sess => (
                 <div key={sess.id} style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '10px 14px', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontWeight: 600, fontSize: '13px', color: '#a7f3d0' }}>{sess.moduleTitle}</div>
+                  <div style={{ fontWeight: 600, fontSize: '13px', color: '#b9d6c8' }}>{sess.moduleTitle}</div>
                   <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
                     Validé le {sess.scheduledDate} avec un uplift de <strong>+{sess.upliftPercentage}%</strong>
                   </div>
@@ -223,14 +223,14 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
               Formations Recommandées par l'IA :
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.25)', padding: '10px 14px', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ background: 'rgba(125, 122, 166, 0.08)', border: '1px solid rgba(125, 122, 166, 0.25)', padding: '10px 14px', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: 600, fontSize: '13px', color: '#e9d5ff' }}>Techniques Avancées de Traitement des Objections</div>
                 <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Recommandé suite aux hésitations relevées lors des objections tarifaires concurrentielles.
                 </div>
               </div>
 
-              <div style={{ background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.25)', padding: '10px 14px', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ background: 'rgba(125, 122, 166, 0.08)', border: '1px solid rgba(125, 122, 166, 0.25)', padding: '10px 14px', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontWeight: 600, fontSize: '13px', color: '#e9d5ff' }}>Gestion du Tempo et Élimination des Interruptions</div>
                 <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Recommandé pour supprimer les coupures acoustiques résiduelles.

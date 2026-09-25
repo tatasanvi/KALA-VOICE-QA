@@ -72,7 +72,7 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
             <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
               Motif de Contact Détecté
             </span>
-            <h2 style={{ fontSize: '19px', fontWeight: 800, color: '#93c5fd', marginTop: '2px' }}>
+            <h2 style={{ fontSize: '19px', fontWeight: 800, color: '#b4c6de', marginTop: '2px' }}>
               {analytics.contactIntent || "Information non déterminée."}
             </h2>
           </div>
@@ -135,20 +135,20 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
             <span style={{ color: 'var(--primary-light)', fontWeight: 600 }}>
               Agent : {agentPercent}% ({Math.round(analytics.agentTalkTimeSeconds)}s)
             </span>
-            <span style={{ color: '#34d399', fontWeight: 600 }}>
+            <span style={{ color: '#6db89a', fontWeight: 600 }}>
               Client : {clientPercent}% ({Math.round(analytics.clientTalkTimeSeconds)}s)
             </span>
           </div>
 
           <div style={{ height: '14px', width: '100%', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
             <div style={{ width: `${agentPercent}%`, background: 'var(--primary-gradient)', transition: 'width 0.4s ease' }} />
-            <div style={{ width: `${clientPercent}%`, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', transition: 'width 0.4s ease' }} />
+            <div style={{ width: `${clientPercent}%`, background: '#3f9a7a', transition: 'width 0.4s ease' }} />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '18px' }}>
             <div style={{ background: 'rgba(0,0,0,0.25)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Chevauchements / Interruptions</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: analytics.interruptionCount > 3 ? '#f87171' : '#34d399', marginTop: '2px' }}>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: analytics.interruptionCount > 3 ? '#d98383' : '#6db89a', marginTop: '2px' }}>
                 {analytics.interruptionCount} coupure{analytics.interruptionCount > 1 ? 's' : ''}
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{analytics.interruptionCount > 3 ? 'Alerte : fréquence élevée' : 'Rythme fluide'}</div>
@@ -196,7 +196,7 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
                   fontWeight: 600, 
                   width: '75px', 
                   textAlign: 'right',
-                  color: item.clientSentiment >= 0 ? '#34d399' : '#f87171' 
+                  color: item.clientSentiment >= 0 ? '#6db89a' : '#d98383' 
                 }}>
                   {item.clientSentiment > 0.3 ? 'Serein' : item.clientSentiment < -0.3 ? 'Frustré' : 'Neutre'}
                 </span>
@@ -237,7 +237,7 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
         {/* Actions & Informations Clés */}
         <div className="glass-panel">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-            <CheckCircle2 size={18} color="#34d399" />
+            <CheckCircle2 size={18} color="#6db89a" />
             <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Actions & Engagements Pris</h3>
           </div>
 

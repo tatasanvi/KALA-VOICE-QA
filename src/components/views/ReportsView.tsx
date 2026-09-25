@@ -88,7 +88,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
                 padding: '14px',
                 cursor: 'pointer',
                 textAlign: 'center',
-                background: isActive ? 'rgba(59, 130, 246, 0.15)' : 'var(--bg-card)',
+                background: isActive ? 'rgba(74, 111, 165, 0.15)' : 'var(--bg-card)',
                 borderColor: isActive ? 'var(--primary)' : 'var(--border-subtle)',
                 color: isActive ? '#fff' : 'var(--text-secondary)'
               }}
@@ -137,7 +137,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               </div>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Score Qualité Attribué</div>
-                <div style={{ fontSize: '16px', fontWeight: 800, color: '#34d399' }}>{currentCall.qualityScore} / 100</div>
+                <div style={{ fontSize: '16px', fontWeight: 800, color: '#6db89a' }}>{currentCall.qualityScore} / 100</div>
               </div>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Environnement Acoustique</div>
@@ -160,7 +160,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Moyenne Générale Qualité</div>
-                <div style={{ fontSize: '32px', fontWeight: 900, color: '#34d399' }}>82.8 / 100</div>
+                <div style={{ fontSize: '32px', fontWeight: 900, color: '#6db89a' }}>82.8 / 100</div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Sur un échantillon de 2 840 appels analysés</div>
               </div>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
@@ -199,7 +199,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               Rapport d'Efficacité des Formations
             </h3>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Le taux de progression moyen après passage dans l'un des 4 modules de l'Académie Métier est mesuré à <strong>+11.2%</strong> en qualité d'interaction et à <strong>-38%</strong> sur le nombre d'interruptions client.
+              L'efficacité des formations n'a pas encore été mesurée : ce rapport sera alimenté par des évaluations réelles avant et après chaque module de l'Académie Métier.
             </p>
           </div>
         )}
@@ -210,7 +210,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               Comparatif des Performances Inter-Équipes
             </h3>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              L'Équipe Titan (Sinistres) conserve la tête avec un score de <strong>88.7%</strong>, suivie de l'Équipe Phénix (<strong>86.1%</strong>) et de l'Équipe Alpha (<strong>82.4%</strong>).
+              Comparatif indisponible en démonstration : les scores par équipe seront alimentés par des évaluations réelles.
             </p>
           </div>
         )}
@@ -221,7 +221,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               Rapport de Progression Chronologique du Centre
             </h3>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              L'introduction conjointe du débruitage ASR adaptatif (+11.2 dB SNR) et des plans de coaching personnalisés a permis d'élever le score qualité de 71% en Janvier à 84% en Avril.
+              Aucune progression n'a encore été mesurée : ce rapport retracera l'évolution du score qualité à partir d'évaluations réelles, sans attribuer d'effet au débruitage tant qu'il n'a pas été évalué.
             </p>
           </div>
         )}

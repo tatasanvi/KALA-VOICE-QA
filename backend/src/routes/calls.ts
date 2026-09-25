@@ -5,6 +5,7 @@ import { Router, Request, Response } from 'express';
 import { requireAuth, requireRole, SUPERVISOR_UP, ALL_ROLES } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
+import { canAccessCall } from '../middleware/callAccess.js';
 
 const router = Router();
 const sqlite = () => (db as any).session.client;
@@ -31,8 +32,13 @@ router.get('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Resp
 
   // Filtre RBAC : un AGENT ne voit que ses propres appels
   if (req.user!.role === 'AGENT') {
-    where += ' AND agent_id IN (SELECT id FROM agents WHERE user_id = ?)';
-    params.push(req.user!.userId);
+    // Un agent voit ses appels, ainsi que les transcriptions réelles qu'il a lui-même importées.
+    where += " AND (agent_id IN (SELECT id FROM agents WHERE user_id = ?) OR json_extract(transcription_json, '$.createdByUserId') = ?)";
+    params.push(req.user!.userId, req.user!.userId);
+  }
+  // source=real : uniquement les appels issus d'une vraie transcription (et non des données de démonstration)
+  if ((req.query as any).source === 'real') {
+    where += " AND json_extract(transcription_json, '$.source') = 'REAL_ASR'";
   }
   if (agentId)    { where += ' AND agent_id = ?';    params.push(agentId); }
   if (campaignId) { where += ' AND campaign_id = ?'; params.push(campaignId); }
@@ -42,7 +48,7 @@ router.get('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Resp
   if (dateTo)     { where += ' AND call_date <= ?';  params.push(dateTo); }
 
   const total = (sqlite().prepare(`SELECT COUNT(*) as c FROM calls WHERE ${where}`).get(...params) as any).c;
-  const rows = sqlite().prepare(`SELECT * FROM calls WHERE ${where} ORDER BY call_date DESC LIMIT ? OFFSET ?`).all(...params, parseInt(limit), offset);
+  const rows = sqlite().prepare(`SELECT * FROM calls WHERE ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`).all(...params, parseInt(limit), offset);
 
   res.json({ total, page: parseInt(page), limit: parseInt(limit), data: rows.map(toCall) });
 });
@@ -50,7 +56,8 @@ router.get('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Resp
 // GET /api/calls/:id
 router.get('/:id', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Response): void => {
   const row = sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(req.params.id) as any;
-  if (!row) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
+  // 404 aussi hors périmètre : on ne révèle pas l'existence d'un appel inaccessible.
+  if (!row || !canAccessCall(req.user!, row)) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
   res.json(toCall(row));
 });
 
@@ -91,7 +98,7 @@ router.patch('/:callId/segments/:segId', requireAuth, requireRole(...ALL_ROLES),
   const { correctedText } = req.body as { correctedText?: string };
 
   const row = sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(callId) as any;
-  if (!row) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
+  if (!row || !canAccessCall(req.user!, row)) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
 
   const transcription = JSON.parse(row.transcription_json ?? '{}');
   const segments: any[] = transcription.segments ?? [];

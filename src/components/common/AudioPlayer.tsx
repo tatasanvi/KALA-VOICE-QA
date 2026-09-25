@@ -65,7 +65,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
       {/* Header du lecteur avec sélecteur de mode de débruitage */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-sm)', background: 'rgba(59, 130, 246, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-sm)', background: 'rgba(74, 111, 165, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9fb7d6' }}>
             <Volume2 size={18} />
           </div>
           <div>
@@ -93,8 +93,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
             onClick={() => handleModeChange('KALA_DENOISED')}
             style={{ fontSize: '11.5px', padding: '4px 10px', marginLeft: '4px' }}
           >
-            <Sparkles size={13} color="#93c5fd" />
-            <span>Débruité KALA (+11.2 dB)</span>
+            <Sparkles size={13} color="#b4c6de" />
+            <span>Débruité KALA (simulation)</span>
           </button>
         </div>
       </div>
@@ -157,7 +157,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
         {/* Badges Acoustiques & Bruit */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <span className="badge badge-gray" title="Rapport Signal sur Bruit mesuré">
-            SNR : <strong style={{ color: metadata.snrDb > 15 ? '#34d399' : '#f59e0b' }}>{metadata.snrDb} dB</strong>
+            SNR : <strong style={{ color: metadata.snrDb > 15 ? '#6db89a' : '#f59e0b' }}>{metadata.snrDb} dB</strong>
           </span>
 
           <span 
