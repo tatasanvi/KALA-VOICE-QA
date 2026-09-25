@@ -83,10 +83,10 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       </div>
 
       <div style={{ flex: 1, paddingBottom: '16px' }}>
-        {/* 1. CŒUR SCIENTIFIQUE (MASTER 2 IA & BIG DATA) */}
+        {/* 1. INTELLIGENCE VOCALE & ASR */}
         <div className="nav-section">
           <div className="nav-section-title" style={{ color: '#b3aed1', letterSpacing: '0.6px' }}>
-            Recherche ASR • Master 2
+            Intelligence Vocale & ASR
           </div>
 
           <button 
@@ -95,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             style={{ width: '100%', background: 'none', textAlign: 'left' }}
           >
             <FlaskConical size={18} color="#b3aed1" />
-            <span style={{ fontWeight: 700, color: '#e9d5ff' }}>Laboratoire ASR</span>
+            <span style={{ fontWeight: 700, color: '#e9d5ff' }}>Banc d'Essai ASR</span>
             <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: '10px' }}>WER / CER</span>
           </button>
 
@@ -110,10 +110,10 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           </button>
         </div>
 
-        {/* 2. DÉMONSTRATEUR MÉTIER (APPELS À FROID / PROSPECTION SORTANTE) */}
+        {/* 2. OPÉRATIONS PLATEAU (APPELS & QUALITÉ) */}
         <div className="nav-section">
           <div className="nav-section-title" style={{ color: '#9fb7d6' }}>
-            Opérations Plateau
+            Opérations & Supervision
           </div>
 
           <button 

@@ -63,23 +63,23 @@ export const LoginView: React.FC = () => {
     }
   };
 
-  // Deux profils de démonstration ciblés pour la soutenance Master 2
+  // Profils pré-configurés pour tester le prototype
   const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string; badge: string }[] = [
     { 
       role: 'QA_MANAGER', 
-      title: 'Responsable QA & Superviseur Plateau', 
+      title: 'Responsable Qualité & Supervision', 
       email: 'c.delattre@kalavoice.ai', 
       color: '#6db89a', 
-      badge: 'Vue Opérationnelle Plateau',
-      desc: 'Supervision des appels à froid : agents en ligne/pause, DMT, écoute des enregistrements et grilles d\'évaluation.' 
+      badge: 'Supervision & Audit QA',
+      desc: 'Supervision des appels sortants, écoute des enregistrements importés, grilles d\'évaluation et conformité.' 
     },
     { 
       role: 'ADMIN', 
-      title: 'Chercheur IA — Démonstrateur ASR (Master 2)', 
+      title: 'Administrateur & Ingénieur IA Vocale', 
       email: 'a.moreau@kalavoice.ai', 
       color: '#b3aed1', 
-      badge: 'Vue Recherche Scientifique',
-      desc: 'Laboratoire expérimental : Whisper vs Wav2Vec 2.0, simulation de bruit SNR, courbes WER/CER et gain DeepFilterNet3.' 
+      badge: 'Paramétrage & Modèles ASR',
+      desc: 'Banc d\'essai ASR : Whisper large-v3, débruitage DeepFilterNet3, configuration des critères et gestion des utilisateurs.' 
     },
   ];
 
@@ -351,11 +351,11 @@ export const LoginView: React.FC = () => {
               <ShieldCheck size={13} color="#6db89a" />
               Sécurité JWT & Traçabilité RBAC
             </span>
-            <span>v1.0.0 • Master 2 IA</span>
+            <span>v1.0.0 • Prototype Démo</span>
           </div>
         </div>
 
-        {/* Colonne Droite : Accès Démonstration Rapide pour la Soutenance */}
+        {/* Colonne Droite : Accès Démonstration Rapide */}
         <div style={{
           background: 'rgba(15, 23, 42, 0.65)',
           border: '1px solid rgba(125, 122, 166, 0.2)',
@@ -368,7 +368,7 @@ export const LoginView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <Sparkles size={18} color="#7d7aa6" />
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#b3aed1', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-              Environnement Soutenance Master 2
+              Environnement Démonstration & Test
             </span>
           </div>
 

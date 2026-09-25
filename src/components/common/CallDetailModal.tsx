@@ -6,7 +6,6 @@ import {
   Volume2, Pause, Sparkles, Target, ArrowRight
 } from 'lucide-react';
 import { Call, UserRole } from '../../types';
-import { DemoDataBadge } from './DemoDataBanner';
 
 interface CallDetailModalProps {
   call: Call;
@@ -121,10 +120,9 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 </span>
               )}
             </div>
-            <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '4px' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '6px' }}>
               {call.callNumber} — {call.agentName}
             </h2>
-            <div style={{ marginBottom: '6px' }}><DemoDataBadge /></div>
             <div style={{ display: 'flex', gap: '16px', fontSize: '12.5px', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
               <span>📅 {call.callDate}</span>
               <span>⏱ {durationMin}m {durationSec}s</span>

@@ -216,7 +216,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
           Calculateur Dynamique de WER & Levenshtein en Temps Réel
         </h3>
         <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-          Saisissez ou modifiez deux phrases pour tester la robustesse de l'algorithme d'alignement durant la soutenance.
+          Saisissez ou modifiez deux phrases pour tester la robustesse de l'algorithme d'alignement et de calcul WER en temps réel.
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px' }}>

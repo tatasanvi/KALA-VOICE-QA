@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { ReportService } from '../../services/reportService';
-import { UserRole } from '../../types';
+import { UserRole, Call } from '../../types';
 
 interface ReportsViewProps {
   currentRole: UserRole;
@@ -18,16 +18,16 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
   const campaigns = storageService.getCampaigns();
   const sessions = storageService.getTrainingSessions();
 
-  const [selectedReportType, setSelectedReportType] = useState<string>('CALL');
-  const [selectedCallId, setSelectedCallId] = useState<string>(calls[0].id);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0].id);
+  const [selectedReportType, setSelectedReportType] = useState<string>(calls.length > 0 ? 'CALL' : 'QUALITY');
+  const [selectedCallId, setSelectedCallId] = useState<string>(calls[0]?.id || '');
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id || '');
 
-  const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
+  const currentCall = (calls.find(c => c.id === selectedCallId) || calls[0]) as Call | undefined;
   const currentAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
 
   const handlePrintCurrentReport = () => {
     if (selectedReportType === 'CALL') {
-      ReportService.printCallQualityReport(currentCall);
+      if (currentCall) ReportService.printCallQualityReport(currentCall);
     } else {
       window.print();
     }
@@ -103,53 +103,59 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
       {/* Aperçu du Rapport Sélectionné */}
       <div className="glass-panel" style={{ background: '#0d1322', border: '1px solid rgba(255,255,255,0.1)' }}>
         {selectedReportType === 'CALL' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '14px', marginBottom: '18px' }}>
-              <div>
-                <span className="badge badge-blue">Rapport Individuel d'Interaction</span>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, marginTop: '4px' }}>
-                  Bilan d'Appel N° {currentCall.callNumber}
-                </h3>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Choisir l'appel :</span>
-                <select 
-                  value={currentCall.id}
-                  onChange={(e) => setSelectedCallId(e.target.value)}
-                  className="role-select"
-                  style={{ background: 'rgba(0,0,0,0.4)', padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}
-                >
-                  {calls.map(c => (
-                    <option key={c.id} value={c.id}>{c.callNumber} ({c.agentName})</option>
-                  ))}
-                </select>
-              </div>
+          !currentCall ? (
+            <div style={{ padding: '36px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+              Aucun appel disponible pour générer un bilan d'interaction. Importez d'abord un enregistrement audio depuis le registre des appels.
             </div>
+          ) : (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '14px', marginBottom: '18px' }}>
+                <div>
+                  <span className="badge badge-blue">Rapport Individuel d'Interaction</span>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, marginTop: '4px' }}>
+                    Bilan d'Appel N° {currentCall.callNumber}
+                  </h3>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Choisir l'appel :</span>
+                  <select 
+                    value={currentCall.id}
+                    onChange={(e) => setSelectedCallId(e.target.value)}
+                    className="role-select"
+                    style={{ background: 'rgba(0,0,0,0.4)', padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}
+                  >
+                    {calls.map(c => (
+                      <option key={c.id} value={c.id}>{c.callNumber} ({c.agentName})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Conseiller</div>
-                <div style={{ fontSize: '14px', fontWeight: 700 }}>{currentCall.agentName}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Conseiller</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700 }}>{currentCall.agentName}</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Client</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700 }}>{currentCall.customerNameMasked}</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Score Qualité Attribué</div>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#6db89a' }}>{currentCall.qualityScore ?? 'Non évalué'}</div>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Environnement Acoustique</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700 }}>Bruit {currentCall.audioMetadata.estimatedNoiseLevel} ({currentCall.audioMetadata.snrDb} dB)</div>
+                </div>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Client</div>
-                <div style={{ fontSize: '14px', fontWeight: 700 }}>{currentCall.customerNameMasked}</div>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Score Qualité Attribué</div>
-                <div style={{ fontSize: '16px', fontWeight: 800, color: '#6db89a' }}>{currentCall.qualityScore} / 100</div>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Environnement Acoustique</div>
-                <div style={{ fontSize: '14px', fontWeight: 700 }}>Bruit {currentCall.audioMetadata.estimatedNoiseLevel} ({currentCall.audioMetadata.snrDb} dB)</div>
-              </div>
-            </div>
 
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '13.5px', lineHeight: 1.6 }}>
-              <strong>Synthèse Exécutive de l'Appel :</strong><br/>
-              {currentCall.analytics.summary}
+              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '13.5px', lineHeight: 1.6 }}>
+                <strong>Synthèse Exécutive de l'Appel :</strong><br/>
+                {currentCall.analytics.summary}
+              </div>
             </div>
-          </div>
+          )
         )}
 
         {selectedReportType === 'QUALITY' && (
