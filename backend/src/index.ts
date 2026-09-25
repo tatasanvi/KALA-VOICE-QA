@@ -11,6 +11,7 @@ import authRouter from './routes/auth.js';
 import usersRouter from './routes/users.js';
 import callsRouter from './routes/calls.js';
 import transcriptionsRouter from './routes/transcriptions.js';
+import transcribeRouter from './routes/transcribe.js';
 import {
   qualityRouter, criteriaRouter, agentsRouter, teamsRouter,
   campaignsRouter, coachingRouter, trainingRouter,
@@ -44,6 +45,7 @@ app.use('/api/auth',        authRouter);
 app.use('/api/users',       usersRouter);
 app.use('/api/calls',       callsRouter);
 app.use('/api/transcriptions', transcriptionsRouter);
+app.use('/api/transcribe',     transcribeRouter);    // Groq Whisper (dev local + Vercel fallback)
 app.use('/api/evaluations', qualityRouter);
 app.use('/api/criteria',    criteriaRouter);
 app.use('/api/agents',      agentsRouter);

@@ -55,3 +55,6 @@ backend/storage/
 
 # Captures et enregistrement d'un outil tiers (données personnelles) : jamais versionnés
 AUDIOLIZ/
+
+.vercel
+.env*
