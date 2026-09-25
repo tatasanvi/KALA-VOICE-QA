@@ -1,6 +1,6 @@
 // ============================================================================
 // KALA VOICE QA — Définitions des Types & Modèles de Données
-// Plateforme Intelligente d'Analyse Vocale, Qualité & Coaching (Mémoire Master IA)
+// Plateforme Intelligente d'Analyse Vocale, Qualité & Coaching
 // ============================================================================
 
 export type UserRole = 
@@ -312,7 +312,7 @@ export interface TrainingSession {
 }
 
 // ----------------------------------------------------------------------------
-// MODÈLE DU DÉMONSTRATEUR D'EXPÉRIMENTATION SCIENTIFIQUE (MÉMOIRE DE MASTER)
+// MODÈLE DU LABORATOIRE D'ÉVALUATION ACOUSTIQUE & BENCHMARK ASR
 // ----------------------------------------------------------------------------
 export interface ExperimentConfiguration {
   id: string;

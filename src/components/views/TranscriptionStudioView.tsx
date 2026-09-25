@@ -19,7 +19,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
   selectedCallId, 
   onSelectCall 
 }) => {
-  const calls = storageService.getCalls();
+  const [calls, setCalls] = useState<Call[]>(() => storageService.getCalls());
   const currentCall = (calls.find(c => c.id === selectedCallId) || calls[0]) as Call | undefined;
 
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -29,11 +29,26 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
   const [activeTab, setActiveTab] = useState<'SEGMENTS' | 'COMPARE'>('SEGMENTS');
 
   useEffect(() => {
+    const unsubStorage = storageService.subscribe(() => {
+      setCalls([...storageService.getCalls()]);
+    });
+    return () => unsubStorage();
+  }, []);
+
+  useEffect(() => {
     const unsub = audioSignalService.onTimeUpdate((time) => {
       setCurrentTime(time);
     });
     return () => unsub();
   }, []);
+
+  const handleImportSaved = () => {
+    setShowImportModal(false);
+    const updated = storageService.getCalls();
+    if (updated.length > 0) {
+      onSelectCall(updated[0].id);
+    }
+  };
 
   if (!currentCall) {
     return (
@@ -76,7 +91,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
             position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.75)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
           }} onClick={() => setShowImportModal(false)}>
-            <div className="glass-panel" style={{ width: '720px', maxWidth: '96%', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}
+            <div className="glass-panel" style={{ width: '760px', maxWidth: '96%', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}
               onClick={e => e.stopPropagation()}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>Importer un nouvel audio</h3>
@@ -84,7 +99,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
                   <X size={14} />
                 </button>
               </div>
-              <RealTranscription onSaved={() => setShowImportModal(false)} />
+              <RealTranscription onSaved={handleImportSaved} />
             </div>
           </div>
         )}
@@ -415,13 +430,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
               </button>
             </div>
 
-            <RealTranscription />
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button className="btn btn-secondary" onClick={() => setShowImportModal(false)}>
-                Fermer
-              </button>
-            </div>
+            <RealTranscription onSaved={handleImportSaved} />
           </div>
         </div>
       )}

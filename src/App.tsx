@@ -38,9 +38,8 @@ import { SettingsAuditView } from './components/views/SettingsAuditView';
 import { UserManagementView } from './components/views/UserManagementView';
 
 import { authApi } from './services/apiClient';
-import { DemoDataBanner } from './components/common/DemoDataBanner';
 
-// ─── Layout Authentifié avec Sidebar, Navbar & Bannière Master 2 ───────────────
+// ─── Layout Authentifié avec Sidebar, Navbar & En-tête Dynamique ─────────────
 const AppLayout: React.FC = () => {
   const location = useLocation();
   const [isApiOnline, setIsApiOnline] = useState<boolean>(true);
@@ -66,7 +65,7 @@ const AppLayout: React.FC = () => {
     if (path.startsWith('/equipes')) return "Structure des Équipes & Plateaux Télécom";
     if (path.startsWith('/campagnes')) return "Structure des Campagnes Métiers";
     if (path.startsWith('/rapports')) return "Rapports d'Audit & Synthèses Métiers";
-    if (path.startsWith('/experimentation')) return "Laboratoire Expérimental ASR (Mémoire Master IA)";
+    if (path.startsWith('/experimentation')) return "Laboratoire d'Évaluation & Benchmark ASR";
     if (path.startsWith('/parametres')) return "Sécurité, Traçabilité & Paramètres Système";
     if (path.startsWith('/admin/users')) return "Administration & Gestion des Comptes Utilisateurs";
     return "KALA VOICE QA — Plateforme Intelligente d'Analyse Vocale";

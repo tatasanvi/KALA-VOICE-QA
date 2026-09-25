@@ -1,6 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Générateur de Données d'Appels Sortants (Prospection à Froid)
-// Soutenance Master 2 IA : Optimisation ASR en Milieu Bruité (Centre d'Appels)
+// KALA VOICE QA — Générateur de Données d'Appels Sortants (Prospection Télécom & Énergie)
 // =============================================================================
 import { Call, CallStatus } from '../types';
 

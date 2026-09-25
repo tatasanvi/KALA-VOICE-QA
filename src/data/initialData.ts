@@ -2113,7 +2113,7 @@ export const INITIAL_TRAINING_SESSIONS: TrainingSession[] = [
 ];
 
 // ----------------------------------------------------------------------------
-// LABORATOIRE D'EXPÉRIMENTATION SCIENTIFIQUE (MÉMOIRE MASTER IA & BIG DATA)
+// LABORATOIRE D'ÉVALUATION ACOUSTIQUE & BENCHMARK ASR
 // ----------------------------------------------------------------------------
 export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
   {

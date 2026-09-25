@@ -23,7 +23,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Liste des comptes de démonstration prédéfinis pour la soutenance (password: kala2024!)
+// Comptes utilisateurs pré-configurés pour la plateforme (password: kala2024!)
 const DEMO_CREDENTIALS: Record<string, UserRole> = {
   'a.moreau@kalavoice.ai': 'ADMIN',
   'c.delattre@kalavoice.ai': 'QA_MANAGER',
