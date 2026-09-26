@@ -350,11 +350,11 @@ export const transcriptionsApi = {
         return { data, status: res.status, ok: true };
       }
 
-      if (res.status === 400 || res.status === 413) {
-        return { error: data?.error ?? `Erreur ${res.status}`, status: res.status, ok: false };
+      if (data?.error && res.status !== 404) {
+        return { error: data.error, status: res.status, ok: false };
       }
     } catch {
-      // Route /api/transcribe locale indisponible, on tente Groq direct
+      // Route /api/transcribe locale indisponible (ex: vite dev sans serverless), on tente Groq direct
     }
 
     // 2. Fallback direct vers l'API Groq (infaillible en dev et prod)
