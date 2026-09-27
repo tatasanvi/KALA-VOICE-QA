@@ -22,7 +22,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
   currentRole
 }) => {
   // Ingestion réservée aux rôles superviseur et au-dessus (contrôle réel côté backend).
-  const canImport = currentRole !== 'AGENT' && currentRole !== 'TRAINER';
+  const canImport = currentRole === 'ADMIN' || currentRole === 'QUALITE_FORMATION';
   const calls = storageService.getCalls();
   const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
 

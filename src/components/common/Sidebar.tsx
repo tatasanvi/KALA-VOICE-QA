@@ -51,19 +51,16 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   };
 
   const roleLabels: Record<UserRole, { label: string; badge: string; color: string }> = {
-    ADMIN:      { label: 'Administrateur', badge: 'badge-red',    color: '#d98383' },
-    MANAGER:    { label: 'Manager Ops',    badge: 'badge-orange', color: '#fb923c' },
-    SUPERVISOR: { label: 'Superviseur',    badge: 'badge-blue',   color: '#9fb7d6' },
-    QA_MANAGER: { label: 'Resp. Qualité',  badge: 'badge-purple', color: '#b3aed1' },
-    TRAINER:    { label: 'Formateur',      badge: 'badge-green',  color: '#6db89a' },
-    AGENT:      { label: 'Conseiller',     badge: 'badge-gray',   color: '#94a3b8' },
+    ADMIN:             { label: 'Administrateur',     badge: 'badge-red',   color: '#d98383' },
+    QUALITE_FORMATION: { label: 'Qualité & Formation', badge: 'badge-blue',  color: '#9fb7d6' },
+    AGENT:             { label: 'Conseiller',          badge: 'badge-gray',  color: '#94a3b8' },
   };
 
   const currentRoleMeta = role ? roleLabels[role] : roleLabels.AGENT;
 
   // Filtrage RBAC des sections
   const showAdminSection = role === 'ADMIN';
-  const showExperimentation = role === 'ADMIN' || role === 'MANAGER' || role === 'QA_MANAGER';
+  const showExperimentation = role === 'ADMIN' || role === 'QUALITE_FORMATION';
 
   return (
     <aside className="sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>

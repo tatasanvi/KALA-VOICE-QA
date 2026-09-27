@@ -25,12 +25,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Liste des comptes de démonstration prédéfinis pour la soutenance (password: kala2024!)
 const DEMO_CREDENTIALS: Record<string, UserRole> = {
-  'a.moreau@kalavoice.ai': 'ADMIN',
-  'c.delattre@kalavoice.ai': 'QA_MANAGER',
-  's.laurent@kalavoice.ai': 'MANAGER',
-  'm.vasseur@kalavoice.ai': 'SUPERVISOR',
-  'p.simon@kalavoice.ai': 'TRAINER',
-  'j.dupont@kalavoice.ai': 'AGENT',
+  'admin@kalavoice.ai': 'ADMIN',
+  'qualite@kalavoice.ai': 'QUALITE_FORMATION',
+  'agent@kalavoice.ai': 'AGENT',
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

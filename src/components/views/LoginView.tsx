@@ -65,12 +65,9 @@ export const LoginView: React.FC = () => {
 
   // Raccourcis de connexion 1-clic pour le jury de soutenance
   const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string }[] = [
-    { role: 'ADMIN', title: 'Administrateur', email: 'a.moreau@kalavoice.ai', color: '#d98383', desc: 'Accès total système, utilisateurs & paramètres' },
-    { role: 'QA_MANAGER', title: 'Responsable QA', email: 'c.delattre@kalavoice.ai', color: '#b3aed1', desc: 'Évaluations qualité, critères & grilles d\'audit' },
-    { role: 'MANAGER', title: 'Manager', email: 's.laurent@kalavoice.ai', color: '#fb923c', desc: 'Pilotage global, équipes, campagnes & ROI' },
-    { role: 'SUPERVISOR', title: 'Superviseur', email: 'm.vasseur@kalavoice.ai', color: '#9fb7d6', desc: 'Gestion du plateau, suivi temps réel des appels' },
-    { role: 'TRAINER', title: 'Formateur', email: 'p.simon@kalavoice.ai', color: '#6db89a', desc: 'Académie, coaching ciblé & mesure d\'uplift' },
-    { role: 'AGENT', title: 'Conseiller Client', email: 'j.dupont@kalavoice.ai', color: '#94a3b8', desc: 'Espace personnel du conseiller (Jean Dupont)' },
+    { role: 'ADMIN', title: 'Administrateur', email: 'admin@kalavoice.ai', color: '#d98383', desc: 'Accès total, gestion des utilisateurs et journal d\'audit' },
+    { role: 'QUALITE_FORMATION', title: 'Qualité & Formation', email: 'qualite@kalavoice.ai', color: '#9fb7d6', desc: 'Import et transcription, évaluations, coaching, contestations' },
+    { role: 'AGENT', title: 'Conseiller Client', email: 'agent@kalavoice.ai', color: '#94a3b8', desc: 'Consultation de ses propres résultats et contestation' },
   ];
 
   const handleQuickLogin = (demoEmail: string) => {
@@ -206,7 +203,7 @@ export const LoginView: React.FC = () => {
                   className="input-field"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ex: a.moreau@kalavoice.ai"
+                  placeholder="ex: admin@kalavoice.ai"
                   required
                   style={{
                     width: '100%',

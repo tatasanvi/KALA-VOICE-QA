@@ -359,7 +359,7 @@ export const App: React.FC = () => {
             <Route 
               path="/parametres" 
               element={
-                <RoleGuard allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER']}>
+                <RoleGuard allowedRoles={['ADMIN', 'QUALITE_FORMATION']}>
                   <SettingsRouteWrapper />
                 </RoleGuard>
               } 

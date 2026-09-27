@@ -42,7 +42,7 @@ class StorageService {
 
   constructor() {
     this.users = this.load('kala_users', INITIAL_USERS);
-    this.currentUser = this.load('kala_current_user', INITIAL_USERS[3]); // Default: Claire Delattre (QA_MANAGER)
+    this.currentUser = this.load('kala_current_user', INITIAL_USERS[0]); // Par défaut : premier compte (rôle réel donné par le JWT)
     this.campaigns = this.load('kala_campaigns_v2', []);
     this.teams = this.load('kala_teams_v2', []);
     this.agents = this.load('kala_agents_v2', []);

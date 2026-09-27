@@ -10,20 +10,16 @@ import { User, UserRole } from '../../types';
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
 const ROLES: { value: UserRole; label: string; badge: string; color: string }[] = [
-  { value: 'ADMIN',      label: 'Administrateur',       badge: 'badge-red',    color: '#d98383' },
-  { value: 'MANAGER',    label: 'Manager',              badge: 'badge-orange', color: '#fb923c' },
-  { value: 'SUPERVISOR', label: 'Superviseur',          badge: 'badge-blue',   color: '#9fb7d6' },
-  { value: 'QA_MANAGER', label: 'Responsable QA',       badge: 'badge-purple', color: '#b3aed1' },
-  { value: 'TRAINER',    label: 'Formateur',            badge: 'badge-green',  color: '#6db89a' },
-  { value: 'AGENT',      label: 'Conseiller',           badge: 'badge-gray',   color: '#94a3b8' },
+  { value: 'ADMIN',             label: 'Administrateur',     badge: 'badge-red',  color: '#d98383' },
+  { value: 'QUALITE_FORMATION', label: 'Qualité & Formation', badge: 'badge-blue', color: '#9fb7d6' },
+  { value: 'AGENT',             label: 'Conseiller',          badge: 'badge-gray', color: '#94a3b8' },
 ];
 
 const ROLE_ICONS: Record<UserRole, string> = {
-  ADMIN: '🔴', MANAGER: '🟠', SUPERVISOR: '🔵',
-  QA_MANAGER: '🟣', TRAINER: '🟢', AGENT: '⚪',
+  ADMIN: '🔴', QUALITE_FORMATION: '🔵', AGENT: '⚪',
 };
 
-const getRoleMeta = (role: UserRole) => ROLES.find(r => r.value === role) ?? ROLES[5];
+const getRoleMeta = (role: UserRole) => ROLES.find(r => r.value === role) ?? ROLES[ROLES.length - 1];
 
 // ─── Type du formulaire ────────────────────────────────────────────────────
 type FormMode = 'create' | 'edit';

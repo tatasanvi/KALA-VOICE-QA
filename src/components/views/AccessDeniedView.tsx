@@ -20,10 +20,7 @@ export const AccessDeniedView: React.FC<AccessDeniedViewProps> = ({
 
   const roleLabels: Record<string, string> = {
     ADMIN: 'Administrateur Système',
-    MANAGER: 'Manager Opérations',
-    SUPERVISOR: 'Superviseur de Plateau',
-    QA_MANAGER: 'Responsable Qualité & Audit',
-    TRAINER: 'Formateur Métier',
+    QUALITE_FORMATION: 'Qualité & Formation',
     AGENT: 'Conseiller Client'
   };
 

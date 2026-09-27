@@ -35,12 +35,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
 
   const roleLabels: Record<UserRole, { label: string; badge: string; color: string }> = {
-    ADMIN:      { label: 'Administrateur',    badge: 'Système & IA',       color: 'badge-purple' },
-    MANAGER:    { label: 'Manager Opérations',badge: 'Direction Métier',   color: 'badge-blue' },
-    SUPERVISOR: { label: 'Superviseur',       badge: 'Plateau Télécom',    color: 'badge-blue' },
-    QA_MANAGER: { label: 'Responsable Qualité',badge: 'Audit & Conformité', color: 'badge-green' },
-    TRAINER:    { label: 'Formateur / Coach', badge: 'Académie Métier',    color: 'badge-amber' },
-    AGENT:      { label: 'Conseiller Client', badge: 'Équipe Alpha',       color: 'badge-gray' }
+    ADMIN:             { label: 'Administrateur',     badge: 'Système & IA',                 color: 'badge-blue' },
+    QUALITE_FORMATION: { label: 'Qualité & Formation', badge: 'Audit, coaching & supervision', color: 'badge-green' },
+    AGENT:             { label: 'Conseiller Client',   badge: 'Consultation',                 color: 'badge-gray' }
   };
 
   const currentRole = role || 'AGENT';

@@ -3,12 +3,9 @@
 // Plateforme Intelligente d'Analyse Vocale, Qualité & Coaching (Mémoire Master IA)
 // ============================================================================
 
-export type UserRole = 
+export type UserRole =
   | 'ADMIN'
-  | 'MANAGER'
-  | 'SUPERVISOR'
-  | 'QA_MANAGER'
-  | 'TRAINER'
+  | 'QUALITE_FORMATION'
   | 'AGENT';
 
 export interface User {

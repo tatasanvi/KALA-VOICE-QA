@@ -53,7 +53,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [realCallsRefresh, setRealCallsRefresh] = useState<number>(0);
   // L'ingestion est réservée aux rôles superviseur et au-dessus (contrôle réel côté backend).
-  const canImport = currentRole !== 'AGENT' && currentRole !== 'TRAINER';
+  const canImport = currentRole === 'ADMIN' || currentRole === 'QUALITE_FORMATION';
   const [selectedCall, setSelectedCall] = useState<Call | null>(() => {
     if (initialCallId) {
       return calls.find(c => c.id === initialCallId) || null;
