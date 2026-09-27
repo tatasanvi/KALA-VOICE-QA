@@ -161,6 +161,12 @@ export function createTables(): void {
   }
 }
 
+const DEMO_USERS = [
+  { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             dept: 'Direction Informatique & IA',      phone: '+33 1 42 68 00 01' },
+  { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', dept: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02' },
+  { id: 'user-agent', name: 'Jean Dupont',      email: 'agent@kalavoice.ai',   role: 'AGENT',             dept: 'Conseillers',                      phone: '+33 1 42 68 00 03' },
+];
+
 // Migration des rôles : passage de six rôles à trois.
 // MANAGER, SUPERVISOR, QA_MANAGER et TRAINER deviennent QUALITE_FORMATION.
 function migrateRoles(sqlite: any): void {
@@ -180,17 +186,22 @@ function migrateRoles(sqlite: any): void {
   if (changed || removed) {
     console.log(`  ↪ Migration des rôles : ${changed} compte(s) converti(s), ${removed} ancien(s) compte(s) de démonstration retiré(s).`);
   }
+
+  // L'ancien compte administrateur reprend l'adresse courte.
+  sqlite.prepare("UPDATE users SET email = 'admin@kalavoice.ai' WHERE id = 'user-admin' AND email = 'a.moreau@kalavoice.ai'").run();
+
+  // Les trois comptes de démonstration doivent exister, même sur une base déjà peuplée.
+  const hash = hashSync('kala2024!', 10);
+  const now = new Date().toISOString().substring(0, 10);
+  const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`);
+  for (const u of DEMO_USERS) ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now);
 }
 
 function seedDefaults(sqlite: any): void {
   const now = new Date().toISOString().substring(0, 10);
   const hash = hashSync('kala2024!', 10);
 
-  const users = [
-    { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             dept: 'Direction Informatique & IA',    phone: '+33 1 42 68 00 01' },
-    { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', dept: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02' },
-    { id: 'user-agent', name: 'Jean Dupont',      email: 'agent@kalavoice.ai',   role: 'AGENT',             dept: 'Conseillers',                     phone: '+33 1 42 68 00 03' },
-  ];
+  const users = DEMO_USERS;
 
   const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`);
   for (const u of users) ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now);

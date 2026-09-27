@@ -59,6 +59,11 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   const currentRoleMeta = role ? roleLabels[role] : roleLabels.AGENT;
 
   // Filtrage RBAC des sections
+  const isAgent = role === 'AGENT';
+  // Le conseiller n'accède qu'à ses propres données : pas de pilotage global,
+  // ni de vues d'équipe (le backend renvoie 403 sur ces données de toute façon).
+  const showPilotage = !isAgent;
+  const showPerformance = !isAgent;
   const showAdminSection = role === 'ADMIN';
   const showExperimentation = role === 'ADMIN' || role === 'QUALITE_FORMATION';
 
@@ -81,6 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
 
       <div style={{ flex: 1, paddingBottom: '16px' }}>
         {/* 1. PILOTAGE */}
+        {showPilotage && (
         <div className="nav-section">
           <div className="nav-section-title">Pilotage</div>
 
@@ -102,6 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <span>Rapports & Synthèses</span>
           </button>
         </div>
+        )}
 
         {/* 2. OPÉRATIONS */}
         <div className="nav-section">
@@ -114,7 +121,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           >
             <PhoneCall size={18} />
             <span>Appels & Enregistrements</span>
-            <span className="nav-badge">100+</span>
           </button>
 
           <button 
@@ -133,11 +139,11 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           >
             <CheckCircle2 size={18} />
             <span>Contrôle Qualité (QA)</span>
-            <span className="nav-badge urgent">2</span>
           </button>
         </div>
 
         {/* 3. PERFORMANCE */}
+        {showPerformance && (
         <div className="nav-section">
           <div className="nav-section-title">Performance</div>
 
@@ -168,6 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <span>Campagnes Métiers</span>
           </button>
         </div>
+        )}
 
         {/* 4. AMÉLIORATION */}
         <div className="nav-section">
@@ -189,7 +196,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           >
             <GraduationCap size={18} />
             <span>Académie & Uplift</span>
-            <span className="badge badge-green" style={{ marginLeft: 'auto', fontSize: '10px' }}>+13 pts</span>
           </button>
         </div>
 
