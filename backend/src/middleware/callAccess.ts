@@ -1,5 +1,5 @@
 // =============================================================================
-// Contrôle d'accès à un appel (anti-IDOR), appliqué côté serveur
+// Contrôles d'accès (anti-IDOR), appliqués côté serveur
 // Un AGENT n'accède qu'aux appels rattachés à sa fiche agent, ou aux
 // transcriptions réelles qu'il a lui-même importées. Les autres rôles
 // conservent leur périmètre existant (tous les appels).
@@ -22,4 +22,13 @@ export function canAccessCall(user: JwtPayload, row: { agent_id?: string; transc
   } catch {
     return false;
   }
+}
+
+// Un AGENT n'accède qu'à sa propre fiche agent (et donc à son coaching).
+// ADMIN et QUALITE_FORMATION conservent l'accès à tous les conseillers.
+export function canAccessAgent(user: JwtPayload, agentId: string): boolean {
+  if (user.role !== 'AGENT') return true;
+  return Boolean(
+    sqlite().prepare('SELECT 1 FROM agents WHERE id = ? AND user_id = ?').get(agentId, user.userId)
+  );
 }

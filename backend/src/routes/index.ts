@@ -5,7 +5,7 @@ import { Router, Request, Response } from 'express';
 import { requireAuth, requireRole, STAFF_UP, ALL_ROLES, ADMIN_ONLY } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
-import { canAccessCall } from '../middleware/callAccess.js';
+import { canAccessCall, canAccessAgent } from '../middleware/callAccess.js';
 
 const sqlite = () => (db as any).session.client;
 
@@ -96,8 +96,11 @@ criteriaRouter.put('/:id', requireAuth, requireRole(...STAFF_UP), (req: Request,
 // ─── Agents ───────────────────────────────────────────────────────────────────
 export const agentsRouter = Router();
 
-agentsRouter.get('/', requireAuth, requireRole(...ALL_ROLES), (_req, res) => {
-  const rows = sqlite().prepare('SELECT * FROM agents ORDER BY name').all();
+agentsRouter.get('/', requireAuth, requireRole(...ALL_ROLES), (req, res) => {
+  // Un conseiller ne voit que sa propre fiche ; le personnel voit tout le monde.
+  const rows = req.user!.role === 'AGENT'
+    ? sqlite().prepare('SELECT * FROM agents WHERE user_id = ? ORDER BY name').all(req.user!.userId)
+    : sqlite().prepare('SELECT * FROM agents ORDER BY name').all();
   res.json(rows.map((a: any) => ({
     ...a,
     monthlyScores:   JSON.parse(a.monthly_scores_json ?? '[]'),
@@ -108,7 +111,8 @@ agentsRouter.get('/', requireAuth, requireRole(...ALL_ROLES), (_req, res) => {
 
 agentsRouter.get('/:id', requireAuth, requireRole(...ALL_ROLES), (req, res) => {
   const a = sqlite().prepare('SELECT * FROM agents WHERE id = ?').get(req.params.id) as any;
-  if (!a) { res.status(404).json({ error: 'Agent introuvable.' }); return; }
+  // 404 hors périmètre : on ne révèle pas l'existence d'une fiche inaccessible.
+  if (!a || !canAccessAgent(req.user!, req.params.id)) { res.status(404).json({ error: 'Agent introuvable.' }); return; }
   res.json({ ...a, monthlyScores: JSON.parse(a.monthly_scores_json ?? '[]'), strengths: JSON.parse(a.strengths_json ?? '[]'), improvementAxes: JSON.parse(a.improvement_axes_json ?? '[]') });
 });
 
@@ -138,7 +142,7 @@ coachingRouter.get('/', requireAuth, requireRole(...STAFF_UP), (_req, res) => {
 
 coachingRouter.get('/agent/:agentId', requireAuth, requireRole(...ALL_ROLES), (req, res) => {
   const row = sqlite().prepare('SELECT * FROM coaching_plans WHERE agent_id = ? ORDER BY created_at DESC LIMIT 1').get(req.params.agentId) as any;
-  if (!row) { res.status(404).json({ error: 'Plan introuvable.' }); return; }
+  if (!row || !canAccessAgent(req.user!, req.params.agentId)) { res.status(404).json({ error: 'Plan introuvable.' }); return; }
   res.json({ ...row, objectives: JSON.parse(row.objectives_json ?? '[]'), strengthsSummary: JSON.parse(row.strengths_summary_json ?? '[]') });
 });
 
