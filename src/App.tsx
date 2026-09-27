@@ -40,6 +40,30 @@ import { UserManagementView } from './components/views/UserManagementView';
 import { authApi } from './services/apiClient';
 
 // ─── Layout Authentifié avec Sidebar, Navbar & Bannière Master 2 ───────────────
+const SessionStrip: React.FC<{ isApiOnline: boolean }> = ({ isApiOnline }) => {
+  const { user, role } = useAuth();
+  return (
+    <div style={{
+      background: 'rgba(255, 255, 255, 0.03)',
+      borderBottom: '1px solid var(--border-subtle)',
+      padding: '6px 24px', display: 'flex', alignItems: 'center', gap: '10px',
+      fontSize: '11.5px', color: 'var(--text-secondary)', flexWrap: 'wrap'
+    }}>
+      <span style={{
+        display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%',
+        background: isApiOnline ? '#6db89a' : '#d98383'
+      }} />
+      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+        {user ? `${user.name} · ${role}` : 'Session non authentifiée'}
+      </span>
+      <span style={{ color: 'var(--text-muted)' }}>·</span>
+      <span style={{ color: 'var(--text-muted)' }}>
+        {isApiOnline ? 'Serveur KALA connecté' : 'Serveur KALA injoignable'}
+      </span>
+    </div>
+  );
+};
+
 const AppLayout: React.FC = () => {
   const location = useLocation();
   const [isApiOnline, setIsApiOnline] = useState<boolean>(true);
@@ -83,39 +107,8 @@ const AppLayout: React.FC = () => {
           isOnline={isApiOnline}
         />
 
-        {/* Bannière Démonstration Soutenance Master 2 */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.03)',
-          borderBottom: '1px solid rgba(125, 122, 166, 0.25)',
-          padding: '6px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: '11.5px',
-          color: 'var(--text-secondary)',
-          flexWrap: 'wrap',
-          gap: '8px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ 
-              display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', 
-              background: '#6db89a', boxShadow: 'none' 
-            }} />
-            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-              Données de démonstration — Soutenance Master 2 IA & Big Data
-            </span>
-            <span style={{ color: 'var(--text-muted)' }}>•</span>
-            <span style={{ color: 'var(--text-muted)' }}>
-              20 conseillers • 4 équipes • 3 campagnes métiers • 100+ conversations transcrites & analysées
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="badge badge-purple" style={{ fontSize: '10px', padding: '2px 8px' }}>
-              Pipeline : Audio Bruité → Dénoyautage Spectral → ASR → QA & Coaching
-            </span>
-          </div>
-        </div>
+        {/* État réel de la session : utilisateur connecté et services. Aucun chiffre estimé. */}
+        <SessionStrip isApiOnline={isApiOnline} />
 
         <main className="content-area">
           <Outlet />
