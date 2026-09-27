@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Contexte d'Authentification & Session (RBAC)
+// KALA VOICE QA · Contexte d'Authentification & Session (RBAC)
 // Gestion de la session persistante, synchronisation JWT et rôles applicatifs
 // =============================================================================
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';

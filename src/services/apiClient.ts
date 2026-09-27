@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Client HTTP API (Frontend → Backend)
+// KALA VOICE QA · Client HTTP API (Frontend → Backend)
 // Intercepteur JWT automatique + fallback localStorage en cas d'API hors ligne
 // =============================================================================
 
@@ -64,7 +64,7 @@ export async function apiCall<T = any>(
       ok: res.ok,
     };
   } catch {
-    return { error: 'API indisponible — mode hors-ligne actif.', status: 0, ok: false };
+    return { error: 'API indisponible · mode hors-ligne actif.', status: 0, ok: false };
   }
 }
 

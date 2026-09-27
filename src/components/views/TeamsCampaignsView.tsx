@@ -394,7 +394,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
                 <input 
                   type="text"
                   required
-                  placeholder="Ex: Énergie & Gaz — Rétention Particuliers"
+                  placeholder="Ex: Énergie & Gaz · Rétention Particuliers"
                   value={campName}
                   onChange={e => setCampName(e.target.value)}
                   style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', color: 'white' }}

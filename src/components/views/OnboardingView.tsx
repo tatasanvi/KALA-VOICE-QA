@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Parcours d'Onboarding Léger (/onboarding)
+// KALA VOICE QA · Parcours d'Onboarding Léger (/onboarding)
 // Configuration du profil conseiller/manager lors de la première connexion
 // =============================================================================
 import React, { useState } from 'react';

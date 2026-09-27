@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Page de Connexion Principale (/login)
+// KALA VOICE QA · Page de Connexion Principale (/login)
 // Design Dark Tech Neo-Futuriste • Authentification Réelle & Accès Démo 1-Clic
 // =============================================================================
 import React, { useState } from 'react';

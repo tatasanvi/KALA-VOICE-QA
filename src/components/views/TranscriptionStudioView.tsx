@@ -81,7 +81,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
               >
                 {calls.map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.callNumber} — {c.agentName} ({c.audioMetadata.estimatedNoiseLevel} bruit)
+                    {c.callNumber} · {c.agentName} ({c.audioMetadata.estimatedNoiseLevel} bruit)
                   </option>
                 ))}
               </select>

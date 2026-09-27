@@ -154,7 +154,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
                 Programme d'Accompagnement Spécifique
               </span>
               <h3 style={{ fontSize: '18px', fontWeight: 800, marginTop: '2px' }}>
-                Plan de Coaching Individuel — {activePlan.agentName}
+                Plan de Coaching Individuel · {activePlan.agentName}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 Formateur référent : <strong>{activePlan.trainerName}</strong> • Date cible de clôture : {activePlan.targetCompletionDate}

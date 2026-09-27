@@ -103,7 +103,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Target size={20} color="var(--primary-light)" />
               <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Plan de Coaching Actif — {coachingPlan.trainerName}</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Plan de Coaching Actif · {coachingPlan.trainerName}</h3>
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{coachingPlan.overallObjectiveSummary}</p>
               </div>
             </div>

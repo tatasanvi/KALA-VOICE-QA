@@ -64,7 +64,7 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
       <div className="ai-disclaimer-banner">
         <Info size={16} />
         <span>
-          <strong>Règle d'Explicabilité IA :</strong> {analytics.aiDisclaimer || "Suggestion IA — à valider par le responsable. Les indicateurs sont calculés sur le signal acoustique et textuel."}
+          <strong>Règle d'Explicabilité IA :</strong> {analytics.aiDisclaimer || "Suggestion IA · à valider par le responsable. Les indicateurs sont calculés sur le signal acoustique et textuel."}
         </span>
       </div>
 

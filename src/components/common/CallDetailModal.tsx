@@ -121,7 +121,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               )}
             </div>
             <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '4px' }}>
-              {call.callNumber} — {call.agentName}
+              {call.callNumber} · {call.agentName}
             </h2>
             <div style={{ display: 'flex', gap: '16px', fontSize: '12.5px', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
               <span>📅 {call.callDate}</span>
@@ -357,7 +357,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                 <div>
-                  <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Transcription Synchronisée — {t.versionNumber === 1 ? 'Version Brute' : `Version Corrigée v${t.versionNumber}`}</h3>
+                  <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Transcription Synchronisée · {t.versionNumber === 1 ? 'Version Brute' : `Version Corrigée v${t.versionNumber}`}</h3>
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                     Modèle : <strong>{t.asrModelUsed}</strong> • {t.totalWords} mots • Traitement : {t.processingTimeMs}ms
                   </p>
@@ -452,7 +452,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   <Eye size={14} color="var(--primary-light)" />
                   <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary-light)', textTransform: 'uppercase' }}>
-                    Cadre de Transparence IA — {a.aiDisclaimer}
+                    Cadre de Transparence IA · {a.aiDisclaimer}
                   </span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
@@ -572,8 +572,8 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                       ? call.qualityScore >= 85 
                         ? '✅ Agent conforme aux standards de qualité définis'
                         : call.qualityScore >= 70 
-                          ? '⚠️ Plusieurs axes d\'amélioration identifiés — coaching recommandé'
-                          : '🔴 Performance insuffisante — plan de remédiation requis'
+                          ? '⚠️ Plusieurs axes d\'amélioration identifiés · coaching recommandé'
+                          : '🔴 Performance insuffisante · plan de remédiation requis'
                       : 'Cet appel n\'a pas encore été évalué par le service qualité.'}
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

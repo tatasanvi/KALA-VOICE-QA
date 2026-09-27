@@ -133,7 +133,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           >
             {calls.map(c => (
               <option key={c.id} value={c.id}>
-                {c.callNumber} — {c.agentName} (Score actuel : {c.qualityScore ?? 'Non noté'})
+                {c.callNumber} · {c.agentName} (Score actuel : {c.qualityScore ?? 'Non noté'})
               </option>
             ))}
           </select>
@@ -177,7 +177,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
         <Eye size={16} color="var(--primary-light)" style={{ flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
           <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--primary-light)' }}>
-            Évaluation assistée par IA — validation humaine requise.
+            Évaluation assistée par IA · validation humaine requise.
           </span>
           <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '8px' }}>
             Les notes proposées sont des suggestions extraites de la transcription. L'évaluateur doit valider, ajuster ou refuser chaque score.
@@ -200,7 +200,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             {evaluation.formTitle}
           </span>
           <h2 style={{ fontSize: '22px', fontWeight: 800, marginTop: '2px' }}>
-            Contrôle Qualité — Agent : {currentCall.agentName}
+            Contrôle Qualité · Agent : {currentCall.agentName}
           </h2>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
             Statut : <strong style={{ color: evaluation.status === 'VALIDÉE_RESPONSABLE' ? '#6db89a' : '#d9ae55' }}>{evaluation.status}</strong>

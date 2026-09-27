@@ -57,7 +57,7 @@ export class ReportService {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Rapport d'Audit Qualité — ${call.callNumber}</title>
+        <title>Rapport d'Audit Qualité · ${call.callNumber}</title>
         <style>
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #1e293b; background: #fff; line-height: 1.5; }
           .header { border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
@@ -80,7 +80,7 @@ export class ReportService {
       <body>
         <div class="header">
           <div>
-            <div class="brand">KALA VOICE QA — Audit Qualité & Interaction Vocale</div>
+            <div class="brand">KALA VOICE QA · Audit Qualité & Interaction Vocale</div>
             <div class="subtitle">Rapport d'évaluation officielle certifié • Centre de contacts</div>
           </div>
           <div style="text-align: right;">
@@ -126,7 +126,7 @@ export class ReportService {
         </div>
 
         <div class="disclaimer">
-          KALA VOICE QA — Plateforme d'optimisation de la qualité et d'expérimentation en transcription vocale bruitée.<br/>
+          KALA VOICE QA · Plateforme d'optimisation de la qualité et d'expérimentation en transcription vocale bruitée.<br/>
           Les scores et suggestions de l'IA sont des indicateurs d'aide à la décision validés par le superviseur qualité.
         </div>
 

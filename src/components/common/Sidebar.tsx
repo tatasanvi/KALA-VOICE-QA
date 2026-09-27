@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Barre de Navigation Latérale (Sidebar)
+// KALA VOICE QA · Barre de Navigation Latérale (Sidebar)
 // Organisation structurée en 6 sections métiers, profil utilisateur & déconnexion
 // =============================================================================
 import React from 'react';

@@ -565,7 +565,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
                         {/* Indicateur compte courant */}
                         {isSelf && (
-                          <span title="Compte courant — protégé" style={{ color: 'var(--primary-light)', padding: '6px' }}>
+                          <span title="Compte courant · protégé" style={{ color: 'var(--primary-light)', padding: '6px' }}>
                             <ShieldCheck size={14} />
                           </span>
                         )}
@@ -580,7 +580,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       </div>
 
       <p style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', fontStyle: 'italic' }}>
-        💡 Toutes les actions sur les comptes sont tracées dans le journal d'audit — conformité RGPD.
+        💡 Toutes les actions sur les comptes sont tracées dans le journal d'audit · conformité RGPD.
         Vous ne pouvez pas supprimer ni désactiver votre propre compte.
       </p>
     </div>

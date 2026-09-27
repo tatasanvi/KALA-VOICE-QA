@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Barre Supérieure (Navbar)
+// KALA VOICE QA · Barre Supérieure (Navbar)
 // Statut API, Débruiteur KALA, Notifications en direct & Sélecteur de Rôle RBAC
 // =============================================================================
 import React, { useState } from 'react';
@@ -23,7 +23,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
-  activeViewTitle = "KALA VOICE QA — Plateforme Intelligente d'Analyse Vocale",
+  activeViewTitle = "KALA VOICE QA · Plateforme Intelligente d'Analyse Vocale",
   onNavigate,
   isOnline = true
 }) => {

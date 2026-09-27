@@ -79,8 +79,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
   const scoreDistrib = useMemo(() => {
     const ranges = [
       { label: '≥ 90', min: 90, max: 100, color: '#6db89a' },
-      { label: '80–90', min: 80, max: 90, color: '#9fb7d6' },
-      { label: '70–80', min: 70, max: 80, color: '#d9ae55' },
+      { label: '80-90', min: 80, max: 90, color: '#9fb7d6' },
+      { label: '70-80', min: 70, max: 80, color: '#d9ae55' },
       { label: '< 70', min: 0, max: 70, color: '#d98383' },
     ];
     const total = evaluatedCalls.length || 1;
@@ -175,7 +175,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
         </span>
       </div>
 
-      {/* ── KPI Row 1 — Appels & Qualité ── */}
+      {/* ── KPI Row 1 · Appels & Qualité ── */}
       <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-header">
@@ -236,7 +236,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
         </div>
       </div>
 
-      {/* ── KPI Row 2 — Agents & Formation ── */}
+      {/* ── KPI Row 2 · Agents & Formation ── */}
       <div className="kpi-grid">
         <div className="kpi-card">
           <div className="kpi-header">
@@ -459,7 +459,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             borderRadius: '10px'
           }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 700, textTransform: 'uppercase' }}>
-              🌟 Focus Coaching — Koffi Mensah
+              🌟 Focus Coaching · Koffi Mensah
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
               <span style={{ fontWeight: 700, color: '#d98383' }}>68%</span>
@@ -471,7 +471,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
               <span className="badge badge-green" style={{ fontSize: '11px' }}>+13 pts ↑</span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Avant formation (Jan) → Après coaching ciblé (Avr) — Uplift mesuré
+              Avant formation (Jan) → Après coaching ciblé (Avr) · Uplift mesuré
             </div>
           </div>
         </div>

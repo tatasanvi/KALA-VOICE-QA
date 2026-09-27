@@ -131,7 +131,7 @@ export class QualityService {
       potentialErrors: [],
       unmetCriteriaCount: items.filter(it => it.score < 7).length,
       recommendations: [
-        "Suggestion IA — À valider par le responsable qualité avant prise en compte officielle dans le score agent."
+        "Suggestion IA · À valider par le responsable qualité avant prise en compte officielle dans le score agent."
       ],
       evaluatorFinalNotes: "Évaluation pré-générée automatiquement par le moteur d'analyse IA. En attente de revue par le superviseur qualité.",
       evaluatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16)

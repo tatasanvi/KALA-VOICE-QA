@@ -1,5 +1,5 @@
 // ============================================================================
-// KALA VOICE QA — Définitions des Types & Modèles de Données
+// KALA VOICE QA · Définitions des Types & Modèles de Données
 // Plateforme Intelligente d'Analyse Vocale, Qualité & Coaching (Mémoire Master IA)
 // ============================================================================
 

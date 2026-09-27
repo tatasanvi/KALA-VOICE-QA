@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Écran 403 : Accès Restreint (RBAC Security)
+// KALA VOICE QA · Écran 403 : Accès Restreint (RBAC Security)
 // Protection des routes d'administration et d'audit contre les accès non autorisés
 // =============================================================================
 import React from 'react';

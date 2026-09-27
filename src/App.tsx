@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Application Principale (App.tsx)
+// KALA VOICE QA · Application Principale (App.tsx)
 // Routage React Router, Protection des Routes RBAC, Authentification & Layout Métier
 // =============================================================================
 import React, { useState, useEffect } from 'react';
@@ -92,7 +92,7 @@ const AppLayout: React.FC = () => {
     if (path.startsWith('/experimentation')) return "Laboratoire Expérimental ASR (Mémoire Master IA)";
     if (path.startsWith('/parametres')) return "Sécurité, Traçabilité & Paramètres Système";
     if (path.startsWith('/admin/users')) return "Administration & Gestion des Comptes Utilisateurs";
-    return "KALA VOICE QA — Plateforme Intelligente d'Analyse Vocale";
+    return "KALA VOICE QA · Plateforme Intelligente d'Analyse Vocale";
   };
 
   return (
