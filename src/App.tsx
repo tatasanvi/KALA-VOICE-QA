@@ -92,7 +92,7 @@ const AppLayout: React.FC = () => {
     if (path.startsWith('/experimentation')) return "Laboratoire Expérimental ASR (Mémoire Master IA)";
     if (path.startsWith('/parametres')) return "Sécurité, Traçabilité & Paramètres Système";
     if (path.startsWith('/admin/users')) return "Administration & Gestion des Comptes Utilisateurs";
-    return "KALA VOICE QA · Plateforme Intelligente d'Analyse Vocale";
+    return "KALA Voice QA";
   };
 
   return (

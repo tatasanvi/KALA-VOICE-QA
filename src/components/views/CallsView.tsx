@@ -114,7 +114,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
         <button
           onClick={() => setSelectedStatus('ALL')}
           style={{
-            padding: '7px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+            padding: '7px 14px', borderRadius: 'var(--radius-sm)', fontSize: '12px', fontWeight: 700,
             background: selectedStatus === 'ALL' ? 'rgba(74, 111, 165,0.2)' : 'rgba(255,255,255,0.04)',
             border: `1px solid ${selectedStatus === 'ALL' ? 'rgba(74, 111, 165,0.5)' : 'rgba(255,255,255,0.1)'}`,
             color: selectedStatus === 'ALL' ? 'var(--primary-light)' : 'var(--text-muted)',
@@ -128,7 +128,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
             key={key}
             onClick={() => setSelectedStatus(key)}
             style={{
-              padding: '7px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+              padding: '7px 14px', borderRadius: 'var(--radius-sm)', fontSize: '12px', fontWeight: 700,
               background: selectedStatus === key ? `${val.color}22` : 'rgba(255,255,255,0.04)',
               border: `1px solid ${selectedStatus === key ? `${val.color}55` : 'rgba(255,255,255,0.1)'}`,
               color: selectedStatus === key ? val.color : 'var(--text-muted)',

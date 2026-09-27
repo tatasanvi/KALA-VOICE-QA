@@ -24,7 +24,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
-  activeViewTitle = "KALA VOICE QA · Plateforme Intelligente d'Analyse Vocale",
+  activeViewTitle = "KALA Voice QA",
   onNavigate,
   isOnline = true
 }) => {
