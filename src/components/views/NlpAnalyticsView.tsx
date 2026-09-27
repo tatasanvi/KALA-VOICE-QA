@@ -1,9 +1,5 @@
 import React from 'react';
-import { 
-  Sparkles, Clock, MessageSquare, AlertCircle, 
-  CheckCircle2, Flame, User, Users, ShieldAlert,
-  Mic, Info
-} from 'lucide-react';
+import { Sparkles, Clock, MessageSquare, AlertCircle, CheckCircle2, Flame, User, Users, ShieldAlert, Mic, Info, Check } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { Call, UserRole } from '../../types';
 import { EmptyState } from '../common/EmptyState';
@@ -248,7 +244,7 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
             {analytics.actionItemsRequested && analytics.actionItemsRequested.length > 0 ? (
               analytics.actionItemsRequested.map((act, i) => (
                 <div key={i} style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: '13px', color: '#d1fae5' }}>
-                  ✓ {act}
+                  <Check size={12} /> {act}
                 </div>
               ))
             ) : (

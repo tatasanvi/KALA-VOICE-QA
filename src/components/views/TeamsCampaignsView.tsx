@@ -71,7 +71,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
       autoAnalyze: ctiAutoAnalyze,
       status: 'CONNECTÉ'
     });
-    alert('✅ Paramètres CTI enregistrés avec succès !');
+    alert('Paramètres CTI enregistrés.');
   };
 
 

@@ -142,7 +142,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
           {/* Sélection rapide de profil démo */}
           <div style={{ marginBottom: '20px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              ⚡ Connexion Rapide (Profils Équipe Démo) :
+              Connexion rapide (profils de démonstration) :
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
               {PRESET_ACCOUNTS.map(acc => {

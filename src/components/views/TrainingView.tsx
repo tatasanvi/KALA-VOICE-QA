@@ -108,7 +108,7 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
         <div className="glass-panel" style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px' }}>🌟</span>
+              
               <div>
                 <div style={{ fontSize: '11px', color: '#d9ae55', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Cas d'École Pilote

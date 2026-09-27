@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  TrendingUp, Target, Plus, CheckCircle2, 
-  Calendar, Award, Sparkles, BookOpen, User, Clock, ArrowRight
-} from 'lucide-react';
+import { TrendingUp, Target, Plus, CheckCircle2, Calendar, Award, Sparkles, BookOpen, User, Clock, ArrowRight, Check } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { CoachingPlan, UserRole } from '../../types';
 import { EmptyState } from '../common/EmptyState';
@@ -176,7 +173,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
             {activePlan.objectives.map((obj) => {
               const statusColor = obj.status === 'VALIDÉ' ? '#6db89a' : obj.status === 'EN_COURS' ? '#9fb7d6' : '#d9ae55';
               const statusBg = obj.status === 'VALIDÉ' ? 'rgba(52,211,153,0.12)' : obj.status === 'EN_COURS' ? 'rgba(96,165,250,0.12)' : 'rgba(251,191,36,0.12)';
-              const statusLabel = obj.status === 'VALIDÉ' ? '✅ Objectif Atteint' : obj.status === 'EN_COURS' ? '🔄 En Cours' : '📋 À Faire';
+              const statusLabel = obj.status === 'VALIDÉ' ? 'Objectif atteint' : obj.status === 'EN_COURS' ? 'En cours' : 'À faire';
               return (
                 <div 
                   key={obj.id} 
@@ -340,7 +337,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                         {sess.simulationExercisesCompleted.map((sim, i) => (
                           <div key={i} style={{ fontSize: '11.5px', color: '#cbd5e1' }}>
-                            ✓ {sim.title} ({sim.score}/100)
+                            <Check size={12} /> {sim.title} ({sim.score}/100)
                           </div>
                         ))}
                       </div>

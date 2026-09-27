@@ -459,7 +459,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             borderRadius: '10px'
           }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 700, textTransform: 'uppercase' }}>
-              🌟 Focus Coaching · Koffi Mensah
+              Focus Coaching · Koffi Mensah
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
               <span style={{ fontWeight: 700, color: '#d98383' }}>68%</span>
@@ -511,7 +511,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                     {c.type} • {c.clientSector}
                   </span>
                   <span className={`badge ${c.isTargetMet ? 'badge-green' : 'badge-amber'}`} style={{ fontSize: '10.5px' }}>
-                    {c.isTargetMet ? '✓ Objectif atteint' : '⚠ En rattrapage'}
+                    {c.isTargetMet ? 'Objectif atteint' : 'En rattrapage'}
                   </span>
                 </div>
 

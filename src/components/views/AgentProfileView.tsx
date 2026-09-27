@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  User, Award, TrendingUp, Calendar, CheckCircle2, 
-  Target, BookOpen, Clock, ShieldCheck, Play
-} from 'lucide-react';
+import { User, Award, TrendingUp, Calendar, CheckCircle2, Target, BookOpen, Clock, ShieldCheck, Play, Check } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { UserRole } from '../../types';
 import { EmptyState } from '../common/EmptyState';
@@ -127,7 +124,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
                 <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.3 }}>{obj.title}</div>
                 {obj.resultat && (
                   <div style={{ fontSize: '11px', color: '#6db89a', marginTop: '4px', fontWeight: 600 }}>
-                    ✓ {obj.resultat}
+                    <Check size={12} /> {obj.resultat}
                   </div>
                 )}
               </div>
