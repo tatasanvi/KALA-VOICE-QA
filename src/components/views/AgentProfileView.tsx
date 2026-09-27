@@ -3,6 +3,7 @@ import { User, Award, TrendingUp, Calendar, CheckCircle2, Target, BookOpen, Cloc
 import { storageService } from '../../services/storageService';
 import { UserRole } from '../../types';
 import { EmptyState } from '../common/EmptyState';
+import { Avatar } from '../common/Avatar';
 
 interface AgentProfileViewProps {
   selectedAgentId: string;
@@ -57,11 +58,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
       {/* Carte d'Identité & Statistiques Globales */}
       <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <img 
-            src={currentAgent.avatarUrl} 
-            alt={currentAgent.name} 
-            style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-full)', border: '3px solid var(--primary)', objectFit: 'cover' }}
-          />
+          <Avatar name={currentAgent.name} size={64} />
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: 800 }}>{currentAgent.name}</h1>
             <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '2px' }}>

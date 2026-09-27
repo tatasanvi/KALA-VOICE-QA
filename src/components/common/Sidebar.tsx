@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
+import { Avatar } from './Avatar';
 
 export type ViewType = 
   | 'dashboard'
@@ -255,18 +256,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', overflow: 'hidden', flex: 1 }}
             title="Consulter votre profil"
           >
-            <img
-              src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
-              alt={user?.name || 'Utilisateur'}
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: `1.5px solid ${currentRoleMeta.color}`,
-                flexShrink: 0
-              }}
-            />
+            <Avatar name={user?.name} size={34} />
             <div style={{ overflow: 'hidden' }}>
               <div style={{
                 fontSize: '12.5px',

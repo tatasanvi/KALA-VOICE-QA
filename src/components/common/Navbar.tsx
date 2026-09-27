@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserRole, TeamNotification } from '../../types';
 import { storageService } from '../../services/storageService';
 import { useAuth } from '../../context/AuthContext';
+import { Avatar } from './Avatar';
 import { 
   ShieldCheck, UserCheck, Sparkles, Bell, LogOut, Check, 
   Wifi, WifiOff, X
@@ -234,11 +235,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Utilisateur Actif & Déconnexion */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img 
-            src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'} 
-            alt={user?.name || 'Utilisateur'} 
-            style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', border: '2px solid var(--border-active)', objectFit: 'cover' }}
-          />
+          <Avatar name={user?.name} size={36} />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1.2 }}>{user?.name || 'Invité'}</div>
             <span className={`badge ${roleLabels[currentRole].color}`} style={{ padding: '1px 6px', fontSize: '10.5px', marginTop: '2px' }}>

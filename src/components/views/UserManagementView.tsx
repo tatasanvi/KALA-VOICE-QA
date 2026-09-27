@@ -6,6 +6,7 @@ import {
 import { storageService } from '../../services/storageService';
 import { usersApi } from '../../services/apiClient';
 import { User, UserRole } from '../../types';
+import { Avatar } from '../common/Avatar';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
@@ -489,10 +490,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '16px', overflow: 'hidden'
                         }}>
-                          {user.avatarUrl
-                            ? <img src={user.avatarUrl} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                            : <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: ROLE_DOTS[user.role] }} />
-                          }
+                          <Avatar name={user.name} size={30} />
                         </div>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: '13.5px' }}>

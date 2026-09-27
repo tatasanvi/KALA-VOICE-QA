@@ -3,6 +3,7 @@ import { TrendingUp, Target, Plus, CheckCircle2, Calendar, Award, Sparkles, Book
 import { storageService } from '../../services/storageService';
 import { CoachingPlan, UserRole } from '../../types';
 import { EmptyState } from '../common/EmptyState';
+import { Avatar } from '../common/Avatar';
 
 interface CoachingViewProps {
   onNavigate: (view: any) => void;
@@ -70,11 +71,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
       {/* Profil Synthétique Agent & KPI Coaching */}
       <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <img 
-            src={selectedAgent.avatarUrl} 
-            alt={selectedAgent.name} 
-            style={{ width: '60px', height: '60px', borderRadius: 'var(--radius-full)', border: '2px solid var(--primary)', objectFit: 'cover' }}
-          />
+          <Avatar name={selectedAgent.name} size={64} />
           <div>
             <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{selectedAgent.name}</h2>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
