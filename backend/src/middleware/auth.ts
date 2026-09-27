@@ -62,9 +62,8 @@ export const requireRole = (...roles: string[]) =>
 export const signToken = (payload: JwtPayload): string =>
   jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
 
-export const ADMIN_ROLES  = ['ADMIN'];
-export const MANAGER_UP   = ['ADMIN', 'MANAGER'];
-export const SUPERVISOR_UP = ['ADMIN', 'MANAGER', 'SUPERVISOR'];
-export const QA_UP        = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER'];
-export const TRAINER_UP   = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER'];
-export const ALL_ROLES    = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER', 'AGENT'];
+// Trois rôles : ADMIN, QUALITE_FORMATION (qualité, formation et supervision), AGENT.
+export const ROLES = ['ADMIN', 'QUALITE_FORMATION', 'AGENT'] as const;
+export const ADMIN_ONLY = ['ADMIN'];
+export const STAFF_UP   = ['ADMIN', 'QUALITE_FORMATION'];
+export const ALL_ROLES  = ['ADMIN', 'QUALITE_FORMATION', 'AGENT'];

@@ -146,12 +146,9 @@ function createTables() {
 
 // ─── Données Initiales ────────────────────────────────────────────────────────
 const SEED_USERS = [
-  { id: 'user-admin',      name: 'Alexandre Moreau', email: 'a.moreau@kalavoice.ai',    role: 'ADMIN',      department: 'Direction Informatique & IA',      phone: '+33 1 42 68 00 01', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150' },
-  { id: 'user-manager',    name: 'Sophie Laurent',   email: 's.laurent@kalavoice.ai',   role: 'MANAGER',    department: 'Direction des Opérations',         phone: '+33 1 42 68 00 02', avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150' },
-  { id: 'user-supervisor', name: 'Marc Vasseur',     email: 'm.vasseur@kalavoice.ai',   role: 'SUPERVISOR', department: 'Plateau Télécom',                  phone: '+33 1 42 68 00 03', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' },
-  { id: 'user-qa',         name: 'Claire Delattre',  email: 'c.delattre@kalavoice.ai',  role: 'QA_MANAGER', department: 'Assurance Qualité & Conformité',   phone: '+33 1 42 68 00 04', avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=150' },
-  { id: 'user-trainer',    name: 'Patrick Simon',    email: 'p.simon@kalavoice.ai',     role: 'TRAINER',    department: 'Académie & Formation Métier',      phone: '+33 1 42 68 00 05', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150' },
-  { id: 'user-agent-1',    name: 'Jean Dupont',      email: 'j.dupont@kalavoice.ai',    role: 'AGENT',      department: 'Équipe Alpha - Service Fibre',     phone: '+33 1 42 68 00 06', avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150' },
+  { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             department: 'Direction Informatique & IA',      phone: '+33 1 42 68 00 01', avatarUrl: '' },
+  { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', department: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02', avatarUrl: '' },
+  { id: 'user-agent', name: 'Jean Dupont',      email: 'agent@kalavoice.ai',   role: 'AGENT',             department: 'Conseillers',                      phone: '+33 1 42 68 00 03', avatarUrl: '' },
 ];
 
 const now = () => new Date().toISOString().substring(0, 10);
@@ -188,9 +185,9 @@ async function seed() {
     INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  insertTeam.run('team-1', 'Équipe Alpha – Fibre & Mobile',    'user-supervisor', 'Marc Vasseur', 'Équipe dédiée aux abonnés Fibre et forfaits 5G.', 8, 84.2, '2024-01-20');
-  insertTeam.run('team-2', 'Équipe Beta – Assurance Sinistres', 'user-supervisor', 'Marc Vasseur', 'Traitement des déclarations de sinistres auto et habitation.', 6, 79.5, '2024-02-01');
-  insertTeam.run('team-3', 'Équipe Gamma – Banque Pro',         'user-supervisor', 'Marc Vasseur', 'Gestion des comptes professionnels et PME.', 7, 88.1, '2024-02-15');
+  insertTeam.run('team-1', 'Équipe Alpha – Fibre & Mobile',    'user-staff', 'Claire Delattre', 'Équipe dédiée aux abonnés Fibre et forfaits 5G.', 8, 84.2, '2024-01-20');
+  insertTeam.run('team-2', 'Équipe Beta – Assurance Sinistres', 'user-staff', 'Claire Delattre', 'Traitement des déclarations de sinistres auto et habitation.', 6, 79.5, '2024-02-01');
+  insertTeam.run('team-3', 'Équipe Gamma – Banque Pro',         'user-staff', 'Claire Delattre', 'Gestion des comptes professionnels et PME.', 7, 88.1, '2024-02-15');
   console.log('  ✅ 3 équipes créées.');
 
   // Campaigns

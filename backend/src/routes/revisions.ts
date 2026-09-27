@@ -5,7 +5,7 @@
 // =============================================================================
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { requireAuth, requireRole, QA_UP, ALL_ROLES } from '../middleware/auth.js';
+import { requireAuth, requireRole, STAFF_UP, ALL_ROLES } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
 
@@ -36,11 +36,11 @@ router.post('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Res
   const evaluation = sqlite().prepare('SELECT * FROM evaluations WHERE id = ?').get(evaluationId) as any;
   if (!evaluation) { res.status(404).json({ error: 'Évaluation introuvable.' }); return; }
 
-  // Seul l'agent concerné peut contester (les rôles QA et au-dessus peuvent
+  // Seul l'agent concerné peut contester (le personnel qualité et formation peut
   // ouvrir une révision à sa place, par exemple après un signalement oral).
   const isConcerned = evaluationConcernsUser(evaluation, req.user!.userId);
-  const isQaUp = QA_UP.includes(req.user!.role);
-  if (!isConcerned && !isQaUp) {
+  const isStaff = STAFF_UP.includes(req.user!.role);
+  if (!isConcerned && !isStaff) {
     res.status(403).json({ error: 'Vous ne pouvez contester qu’une évaluation qui vous concerne.' });
     return;
   }
@@ -74,7 +74,7 @@ router.get('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Resp
 });
 
 // PATCH /api/revisions/:id — traitement par un rôle superviseur ou au-dessus
-router.patch('/:id', requireAuth, requireRole(...QA_UP), (req: Request, res: Response): void => {
+router.patch('/:id', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Response): void => {
   const { status, resolutionNote } = req.body as { status?: string; resolutionNote?: string };
   if (!status || !['ACCEPTEE', 'REFUSEE'].includes(status)) {
     res.status(400).json({ error: 'Statut attendu : ACCEPTEE ou REFUSEE.' });

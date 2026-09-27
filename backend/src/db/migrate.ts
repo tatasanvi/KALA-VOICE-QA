@@ -149,6 +149,9 @@ export function createTables(): void {
     );
   `);
 
+  // Migration des rôles : exécutée à chaque démarrage, sur une base existante comme neuve.
+  migrateRoles(sqlite);
+
   // Seed initial si la table users est vide
   const count = sqlite.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number };
   if (count.c === 0) {
@@ -158,24 +161,42 @@ export function createTables(): void {
   }
 }
 
+// Migration des rôles : passage de six rôles à trois.
+// MANAGER, SUPERVISOR, QA_MANAGER et TRAINER deviennent QUALITE_FORMATION.
+function migrateRoles(sqlite: any): void {
+  const changed = sqlite.prepare(`
+    UPDATE users SET role = 'QUALITE_FORMATION'
+    WHERE role IN ('MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER')
+  `).run().changes;
+  sqlite.prepare(`
+    UPDATE audit_logs SET user_role = 'QUALITE_FORMATION'
+    WHERE user_role IN ('MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER')
+  `).run();
+  // Comptes de démonstration de l'ancienne série (un par ancien rôle), remplacés
+  // par les trois comptes ci-dessous.
+  const removed = sqlite.prepare(`
+    DELETE FROM users WHERE id IN ('user-manager', 'user-supervisor', 'user-qa', 'user-trainer', 'user-agent-1')
+  `).run().changes;
+  if (changed || removed) {
+    console.log(`  ↪ Migration des rôles : ${changed} compte(s) converti(s), ${removed} ancien(s) compte(s) de démonstration retiré(s).`);
+  }
+}
+
 function seedDefaults(sqlite: any): void {
   const now = new Date().toISOString().substring(0, 10);
   const hash = hashSync('kala2024!', 10);
 
   const users = [
-    { id: 'user-admin',      name: 'Alexandre Moreau', email: 'a.moreau@kalavoice.ai',   role: 'ADMIN',      dept: 'Direction Informatique & IA',     phone: '+33 1 42 68 00 01' },
-    { id: 'user-manager',    name: 'Sophie Laurent',   email: 's.laurent@kalavoice.ai',  role: 'MANAGER',    dept: 'Direction des Opérations',        phone: '+33 1 42 68 00 02' },
-    { id: 'user-supervisor', name: 'Marc Vasseur',     email: 'm.vasseur@kalavoice.ai',  role: 'SUPERVISOR', dept: 'Plateau Télécom',                 phone: '+33 1 42 68 00 03' },
-    { id: 'user-qa',         name: 'Claire Delattre',  email: 'c.delattre@kalavoice.ai', role: 'QA_MANAGER', dept: 'Assurance Qualité & Conformité',  phone: '+33 1 42 68 00 04' },
-    { id: 'user-trainer',    name: 'Patrick Simon',    email: 'p.simon@kalavoice.ai',    role: 'TRAINER',    dept: 'Académie & Formation Métier',     phone: '+33 1 42 68 00 05' },
-    { id: 'user-agent-1',    name: 'Jean Dupont',      email: 'j.dupont@kalavoice.ai',   role: 'AGENT',      dept: 'Équipe Alpha - Service Fibre',    phone: '+33 1 42 68 00 06' },
+    { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             dept: 'Direction Informatique & IA',    phone: '+33 1 42 68 00 01' },
+    { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', dept: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02' },
+    { id: 'user-agent', name: 'Jean Dupont',      email: 'agent@kalavoice.ai',   role: 'AGENT',             dept: 'Conseillers',                     phone: '+33 1 42 68 00 03' },
   ];
 
   const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`);
   for (const u of users) ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now);
 
   sqlite.prepare(`INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run('team-1', 'Équipe Alpha – Fibre & Mobile', 'user-supervisor', 'Marc Vasseur', 'Équipe dédiée fibre et 5G.', 8, 84.2, '2024-01-20');
+    .run('team-1', 'Équipe Alpha – Fibre & Mobile', 'user-staff', 'Claire Delattre', 'Équipe dédiée fibre et 5G.', 8, 84.2, '2024-01-20');
 
   sqlite.prepare(`INSERT OR IGNORE INTO campaigns (id, name, type, client_sector, target_quality_score, active_agents_count, total_calls_count, compliance_rate, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .run('camp-1', 'Télécom Fibre & Mobile — Rétention', 'ENTRANT', 'Télécommunications', 85, 24, 1420, 94.2, "Fidélisation et traitement des résiliations.", '2024-01-15');

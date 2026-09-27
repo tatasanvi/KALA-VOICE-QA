@@ -2,7 +2,7 @@
 // KALA VOICE QA — Routes Quality, Agents, Teams, Campaigns, Dashboard, Audit
 // =============================================================================
 import { Router, Request, Response } from 'express';
-import { requireAuth, requireRole, QA_UP, TRAINER_UP, SUPERVISOR_UP, ALL_ROLES, MANAGER_UP } from '../middleware/auth.js';
+import { requireAuth, requireRole, STAFF_UP, ALL_ROLES, ADMIN_ONLY } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
 import { canAccessCall } from '../middleware/callAccess.js';
@@ -12,7 +12,7 @@ const sqlite = () => (db as any).session.client;
 // ─── Quality Evaluations ──────────────────────────────────────────────────────
 export const qualityRouter = Router();
 
-qualityRouter.get('/', requireAuth, requireRole(...QA_UP), (_req, res) => {
+qualityRouter.get('/', requireAuth, requireRole(...STAFF_UP), (_req, res) => {
   const rows = sqlite().prepare('SELECT * FROM evaluations ORDER BY evaluated_at DESC').all();
   res.json(rows.map((e: any) => ({
     ...e,
@@ -48,7 +48,7 @@ qualityRouter.get('/call/:callId', requireAuth, requireRole(...ALL_ROLES), (req,
   res.json({ ...row, items: JSON.parse(row.items_json ?? '[]'), strengths: JSON.parse(row.strengths_json ?? '[]'), weaknesses: JSON.parse(row.weaknesses_json ?? '[]'), recommendations: JSON.parse(row.recommendations_json ?? '[]') });
 });
 
-qualityRouter.post('/', requireAuth, requireRole(...QA_UP), (req: Request, res: Response): void => {
+qualityRouter.post('/', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Response): void => {
   const body = req.body as any;
   const id = body.id ?? `eval-${Date.now()}`;
 
@@ -84,7 +84,7 @@ criteriaRouter.get('/', requireAuth, requireRole(...ALL_ROLES), (_req, res) => {
   res.json(sqlite().prepare('SELECT * FROM quality_criteria ORDER BY category').all());
 });
 
-criteriaRouter.put('/:id', requireAuth, requireRole(...QA_UP), (req: Request, res: Response) => {
+criteriaRouter.put('/:id', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Response) => {
   const { weight, maxScore, isCritical } = req.body as any;
   sqlite().prepare('UPDATE quality_criteria SET weight = ?, max_score = ?, is_critical = ? WHERE id = ?')
     .run(weight, maxScore, isCritical ? 1 : 0, req.params.id);
@@ -126,7 +126,7 @@ campaignsRouter.get('/', requireAuth, requireRole(...ALL_ROLES), (_req, res) => 
 // ─── Coaching Plans ───────────────────────────────────────────────────────────
 export const coachingRouter = Router();
 
-coachingRouter.get('/', requireAuth, requireRole(...TRAINER_UP), (_req, res) => {
+coachingRouter.get('/', requireAuth, requireRole(...STAFF_UP), (_req, res) => {
   const rows = sqlite().prepare('SELECT * FROM coaching_plans ORDER BY created_at DESC').all();
   res.json(rows.map((p: any) => ({
     ...p,
@@ -142,7 +142,7 @@ coachingRouter.get('/agent/:agentId', requireAuth, requireRole(...ALL_ROLES), (r
   res.json({ ...row, objectives: JSON.parse(row.objectives_json ?? '[]'), strengthsSummary: JSON.parse(row.strengths_summary_json ?? '[]') });
 });
 
-coachingRouter.post('/', requireAuth, requireRole(...TRAINER_UP), (req: Request, res: Response) => {
+coachingRouter.post('/', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Response) => {
   const body = req.body as any;
   const id = body.id ?? `coaching-${Date.now()}`;
   sqlite().prepare(`
@@ -169,12 +169,12 @@ trainingRouter.get('/modules', requireAuth, requireRole(...ALL_ROLES), (_req, re
   res.json(rows.map((m: any) => ({ ...m, targetCompetencies: JSON.parse(m.target_competencies_json ?? '[]') })));
 });
 
-trainingRouter.get('/sessions', requireAuth, requireRole(...TRAINER_UP), (_req, res) => {
+trainingRouter.get('/sessions', requireAuth, requireRole(...STAFF_UP), (_req, res) => {
   const rows = sqlite().prepare('SELECT * FROM training_sessions ORDER BY scheduled_date DESC').all();
   res.json(rows.map((s: any) => ({ ...s, simulationExercises: JSON.parse(s.simulation_exercises_json ?? '[]') })));
 });
 
-trainingRouter.post('/sessions', requireAuth, requireRole(...TRAINER_UP), (req: Request, res: Response) => {
+trainingRouter.post('/sessions', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Response) => {
   const body = req.body as any;
   const id = body.id ?? `session-${Date.now()}`;
   sqlite().prepare(`
@@ -193,7 +193,7 @@ trainingRouter.post('/sessions', requireAuth, requireRole(...TRAINER_UP), (req: 
 // ─── Dashboard Metrics ────────────────────────────────────────────────────────
 export const dashboardRouter = Router();
 
-dashboardRouter.get('/metrics', requireAuth, requireRole(...SUPERVISOR_UP), (_req, res) => {
+dashboardRouter.get('/metrics', requireAuth, requireRole(...STAFF_UP), (_req, res) => {
   const s = sqlite();
   const totalCalls        = (s.prepare('SELECT COUNT(*) as c FROM calls').get() as any).c;
   const analyzedCalls     = (s.prepare("SELECT COUNT(*) as c FROM calls WHERE analytics_json != '{}'").get() as any).c;
@@ -219,7 +219,7 @@ dashboardRouter.get('/metrics', requireAuth, requireRole(...SUPERVISOR_UP), (_re
 // ─── Audit Logs ───────────────────────────────────────────────────────────────
 export const auditRouter = Router();
 
-auditRouter.get('/', requireAuth, requireRole(...MANAGER_UP), (req, res) => {
+auditRouter.get('/', requireAuth, requireRole(...ADMIN_ONLY), (req, res) => {
   const { limit = '100' } = req.query as { limit?: string };
   const rows = sqlite().prepare('SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT ?').all(parseInt(limit));
   res.json(rows);
