@@ -72,7 +72,7 @@ export const LoginView: React.FC = () => {
 
   const handleQuickLogin = (demoEmail: string) => {
     setEmail(demoEmail);
-    setPassword('kala2024!');
+
     setErrorMessage(null);
   };
 
@@ -364,8 +364,8 @@ export const LoginView: React.FC = () => {
           </h3>
 
           <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0 0 20px 0' }}>
-            Cliquez sur un profil pour pré-remplir instantanément les identifiants et tester l'application sous différents rôles RBAC.
-            Mot de passe unique : <code style={{ background: 'rgba(74, 111, 165, 0.15)', padding: '2px 6px', borderRadius: '4px', color: '#b4c6de' }}>kala2024!</code>
+            Cliquez sur un profil pour pré-remplir l'adresse e-mail, puis saisissez le mot de passe du compte.
+            Il est défini par la variable DEMO_PASSWORD du backend et n'est pas affiché ici.
           </p>
 
           {/* Grille des profils démo */}

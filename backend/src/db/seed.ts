@@ -145,6 +145,12 @@ function createTables() {
 }
 
 // ─── Données Initiales ────────────────────────────────────────────────────────
+const demoPassword = process.env.DEMO_PASSWORD?.trim() ?? '';
+if (!demoPassword) {
+  console.error('DEMO_PASSWORD manquant : définissez-le dans backend/.env avant de lancer le seed.');
+  process.exit(1);
+}
+
 const SEED_USERS = [
   { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             department: 'Direction Informatique & IA',      phone: '+33 1 42 68 00 01', avatarUrl: '' },
   { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', department: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02', avatarUrl: '' },
@@ -175,10 +181,10 @@ async function seed() {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
   `);
   for (const u of SEED_USERS) {
-    const hash = hashSync('kala2024!', 10);
+    const hash = hashSync(demoPassword, 10);
     insertUser.run(u.id, u.name, u.email, hash, u.role, u.department, u.phone, u.avatarUrl, now(), now());
   }
-  console.log(`  ✅ ${SEED_USERS.length} utilisateurs créés (mot de passe: kala2024!)`);
+  console.log(`  ✅ ${SEED_USERS.length} utilisateurs créés (mot de passe : variable DEMO_PASSWORD).`);
 
   // Teams
   const insertTeam = sqlite.prepare(`
@@ -213,7 +219,7 @@ async function seed() {
   console.log('\n🎉 Base de données KALA initialisée avec succès !');
   console.log('📧 Comptes disponibles :');
   for (const u of SEED_USERS) {
-    console.log(`   ${u.role.padEnd(12)} | ${u.email.padEnd(30)} | mot de passe: kala2024!`);
+    console.log(`   ${u.role.padEnd(18)} | ${u.email}`);
   }
 }
 

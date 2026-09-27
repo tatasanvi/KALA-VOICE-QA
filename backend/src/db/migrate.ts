@@ -14,6 +14,7 @@ export function createTables(): void {
       password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'AGENT',
       department TEXT, phone TEXT, avatar_url TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
+      must_change_password INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL, last_login_at TEXT
     );
     CREATE TABLE IF NOT EXISTS teams (
@@ -161,6 +162,20 @@ export function createTables(): void {
   }
 }
 
+// Comptes de démonstration : créés uniquement si SEED_DEMO_ACCOUNTS=true, et
+// jamais en production. Leur mot de passe vient de DEMO_PASSWORD.
+export function demoSeedEnabled(): boolean {
+  if (process.env.NODE_ENV === 'production') return false;
+  return process.env.SEED_DEMO_ACCOUNTS === 'true';
+}
+
+function demoPassword(): string {
+  const fromEnv = process.env.DEMO_PASSWORD?.trim();
+  if (fromEnv) return fromEnv;
+  console.warn('⚠️  DEMO_PASSWORD absent : les comptes de démonstration ne sont pas créés.');
+  return '';
+}
+
 const DEMO_USERS = [
   { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             dept: 'Direction Informatique & IA',      phone: '+33 1 42 68 00 01' },
   { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', dept: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02' },
@@ -190,21 +205,37 @@ function migrateRoles(sqlite: any): void {
   // L'ancien compte administrateur reprend l'adresse courte.
   sqlite.prepare("UPDATE users SET email = 'admin@kalavoice.ai' WHERE id = 'user-admin' AND email = 'a.moreau@kalavoice.ai'").run();
 
-  // Les trois comptes de démonstration doivent exister, même sur une base déjà peuplée.
-  const hash = hashSync('kala2024!', 10);
+  // Colonne ajoutée après coup sur une base existante.
+  const cols = sqlite.prepare('PRAGMA table_info(users)').all() as { name: string }[];
+  if (!cols.some(c => c.name === 'must_change_password')) {
+    sqlite.prepare('ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0').run();
+  }
+
+  // Les trois comptes de démonstration, uniquement si la configuration l'autorise.
+  ensureDemoAccounts(sqlite);
+}
+
+// Crée (ou complète) les comptes de démonstration. Ne fait rien sans
+// SEED_DEMO_ACCOUNTS=true, ni en production.
+function ensureDemoAccounts(sqlite: any): void {
+  if (!demoSeedEnabled()) return;
+  const password = demoPassword();
+  if (!password) return;
+
+  const hash = hashSync(password, 10);
   const now = new Date().toISOString().substring(0, 10);
-  const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`);
-  for (const u of DEMO_USERS) ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now);
+  const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, must_change_password, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?)`);
+  let created = 0;
+  for (const u of DEMO_USERS) created += ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now).changes;
+  // Les comptes de démonstration partagent un mot de passe connu : ils restent
+  // marqués « à changer » tant qu'un déploiement réel n'a pas imposé le changement.
+  const mark = sqlite.prepare('UPDATE users SET must_change_password = 1 WHERE id = ?');
+  for (const u of DEMO_USERS) mark.run(u.id);
+  if (created) console.log(`  ↪ ${created} compte(s) de démonstration créé(s) (mot de passe : variable DEMO_PASSWORD).`);
 }
 
 function seedDefaults(sqlite: any): void {
-  const now = new Date().toISOString().substring(0, 10);
-  const hash = hashSync('kala2024!', 10);
-
-  const users = DEMO_USERS;
-
-  const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`);
-  for (const u of users) ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now);
+  // Les comptes sont gérés par ensureDemoAccounts (conditionné à SEED_DEMO_ACCOUNTS).
 
   sqlite.prepare(`INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
     .run('team-1', 'Équipe Alpha – Fibre & Mobile', 'user-staff', 'Claire Delattre', 'Équipe dédiée fibre et 5G.', 8, 84.2, '2024-01-20');

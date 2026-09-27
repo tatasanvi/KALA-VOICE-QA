@@ -47,8 +47,13 @@ router.post('/', requireAuth, adminOnly, (req: Request, res: Response): void => 
     return;
   }
 
+  if (!password || String(password).length < 8) {
+    res.status(400).json({ error: 'Mot de passe requis (8 caractères minimum).' });
+    return;
+  }
+
   const id = `user-${Date.now()}`;
-  const passwordHash = hashSync(password ?? 'kala2024!', 10);
+  const passwordHash = hashSync(password, 10);
   const createdAt = new Date().toISOString().substring(0, 10);
 
   sqlite().prepare(`

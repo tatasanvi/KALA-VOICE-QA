@@ -18,14 +18,26 @@ Démarre ensemble :
 - le backend Express + SQLite (port 8000) ;
 - le frontend Vite (port 5173).
 
-Prérequis : `ffmpeg`, et l'environnement Python installé une fois (`asr-service/README.md`).
+Prérequis : `ffmpeg`, l'environnement Python installé une fois (`asr-service/README.md`),
+et un fichier `backend/.env` créé à partir de `backend/.env.example` :
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Renseignez-y `JWT_SECRET` (`openssl rand -hex 32`). Pour disposer des comptes de
+démonstration en local, mettez `SEED_DEMO_ACCOUNTS=true` et choisissez un
+`DEMO_PASSWORD`. En production (`NODE_ENV=production`), le serveur refuse de
+démarrer sans `JWT_SECRET` et ne crée jamais de compte de démonstration ; les
+comptes marqués `must_change_password` doivent voir leur mot de passe changé
+avant tout usage réel (l'écran de changement n'est pas encore implémenté).
 Sans le service Python, la transcription renvoie « Service de transcription non démarré » ;
 sans le backend, la connexion bascule en mode local et l'import est indisponible.
 
-Comptes de démonstration (mot de passe `kala2024!`) : `a.moreau@kalavoice.ai` (admin),
-`c.delattre@kalavoice.ai` (responsable qualité), `m.vasseur@kalavoice.ai` (superviseur),
-`j.dupont@kalavoice.ai` (conseiller). L'ingestion audio est réservée aux rôles
-superviseur, responsable qualité, manager et administrateur.
+Trois comptes de démonstration, dont le mot de passe est celui de `DEMO_PASSWORD` :
+`admin@kalavoice.ai` (ADMIN), `qualite@kalavoice.ai` (QUALITE_FORMATION),
+`agent@kalavoice.ai` (AGENT). L'ingestion audio est réservée aux rôles ADMIN et
+QUALITE_FORMATION.
 
 ## 📋 Description du Projet
 

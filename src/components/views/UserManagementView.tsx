@@ -314,7 +314,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       refresh();
       setModal(null);
       // Appel API en arrière-plan
-      await usersApi.create({ ...data, password: 'kala2024!' });
+      await usersApi.create({ ...data, password: (data as any).password });
     } else if (modal?.mode === 'edit' && modal.user) {
       storageService.updateUser({ ...modal.user, ...data });
       notify(`✅ Compte de ${data.name} mis à jour.`);

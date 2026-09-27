@@ -2,6 +2,7 @@
 // KALA VOICE QA — Serveur Express Principal
 // Backend REST API | Master IA & Big Data
 // =============================================================================
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { createTables } from './db/migrate.js';
@@ -85,7 +86,6 @@ app.listen(PORT, () => {
   console.log('║     GET  /api/calls  (tous rôles)                    ║');
   console.log('║     GET  /api/dashboard/metrics                      ║');
   console.log('║     GET  /api/health                                 ║');
-  console.log('║  🔑 Mot de passe démo : kala2024!                   ║');
   console.log('╚══════════════════════════════════════════════════════╝\n');
 });
 

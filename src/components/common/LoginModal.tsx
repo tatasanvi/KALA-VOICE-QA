@@ -21,7 +21,7 @@ const PRESET_ACCOUNTS = [
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
   const [email, setEmail] = useState('qualite@kalavoice.ai');
-  const [password, setPassword] = useState('kala2024!');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,7 +60,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
   const handleQuickSelect = (acc: typeof PRESET_ACCOUNTS[0]) => {
     setEmail(acc.email);
-    setPassword('kala2024!');
+
   };
 
   return (
@@ -213,7 +213,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
             <div>
               <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '6px' }}>
-                Mot de Passe (défaut démo : kala2024!)
+                Mot de passe
               </label>
               <div style={{ position: 'relative' }}>
                 <Key size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '11px' }} />
