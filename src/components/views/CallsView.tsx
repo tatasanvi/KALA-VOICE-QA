@@ -136,6 +136,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
             Supervision des enregistrements audio, transcription Whisper et audits de conformité
           </p>
         </div>
+      </div>
 
       {/* Bandeau de statuts rapides */}
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>

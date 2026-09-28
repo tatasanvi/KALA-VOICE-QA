@@ -33,8 +33,8 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   // Initialisation de l'évaluation si non existante
   const [evaluation, setEvaluation] = useState<QualityEvaluation | null>(() => {
     if (existingEval) return existingEval;
-    if (!currentCall) return {} as QualityEvaluation;
-    return QualityService.generateAiSuggestedEvaluation(currentCall, criteria, currentUser.name);
+    if (currentCall) return QualityService.generateAiSuggestedEvaluation(currentCall, criteria, currentUser.name);
+    return null;
   });
 
   const [notification, setNotification] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   // Le conseiller ne note personne : il consulte ses évaluations et peut demander une révision.
   if (currentRole === 'AGENT') return <MyEvaluationsPanel />;
 
-  if (calls.length === 0 || !currentCall) return (
+  if (calls.length === 0 || !currentCall || !evaluation) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       <RevisionRequestsPanel />
       <EmptyState title="Aucun appel à évaluer" />
@@ -50,6 +50,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   );
 
   const handleScoreChange = (criterionId: string, newScore: number) => {
+    if (!evaluation) return;
     const updatedItems = evaluation.items.map(item => {
       if (item.criterionId === criterionId) {
         return {
@@ -71,6 +72,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   };
 
   const handleCommentChange = (criterionId: string, comment: string) => {
+    if (!evaluation) return;
     const updatedItems = evaluation.items.map(item => {
       if (item.criterionId === criterionId) {
         return { ...item, comment };
@@ -81,6 +83,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   };
 
   const handleAcceptAiScore = (criterionId: string) => {
+    if (!evaluation) return;
     const updatedItems = evaluation.items.map(item => {
       if (item.criterionId === criterionId) {
         return {
@@ -101,6 +104,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   };
 
   const handleFinalValidation = () => {
+    if (!evaluation) return;
     const validatedEval: QualityEvaluation = {
       ...evaluation,
       status: 'VALIDÉE_RESPONSABLE',
@@ -142,7 +146,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button 
             className="btn btn-secondary btn-sm"
-            onClick={() => ReportService.printCallQualityReport(currentCall, evaluation)}
+            onClick={() => ReportService.printCallQualityReport(currentCall, evaluation || undefined)}
           >
             <Printer size={14} />
             <span>Imprimer Rapport</span>

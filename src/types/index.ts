@@ -319,6 +319,11 @@ export interface ExperimentConfiguration {
   asrModel: string;
   denoiserAlgorithm: string;
   postProcessingApplied: string;
+  estimatedRtf: number; // Real-Time Factor (temps calcul / durée audio)
+  averageWer: number; // Word Error Rate %
+  averageCer: number; // Character Error Rate %
+  snrImprovementDb: number; // Gain en SNR
+  confidenceScoreAvg: number; // Confiance moyenne
 }
 
 export interface BenchmarkSample {

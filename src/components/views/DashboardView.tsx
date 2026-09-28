@@ -393,14 +393,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                   </td>
                   <td style={{ fontSize: '12.5px' }}>{ag.teamName || '—'}</td>
                   <td style={{ fontSize: '12.5px' }}>{ag.campaignName || '—'}</td>
-                  <td style={{ fontFamily: 'JetBrains Mono', fontSize: '12px' }}>
-                    <span className={`badge ${
-                      ag.status === 'ACTIF' ? 'badge-green' :
-                      ag.status === 'EN_COACHING' ? 'badge-amber' :
-                      ag.status === 'EN_FORMATION' ? 'badge-blue' : 'badge-gray'
-                    }`} style={{ fontSize: '10.5px' }}>
+                  <td>
+                    <span
+                      className={`badge ${
+                        ag.status === 'ACTIF'
+                          ? 'badge-green'
+                          : ag.status === 'EN_COACHING'
+                            ? 'badge-amber'
+                            : 'badge-gray'
+                      }`}
+                      style={{ fontSize: '10.5px' }}
+                    >
                       {ag.status}
                     </span>
+
+                    <div
+                      style={{
+                        fontSize: '10.5px',
+                        color: 'var(--text-muted)',
+                        marginTop: '4px'
+                      }}
+                    >
+                      {ag.callsAnalyzedCount} appel(s) analysé(s)
+                    </div>
                   </td>
                   <td>
                     <button 
@@ -488,8 +503,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                       {Math.floor(c.durationSeconds / 60)}m {c.durationSeconds % 60}s
                     </td>
                     <td>
-                      <span className={`badge ${c.audioMetadata.snrDb >= 15 ? 'badge-green' : 'badge-amber'}`} style={{ fontSize: '11px' }}>
-                        {c.audioMetadata.snrDb} dB
+                      <span className={`badge ${(c.audioMetadata.snrDb ?? 0) >= 15 ? 'badge-green' : 'badge-amber'}`} style={{ fontSize: '11px' }}>
+                        {c.audioMetadata.snrDb !== undefined ? `${c.audioMetadata.snrDb} dB` : '—'}
                       </span>
                     </td>
                     <td>

@@ -64,10 +64,10 @@ export const LoginView: React.FC = () => {
   };
 
   // Raccourcis de connexion 1-clic pour le jury de soutenance
-  const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string }[] = [
-    { role: 'ADMIN', title: 'Administrateur', email: 'admin@kalavoice.ai', color: '#d98383', desc: 'Accès total, gestion des utilisateurs et journal d\'audit' },
-    { role: 'QUALITE_FORMATION', title: 'Qualité & Formation', email: 'qualite@kalavoice.ai', color: '#9fb7d6', desc: 'Import et transcription, évaluations, coaching, contestations' },
-    { role: 'AGENT', title: 'Conseiller Client', email: 'agent@kalavoice.ai', color: '#94a3b8', desc: 'Consultation de ses propres résultats et contestation' },
+  const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string; badge: string }[] = [
+    { role: 'ADMIN', title: 'Administrateur', email: 'admin@kalavoice.ai', color: '#d98383', badge: 'Admin', desc: 'Accès total, gestion des utilisateurs et journal d\'audit' },
+    { role: 'QUALITE_FORMATION', title: 'Qualité & Formation', email: 'qualite@kalavoice.ai', color: '#9fb7d6', badge: 'Qualité & Formation', desc: 'Import et transcription, évaluations, coaching, contestations' },
+    { role: 'AGENT', title: 'Conseiller Client', email: 'agent@kalavoice.ai', color: '#94a3b8', badge: 'Conseiller', desc: 'Consultation de ses propres résultats et contestation' },
   ];
 
   const handleQuickLogin = (demoEmail: string) => {
