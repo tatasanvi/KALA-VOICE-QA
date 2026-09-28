@@ -38,6 +38,7 @@ import { SettingsAuditView } from './components/views/SettingsAuditView';
 import { UserManagementView } from './components/views/UserManagementView';
 
 import { authApi } from './services/apiClient';
+import { PrivacyView } from './components/views/PrivacyView';
 
 // ─── Layout Authentifié avec Sidebar, Navbar & Bannière Master 2 ───────────────
 const SessionStrip: React.FC<{ isApiOnline: boolean }> = ({ isApiOnline }) => {
@@ -89,6 +90,7 @@ const AppLayout: React.FC = () => {
     if (path.startsWith('/equipes')) return "Structure des Équipes & Plateaux Télécom";
     if (path.startsWith('/campagnes')) return "Structure des Campagnes Métiers";
     if (path.startsWith('/rapports')) return "Rapports d'Audit & Synthèses Métiers";
+    if (path.startsWith('/donnees-personnelles')) return "Protection des Données (RGPD)";
     if (path.startsWith('/experimentation')) return "Laboratoire Expérimental ASR (Mémoire Master IA)";
     if (path.startsWith('/parametres')) return "Sécurité, Traçabilité & Paramètres Système";
     if (path.startsWith('/admin/users')) return "Administration & Gestion des Comptes Utilisateurs";
@@ -347,6 +349,7 @@ export const App: React.FC = () => {
             {/* Rapports & Expérimentation */}
             <Route path="/rapports" element={<ReportsRouteWrapper />} />
             <Route path="/experimentation" element={<ExperimentLabRouteWrapper />} />
+            <Route path="/donnees-personnelles" element={<PrivacyView />} />
 
             {/* Administration & Paramètres (RBAC Protégé) */}
             <Route 

@@ -297,6 +297,16 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <LogOut size={16} />
           </button>
         </div>
+
+        <button
+          onClick={() => handleNavigate('/donnees-personnelles')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: '8px 4px 0',
+            fontSize: '11px', color: 'var(--text-muted)', textAlign: 'left', width: '100%'
+          }}
+        >
+          Protection des données (RGPD)
+        </button>
       </div>
     </aside>
   );
