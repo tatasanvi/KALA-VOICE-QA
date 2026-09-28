@@ -9,7 +9,7 @@ export const users = sqliteTable('users', {
   name:         text('name').notNull(),
   email:        text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
-  role:         text('role').notNull().default('AGENT'), // ADMIN | MANAGER | SUPERVISOR | QA_MANAGER | TRAINER | AGENT
+  role:         text('role').notNull().default('AGENT'), // ADMIN | QUALITE_FORMATION | AGENT
   department:   text('department'),
   phone:        text('phone'),
   avatarUrl:    text('avatar_url'),

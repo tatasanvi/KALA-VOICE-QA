@@ -4,12 +4,12 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 const { hashSync } = bcrypt;
-import { requireAuth, requireRole, ADMIN_ROLES } from '../middleware/auth.js';
+import { requireAuth, requireRole, ADMIN_ONLY } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
 
 const router = Router();
-const adminOnly = requireRole(...ADMIN_ROLES);
+const adminOnly = requireRole(...ADMIN_ONLY);
 
 const toUser = (u: any) => ({
   id: u.id, name: u.name, email: u.email, role: u.role,
@@ -47,8 +47,13 @@ router.post('/', requireAuth, adminOnly, (req: Request, res: Response): void => 
     return;
   }
 
+  if (!password || String(password).length < 8) {
+    res.status(400).json({ error: 'Mot de passe requis (8 caractères minimum).' });
+    return;
+  }
+
   const id = `user-${Date.now()}`;
-  const passwordHash = hashSync(password ?? 'kala2024!', 10);
+  const passwordHash = hashSync(password, 10);
   const createdAt = new Date().toISOString().substring(0, 10);
 
   sqlite().prepare(`
@@ -111,7 +116,7 @@ router.put('/:id', requireAuth, adminOnly, (req: Request, res: Response): void =
 router.patch('/:id/role', requireAuth, adminOnly, (req: Request, res: Response): void => {
   const { id } = req.params;
   const { role } = req.body as { role?: string };
-  const valid = ['ADMIN','MANAGER','SUPERVISOR','QA_MANAGER','TRAINER','AGENT'];
+  const valid = ['ADMIN', 'QUALITE_FORMATION', 'AGENT'];
 
   if (!role || !valid.includes(role)) {
     res.status(400).json({ error: `Rôle invalide. Valeurs acceptées: ${valid.join(', ')}` });

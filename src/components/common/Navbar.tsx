@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Barre Supérieure (Navbar)
+// KALA VOICE QA · Barre Supérieure (Navbar)
 // Statut API, Débruiteur KALA, Notifications en direct & Sélecteur de Rôle RBAC
 // =============================================================================
 import React, { useState } from 'react';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserRole, TeamNotification } from '../../types';
 import { storageService } from '../../services/storageService';
 import { useAuth } from '../../context/AuthContext';
+import { Avatar } from './Avatar';
 import { 
   ShieldCheck, Sparkles, Bell, LogOut, Check, 
   Wifi, WifiOff, X
@@ -23,7 +24,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
-  activeViewTitle = "KALA VOICE QA — Plateforme Intelligente d'Analyse Vocale",
+  activeViewTitle = "KALA Voice QA",
   onNavigate,
   isOnline = true
 }) => {
@@ -35,15 +36,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
 
   const roleLabels: Record<UserRole, { label: string; badge: string; color: string }> = {
-    ADMIN:      { label: 'Administrateur',    badge: 'Système & IA',       color: 'badge-purple' },
-    MANAGER:    { label: 'Manager Opérations',badge: 'Direction Métier',   color: 'badge-blue' },
-    SUPERVISOR: { label: 'Superviseur',       badge: 'Plateau Télécom',    color: 'badge-blue' },
-    QA_MANAGER: { label: 'Responsable Qualité',badge: 'Audit & Conformité', color: 'badge-green' },
-    TRAINER:    { label: 'Formateur / Coach', badge: 'Académie Métier',    color: 'badge-amber' },
-    AGENT:      { label: 'Conseiller Client', badge: 'Équipe Alpha',       color: 'badge-gray' }
+    ADMIN:             { label: 'Administrateur',     badge: 'Système & IA',                 color: 'badge-blue' },
+    QUALITE_FORMATION: { label: 'Qualité & Formation', badge: 'Audit, coaching & supervision', color: 'badge-green' },
+    AGENT:             { label: 'Conseiller Client',   badge: 'Consultation',                 color: 'badge-gray' }
   };
 
   const currentRole = role || 'AGENT';
+
 
   const handleNotificationClick = (notif: TeamNotification) => {
     storageService.markNotificationAsRead(notif.id);
@@ -236,11 +235,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Utilisateur Actif & Déconnexion */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img 
-            src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150'} 
-            alt={user?.name || 'Utilisateur'} 
-            style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', border: '2px solid var(--border-active)', objectFit: 'cover' }}
-          />
+          <Avatar name={user?.name} size={36} />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: '13px', fontWeight: 700, lineHeight: 1.2 }}>{user?.name || 'Invité'}</div>
             <span className={`badge ${roleLabels[currentRole].color}`} style={{ padding: '1px 6px', fontSize: '10.5px', marginTop: '2px' }}>

@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Client HTTP API (Frontend → Backend)
+// KALA VOICE QA · Client HTTP API (Frontend → Backend)
 // Intercepteur JWT automatique + fallback localStorage en cas d'API hors ligne
 // =============================================================================
 
@@ -49,8 +49,10 @@ export async function apiCall<T = any>(
     const isJson = res.headers.get('content-type')?.includes('application/json');
     const data = isJson ? await res.json() : null;
 
-    if (res.status === 401) {
-      // Token expiré → on nettoie
+    // 401 : session invalide. On nettoie localement et on signale une seule fois.
+    // La route de déconnexion elle-même est exclue, sinon l'événement relancerait
+    // un appel qui renverrait 401, et ainsi de suite (boucle infinie).
+    if (res.status === 401 && path !== '/auth/logout') {
       tokenStore.clearAll();
       window.dispatchEvent(new CustomEvent('kala:logout'));
     }
@@ -62,7 +64,7 @@ export async function apiCall<T = any>(
       ok: res.ok,
     };
   } catch {
-    return { error: 'API indisponible — mode hors-ligne actif.', status: 0, ok: false };
+    return { error: 'API indisponible · mode hors-ligne actif.', status: 0, ok: false };
   }
 }
 
@@ -408,4 +410,30 @@ export const realCallsApi = {
     const res = await apiCall<{ data: any[] }>('/calls?source=real&limit=100');
     return { ...res, data: res.ok && res.data ? res.data.data.map(toRealCall) : undefined };
   },
+};
+
+// ─── Évaluations du conseiller et demandes de révision ───────────────────────
+export interface RevisionRequest {
+  id: string;
+  evaluationId: string;
+  callId: string | null;
+  agentId: string;
+  requestedByName: string;
+  reason: string;
+  status: 'EN_ATTENTE' | 'ACCEPTEE' | 'REFUSEE';
+  createdAt: string;
+  handledByName: string | null;
+  handledAt: string | null;
+  resolutionNote: string | null;
+}
+
+export const revisionsApi = {
+  list:   (status?: string) => apiCall<RevisionRequest[]>(`/revisions${status ? `?status=${status}` : ''}`),
+  create: (evaluationId: string, reason: string) => apiCall<RevisionRequest>('/revisions', 'POST', { evaluationId, reason }),
+  handle: (id: string, status: 'ACCEPTEE' | 'REFUSEE', resolutionNote?: string) =>
+    apiCall<RevisionRequest>(`/revisions/${id}`, 'PATCH', { status, resolutionNote }),
+};
+
+export const myEvaluationsApi = {
+  list: () => apiCall<any[]>('/evaluations/mine'),
 };

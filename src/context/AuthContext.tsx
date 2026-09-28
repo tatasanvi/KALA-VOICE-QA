@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Contexte d'Authentification & Session (RBAC)
+// KALA VOICE QA · Contexte d'Authentification & Session (RBAC)
 // Gestion de la session persistante, synchronisation JWT et rôles applicatifs
 // =============================================================================
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -15,7 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   role: UserRole | null;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: (local?: boolean) => void;
   updateUserProfile: (updates: Partial<User>) => void;
   switchRole: (newRole: UserRole) => void;
   hasRole: (allowedRoles: UserRole[]) => boolean;
@@ -23,15 +23,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Comptes utilisateurs pré-configurés pour la plateforme (password: kala2024!)
-const DEMO_CREDENTIALS: Record<string, UserRole> = {
-  'a.moreau@kalavoice.ai': 'ADMIN',
-  'c.delattre@kalavoice.ai': 'QA_MANAGER',
-  's.laurent@kalavoice.ai': 'MANAGER',
-  'm.vasseur@kalavoice.ai': 'SUPERVISOR',
-  'p.simon@kalavoice.ai': 'TRAINER',
-  'j.dupont@kalavoice.ai': 'AGENT',
-};
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -73,7 +64,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Écoute de l'événement global de déconnexion automatique (401 API)
     const handleRemoteLogout = () => {
-      logout();
+      logout(true);
     };
     window.addEventListener('kala:logout', handleRemoteLogout);
     return () => window.removeEventListener('kala:logout', handleRemoteLogout);
@@ -104,53 +95,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { success: true };
       }
 
-      // 2. Si le backend retourne une erreur d'identifiants explicite
+      // 2. Erreur d'identifiants renvoyée par le backend
       if (res.status === 401 || res.status === 400) {
         setIsLoading(false);
         return { success: false, error: res.error || 'Email ou mot de passe incorrect.' };
       }
 
-      // 3. Fallback hors-ligne intelligent pour les comptes de démonstration (password: kala2024!)
-      if (password === 'kala2024!' && DEMO_CREDENTIALS[cleanEmail]) {
-        const matchedRole = DEMO_CREDENTIALS[cleanEmail];
-        const initialUser = INITIAL_USERS.find(u => u.email.toLowerCase() === cleanEmail) || {
-          id: `user-${Date.now()}`,
-          name: cleanEmail.split('@')[0].replace('.', ' ').toUpperCase(),
-          email: cleanEmail,
-          role: matchedRole,
-          department: 'Centre de Contacts KALA',
-          avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-          isActive: true,
-          createdAt: new Date().toISOString()
-        };
-
-        const syntheticToken = `demo_jwt_${btoa(cleanEmail)}_${Date.now()}`;
-        setToken(syntheticToken);
-        setUser(initialUser);
-        storageService.setCurrentUser(initialUser);
-
-        if (rememberMe) {
-          tokenStore.set(syntheticToken);
-          tokenStore.setUser(initialUser);
-        }
-
-        setIsLoading(false);
-        return { success: true };
-      }
-
+      // 3. Backend injoignable : aucune session n'est ouverte. L'authentification
+      // passe uniquement par le serveur et un vrai JWT.
       setIsLoading(false);
-      return { success: false, error: 'Identifiants incorrects ou compte inactif. Utilisez le mot de passe démo : kala2024!' };
+      return { success: false, error: 'Serveur indisponible, réessayez.' };
     } catch {
       setIsLoading(false);
       return { success: false, error: 'Erreur lors de la tentative d\'authentification.' };
     }
   };
 
-  const logout = () => {
-    try {
-      authApi.logout();
-    } catch {
-      // Ignorer si hors-ligne
+  // `local` : déconnexion déclenchée par un 401 déjà reçu. On ne rappelle alors
+  // pas l'API (l'appel renverrait 401 et relancerait la déconnexion en boucle).
+  const logout = (local = false) => {
+    if (!local) {
+      try {
+        authApi.logout();
+      } catch {
+        // Ignorer si hors-ligne
+      }
     }
 
     tokenStore.clearAll();

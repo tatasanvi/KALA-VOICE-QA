@@ -14,6 +14,7 @@ export function createTables(): void {
       password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'AGENT',
       department TEXT, phone TEXT, avatar_url TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
+      must_change_password INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL, last_login_at TEXT
     );
     CREATE TABLE IF NOT EXISTS teams (
@@ -60,6 +61,14 @@ export function createTables(): void {
       quality_evaluation_id TEXT, quality_score REAL,
       is_urgent_review_required INTEGER NOT NULL DEFAULT 0,
       notes TEXT, created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS revision_requests (
+      id TEXT PRIMARY KEY, evaluation_id TEXT NOT NULL, call_id TEXT,
+      agent_id TEXT NOT NULL, requested_by_user_id TEXT NOT NULL,
+      requested_by_name TEXT NOT NULL, reason TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'EN_ATTENTE',
+      created_at TEXT NOT NULL,
+      handled_by_name TEXT, handled_at TEXT, resolution_note TEXT
     );
     CREATE TABLE IF NOT EXISTS evaluations (
       id TEXT PRIMARY KEY, call_id TEXT NOT NULL, agent_id TEXT NOT NULL,
@@ -141,6 +150,9 @@ export function createTables(): void {
     );
   `);
 
+  // Migration des rôles : exécutée à chaque démarrage, sur une base existante comme neuve.
+  migrateRoles(sqlite);
+
   // Seed initial si la table users est vide
   const count = sqlite.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number };
   if (count.c === 0) {
@@ -150,24 +162,83 @@ export function createTables(): void {
   }
 }
 
-function seedDefaults(sqlite: any): void {
+// Comptes de démonstration : créés uniquement si SEED_DEMO_ACCOUNTS=true, et
+// jamais en production. Leur mot de passe vient de DEMO_PASSWORD.
+export function demoSeedEnabled(): boolean {
+  if (process.env.NODE_ENV === 'production') return false;
+  return process.env.SEED_DEMO_ACCOUNTS === 'true';
+}
+
+function demoPassword(): string {
+  const fromEnv = process.env.DEMO_PASSWORD?.trim();
+  if (fromEnv) return fromEnv;
+  console.warn('⚠️  DEMO_PASSWORD absent : les comptes de démonstration ne sont pas créés.');
+  return '';
+}
+
+const DEMO_USERS = [
+  { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             dept: 'Direction Informatique & IA',      phone: '+33 1 42 68 00 01' },
+  { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', dept: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02' },
+  { id: 'user-agent', name: 'Jean Dupont',      email: 'agent@kalavoice.ai',   role: 'AGENT',             dept: 'Conseillers',                      phone: '+33 1 42 68 00 03' },
+];
+
+// Migration des rôles : passage de six rôles à trois.
+// MANAGER, SUPERVISOR, QA_MANAGER et TRAINER deviennent QUALITE_FORMATION.
+function migrateRoles(sqlite: any): void {
+  const changed = sqlite.prepare(`
+    UPDATE users SET role = 'QUALITE_FORMATION'
+    WHERE role IN ('MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER')
+  `).run().changes;
+  sqlite.prepare(`
+    UPDATE audit_logs SET user_role = 'QUALITE_FORMATION'
+    WHERE user_role IN ('MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER')
+  `).run();
+  // Comptes de démonstration de l'ancienne série (un par ancien rôle), remplacés
+  // par les trois comptes ci-dessous.
+  const removed = sqlite.prepare(`
+    DELETE FROM users WHERE id IN ('user-manager', 'user-supervisor', 'user-qa', 'user-trainer', 'user-agent-1')
+  `).run().changes;
+  if (changed || removed) {
+    console.log(`  ↪ Migration des rôles : ${changed} compte(s) converti(s), ${removed} ancien(s) compte(s) de démonstration retiré(s).`);
+  }
+
+  // L'ancien compte administrateur reprend l'adresse courte.
+  sqlite.prepare("UPDATE users SET email = 'admin@kalavoice.ai' WHERE id = 'user-admin' AND email = 'a.moreau@kalavoice.ai'").run();
+
+  // Colonne ajoutée après coup sur une base existante.
+  const cols = sqlite.prepare('PRAGMA table_info(users)').all() as { name: string }[];
+  if (!cols.some(c => c.name === 'must_change_password')) {
+    sqlite.prepare('ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0').run();
+  }
+
+  // Les trois comptes de démonstration, uniquement si la configuration l'autorise.
+  ensureDemoAccounts(sqlite);
+}
+
+// Crée (ou complète) les comptes de démonstration. Ne fait rien sans
+// SEED_DEMO_ACCOUNTS=true, ni en production.
+function ensureDemoAccounts(sqlite: any): void {
+  if (!demoSeedEnabled()) return;
+  const password = demoPassword();
+  if (!password) return;
+
+  const hash = hashSync(password, 10);
   const now = new Date().toISOString().substring(0, 10);
-  const hash = hashSync('kala2024!', 10);
+  const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, must_change_password, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?)`);
+  let created = 0;
+  for (const u of DEMO_USERS) created += ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now).changes;
+  // Les comptes de démonstration partagent un mot de passe connu : ils restent
+  // marqués « à changer » tant qu'un déploiement réel n'a pas imposé le changement.
+  const mark = sqlite.prepare('UPDATE users SET must_change_password = 1 WHERE id = ?');
+  for (const u of DEMO_USERS) mark.run(u.id);
+  if (created) console.log(`  ↪ ${created} compte(s) de démonstration créé(s) (mot de passe : variable DEMO_PASSWORD).`);
+}
 
-  const users = [
-    { id: 'user-admin',      name: 'Alexandre Moreau', email: 'a.moreau@kalavoice.ai',   role: 'ADMIN',      dept: 'Direction Informatique & IA',     phone: '+33 1 42 68 00 01' },
-    { id: 'user-manager',    name: 'Sophie Laurent',   email: 's.laurent@kalavoice.ai',  role: 'MANAGER',    dept: 'Direction des Opérations',        phone: '+33 1 42 68 00 02' },
-    { id: 'user-supervisor', name: 'Marc Vasseur',     email: 'm.vasseur@kalavoice.ai',  role: 'SUPERVISOR', dept: 'Plateau Télécom',                 phone: '+33 1 42 68 00 03' },
-    { id: 'user-qa',         name: 'Claire Delattre',  email: 'c.delattre@kalavoice.ai', role: 'QA_MANAGER', dept: 'Assurance Qualité & Conformité',  phone: '+33 1 42 68 00 04' },
-    { id: 'user-trainer',    name: 'Patrick Simon',    email: 'p.simon@kalavoice.ai',    role: 'TRAINER',    dept: 'Académie & Formation Métier',     phone: '+33 1 42 68 00 05' },
-    { id: 'user-agent-1',    name: 'Jean Dupont',      email: 'j.dupont@kalavoice.ai',   role: 'AGENT',      dept: 'Équipe Alpha - Service Fibre',    phone: '+33 1 42 68 00 06' },
-  ];
-
-  const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`);
-  for (const u of users) ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now);
+function seedDefaults(sqlite: any): void {
+  // Les comptes sont gérés par ensureDemoAccounts (conditionné à SEED_DEMO_ACCOUNTS).
 
   sqlite.prepare(`INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run('team-1', 'Équipe Alpha – Fibre & Mobile', 'user-supervisor', 'Marc Vasseur', 'Équipe dédiée fibre et 5G.', 8, 84.2, '2024-01-20');
+    .run('team-1', 'Équipe Alpha – Fibre & Mobile', 'user-staff', 'Claire Delattre', 'Équipe dédiée fibre et 5G.', 8, 84.2, '2024-01-20');
 
   sqlite.prepare(`INSERT OR IGNORE INTO campaigns (id, name, type, client_sector, target_quality_score, active_agents_count, total_calls_count, compliance_rate, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .run('camp-1', 'Télécom Fibre & Mobile — Rétention', 'ENTRANT', 'Télécommunications', 85, 24, 1420, 94.2, "Fidélisation et traitement des résiliations.", '2024-01-15');

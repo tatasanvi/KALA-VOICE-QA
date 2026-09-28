@@ -11,6 +11,15 @@ import {
   INITIAL_AUDIT_LOGS, INITIAL_METRICS, SCIENTIFIC_EXPERIMENT_CONFIGS, BENCHMARK_SAMPLES 
 } from '../data/initialData';
 
+// Aucune donnée fictive n'est chargée : les listes restent vides tant qu'aucun
+// appel réel n'a été transcrit (les vrais appels viennent du backend).
+const EMPTY_METRICS: DashboardMetrics = {
+  totalCalls: 0, analyzedCalls: 0, transcriptionsCompleted: 0,
+  averageQualityScore: 0, complianceRate: 0, totalAgentsCount: 0,
+  totalTeamsCount: 0, urgentReviewCallsCount: 0,
+  coachingNeededAgentsCount: 0, averageProgressionPercentage: 0,
+};
+
 class StorageService {
   private users: User[];
   private currentUser: User;
@@ -33,36 +42,23 @@ class StorageService {
 
   constructor() {
     this.users = this.load('kala_users', INITIAL_USERS);
-    this.currentUser = this.load('kala_current_user', INITIAL_USERS[3]); // Default: Claire Delattre (QA_MANAGER)
-    this.campaigns = this.load('kala_campaigns', INITIAL_CAMPAIGNS);
-    this.teams = this.load('kala_teams', INITIAL_TEAMS);
-    this.agents = this.load('kala_agents', INITIAL_AGENTS);
+    this.currentUser = this.load('kala_current_user', INITIAL_USERS[0]); // Par défaut : premier compte (rôle réel donné par le JWT)
+    this.campaigns = this.load('kala_campaigns_v2', []);
+    this.teams = this.load('kala_teams_v2', []);
+    this.agents = this.load('kala_agents_v2', []);
     this.criteria = this.load('kala_criteria', QUALITY_CRITERIA_LIST);
-    // ── Versioning du schéma de données ────────────────────────────────────────
-    // Si la version en cache est différente, on vide les calls/évaluations
-    // pour s'assurer qu'on repart de zéro (les appels viennent de l'import).
-    const SCHEMA_VERSION = '2.0.0';
-    const storedVersion = localStorage.getItem('kala_schema_version');
-    if (storedVersion !== SCHEMA_VERSION) {
-      localStorage.removeItem('kala_calls');
-      localStorage.removeItem('kala_evaluations');
-      localStorage.removeItem('kala_notifications');
-      localStorage.setItem('kala_schema_version', SCHEMA_VERSION);
-    }
-    // ───────────────────────────────────────────────────────────────────────────
-
-    this.calls = this.load('kala_calls', []);         // Démarre vide : les appels arrivent via import audio
-    this.evaluations = this.load('kala_evaluations', []); // Démarre vide : évaluations créées après import
-    this.coachingPlans = this.load('kala_coaching_plans', INITIAL_COACHING_PLANS);
+    this.calls = this.load('kala_calls_v2', []);
+    this.evaluations = this.load('kala_evaluations_v2', []);
+    this.coachingPlans = this.load('kala_coaching_plans_v2', []);
     this.trainingModules = this.load('kala_training_modules', INITIAL_TRAINING_MODULES);
-    this.trainingSessions = this.load('kala_training_sessions', INITIAL_TRAINING_SESSIONS);
-    this.auditLogs = this.load('kala_audit_logs', INITIAL_AUDIT_LOGS);
-    this.metrics = this.load('kala_metrics', INITIAL_METRICS);
+    this.trainingSessions = this.load('kala_training_sessions_v2', []);
+    this.auditLogs = this.load('kala_audit_logs_v2', []);
+    this.metrics = this.load('kala_metrics_v2', EMPTY_METRICS);
     this.experimentConfigs = this.load('kala_experiment_configs_v2', SCIENTIFIC_EXPERIMENT_CONFIGS);
     this.benchmarkSamples = this.load('kala_benchmark_samples_v2', BENCHMARK_SAMPLES);
     
-    // Notifications : démarrage propre, générées dynamiquement depuis les vrais appels importés
-    this.notifications = this.load('kala_notifications', []);
+    // Initialiser les notifications d'équipe
+    this.notifications = this.load('kala_notifications_v2', []);
 
     this.ctiConfig = this.load('kala_cti_config', {
       provider: 'GENESYS_CLOUD',

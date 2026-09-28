@@ -3,7 +3,8 @@ import {
   X, PhoneCall, Mic, User, Bot, Shield, AlertTriangle, 
   CheckCircle2, Clock, MessageSquare, TrendingUp, BarChart2,
   Zap, Eye, HelpCircle, ChevronDown, ChevronUp, Play,
-  Volume2, Pause, Sparkles, Target, ArrowRight
+  Volume2, Pause, Sparkles, Target, ArrowRight,
+  Calendar, Building2, Phone, Scissors, Tag, KeyRound, FileText, Ban, ListChecks, Trash2, Lock
 } from 'lucide-react';
 import { Call, UserRole } from '../../types';
 
@@ -16,21 +17,21 @@ interface CallDetailModalProps {
 }
 
 const SentimentBadge: React.FC<{ sentiment: string }> = ({ sentiment }) => {
-  const map: Record<string, { color: string; emoji: string }> = {
-    POSITIF: { color: '#6db89a', emoji: '😊' },
-    NEUTRE: { color: '#94a3b8', emoji: '😐' },
-    MITIGÉ: { color: '#d9ae55', emoji: '😕' },
-    NÉGATIF: { color: '#d98383', emoji: '😠' },
-    TRÈS_FRUSTRÉ: { color: '#ef4444', emoji: '😡' },
+  const map: Record<string, { color: string }> = {
+    POSITIF: { color: '#6db89a' },
+    NEUTRE: { color: '#94a3b8' },
+    MITIGÉ: { color: '#d9ae55' },
+    NÉGATIF: { color: '#d98383' },
+    TRÈS_FRUSTRÉ: { color: '#ef4444' },
   };
-  const c = map[sentiment] || { color: '#94a3b8', emoji: '❓' };
+  const c = map[sentiment] || { color: '#94a3b8' };
   return (
     <span style={{ 
       display: 'inline-flex', alignItems: 'center', gap: '4px',
       padding: '2px 8px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 600,
       background: `${c.color}22`, color: c.color, border: `1px solid ${c.color}44`
     }}>
-      {c.emoji} {sentiment.replace('_', ' ')}
+      {sentiment.replace('_', ' ')}
     </span>
   );
 };
@@ -120,15 +121,15 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 </span>
               )}
             </div>
-            <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '6px' }}>
-              {call.callNumber} — {call.agentName}
+            <h2 style={{ fontSize: '22px', fontWeight: 900, marginBottom: '4px' }}>
+              {call.callNumber} · {call.agentName}
             </h2>
             <div style={{ display: 'flex', gap: '16px', fontSize: '12.5px', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-              <span>📅 {call.callDate}</span>
-              <span>⏱ {durationMin}m {durationSec}s</span>
-              <span>🏢 {call.campaignName.split('—')[0]}</span>
-              <span>👤 {call.customerNameMasked}</span>
-              <span>📞 {call.customerPhoneMasked}</span>
+              <span><Calendar size={12} /> {call.callDate}</span>
+              <span><Clock size={12} /> {durationMin}m {durationSec}s</span>
+              <span><Building2 size={12} /> {call.campaignName.split('—')[0]}</span>
+              <span><User size={12} /> {call.customerNameMasked}</span>
+              <span><Phone size={12} /> {call.customerPhoneMasked}</span>
               <span style={{ color: call.direction === 'ENTRANT' ? '#6db89a' : '#9fb7d6' }}>
                 {call.direction === 'ENTRANT' ? '↙ Entrant' : '↗ Sortant'}
               </span>
@@ -186,7 +187,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 audio.estimatedNoiseLevel === 'FAIBLE' ? 'badge-green' :
                 audio.estimatedNoiseLevel === 'MODÉRÉ' ? 'badge-amber' : 'badge-red'
               }`} style={{ fontSize: '11px' }}>
-                {audio.estimatedNoiseLevel} • SNR {audio.snrDb} dB
+                {audio.estimatedNoiseLevel}{audio.snrDb !== undefined ? ` • SNR ${audio.snrDb} dB` : ''}
               </span>
             </span>
             <span>Qualité audio : <strong style={{ color: audio.audioQualityScore >= 80 ? '#6db89a' : '#d9ae55' }}>{audio.audioQualityScore}/100</strong></span>
@@ -267,11 +268,11 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-secondary)' }}>Sentiment Agent / Client</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '12.5px' }}>🧑‍💼 Agent :</span>
+                      <span style={{ fontSize: '12.5px' }}>Agent :</span>
                       <SentimentBadge sentiment={a.sentimentAgent} />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '12.5px' }}>👤 Client :</span>
+                      <span style={{ fontSize: '12.5px' }}>Client :</span>
                       <SentimentBadge sentiment={a.sentimentClient} />
                     </div>
                   </div>
@@ -299,9 +300,9 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '16px', fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      <span>✂️ {a.interruptionCount} interruptions</span>
+                      <span><Scissors size={12} /> {a.interruptionCount} interruptions</span>
                       <span>⏸ {a.totalSilenceSeconds}s silences</span>
-                      <span>💬 {a.speechRateWpm} mots/min</span>
+                      <span><MessageSquare size={12} /> {a.speechRateWpm} mots/min</span>
                     </div>
                   </div>
                 </div>
@@ -310,7 +311,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* Actions & Moments Critiques */}
               {a.criticalMoments.length > 0 && (
                 <div style={{ background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '12px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px', color: '#d9ae55' }}>⚡ Moments Critiques Détectés</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px', color: '#d9ae55' }}>Moments Critiques Détectés</h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {a.criticalMoments.slice(0, 5).map((m, i) => (
                       <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', fontSize: '12.5px' }}>
@@ -357,7 +358,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                 <div>
-                  <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Transcription Synchronisée — {t.versionNumber === 1 ? 'Version Brute' : `Version Corrigée v${t.versionNumber}`}</h3>
+                  <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Transcription Synchronisée · {t.versionNumber === 1 ? 'Version Brute' : `Version Corrigée v${t.versionNumber}`}</h3>
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                     Modèle : <strong>{t.asrModelUsed}</strong> • {t.totalWords} mots • Traitement : {t.processingTimeMs}ms
                   </p>
@@ -396,7 +397,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                       </span>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         {seg.isNoisyPassage && (
-                          <span style={{ fontSize: '10px', color: '#d98383', fontWeight: 600 }}>🔊 BRUIT {seg.noiseImpactLevel}</span>
+                          <span style={{ fontSize: '10px', color: '#d98383', fontWeight: 600 }}>BRUIT {seg.noiseImpactLevel}</span>
                         )}
                         <span style={{ fontFamily: 'JetBrains Mono', fontSize: '11px', color: 'var(--text-muted)' }}>
                           {Math.floor(seg.startTime / 60)}:{String(Math.round(seg.startTime) % 60).padStart(2, '0')} → {Math.floor(seg.endTime / 60)}:{String(Math.round(seg.endTime) % 60).padStart(2, '0')}
@@ -452,7 +453,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                   <Eye size={14} color="var(--primary-light)" />
                   <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary-light)', textTransform: 'uppercase' }}>
-                    Cadre de Transparence IA — {a.aiDisclaimer}
+                    Cadre de Transparence IA · {a.aiDisclaimer}
                   </span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
@@ -496,7 +497,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {a.objectionsDetected.length > 0 && (
                   <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '14px' }}>
-                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#d98383', marginBottom: '8px' }}>🚧 Objections Détectées</h4>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#d98383', marginBottom: '8px' }}>Objections Détectées</h4>
                     <ul style={{ paddingLeft: '16px', fontSize: '12.5px', lineHeight: 1.6, color: '#fecaca', margin: 0 }}>
                       {a.objectionsDetected.map((obj, i) => <li key={i}>{obj}</li>)}
                     </ul>
@@ -504,7 +505,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 )}
                 {a.actionItemsRequested.length > 0 && (
                   <div style={{ background: 'rgba(74, 111, 165,0.05)', border: '1px solid rgba(74, 111, 165,0.2)', borderRadius: '12px', padding: '14px' }}>
-                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary-light)', marginBottom: '8px' }}>✅ Actions Demandées</h4>
+                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary-light)', marginBottom: '8px' }}>Actions Demandées</h4>
                     <ul style={{ paddingLeft: '16px', fontSize: '12.5px', lineHeight: 1.6, color: '#c7d2fe', margin: 0 }}>
                       {a.actionItemsRequested.map((act, i) => <li key={i}>{act}</li>)}
                     </ul>
@@ -515,7 +516,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* Communication Issues */}
               {a.detectedCommunicationIssues.length > 0 && (
                 <div style={{ background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: '12px', padding: '14px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#d9ae55', marginBottom: '8px' }}>⚠️ Problèmes de Communication Identifiés</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#d9ae55', marginBottom: '8px' }}>Problèmes de Communication Identifiés</h4>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {a.detectedCommunicationIssues.map((issue, i) => (
                       <span key={i} style={{
@@ -570,10 +571,10 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                     {call.qualityScore 
                       ? call.qualityScore >= 85 
-                        ? '✅ Agent conforme aux standards de qualité définis'
+                        ? 'Agent conforme aux standards de qualité définis'
                         : call.qualityScore >= 70 
-                          ? '⚠️ Plusieurs axes d\'amélioration identifiés — coaching recommandé'
-                          : '🔴 Performance insuffisante — plan de remédiation requis'
+                          ? 'Plusieurs axes d\'amélioration identifiés · coaching recommandé'
+                          : 'Performance insuffisante · plan de remédiation requis'
                       : 'Cet appel n\'a pas encore été évalué par le service qualité.'}
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -596,7 +597,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* Principaux thèmes */}
               {a.mainTopics.length > 0 && (
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '14px 16px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px' }}>🏷️ Thèmes Principaux</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px' }}>Thèmes Principaux</h4>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {a.mainTopics.map((topic, i) => (
                       <span key={i} style={{
@@ -612,7 +613,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* Mots-clés */}
               {a.keywords.length > 0 && (
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '14px 16px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px' }}>🔑 Mots-clés Extraits</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px' }}>Mots-clés Extraits</h4>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                     {a.keywords.map((kw, i) => (
                       <span key={i} style={{
@@ -628,7 +629,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               {/* Note du rédacteur */}
               {call.notes && (
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '14px 16px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>📝 Notes de Supervision</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Notes de Supervision</h4>
                   <p style={{ fontSize: '13px', lineHeight: 1.6, color: '#cbd5e1', margin: 0 }}>{call.notes}</p>
                 </div>
               )}

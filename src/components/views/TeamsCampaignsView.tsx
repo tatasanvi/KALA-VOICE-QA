@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { UserRole, Campaign, CtiIntegrationConfig } from '../../types';
+import { Avatar } from '../common/Avatar';
 
 interface TeamsCampaignsViewProps {
   onSelectAgent: (id: string) => void;
@@ -71,7 +72,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
       autoAnalyze: ctiAutoAnalyze,
       status: 'CONNECTÉ'
     });
-    alert('✅ Paramètres CTI enregistrés avec succès !');
+    alert('Paramètres CTI enregistrés.');
   };
 
 
@@ -232,7 +233,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
                       title="Cliquer pour voir la fiche 360°"
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <img src={member.avatarUrl} alt="" style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+                        <Avatar name={member.name} size={26} />
                         <span style={{ fontSize: '13px', fontWeight: 600 }}>{member.name}</span>
                       </div>
                       <span className={`badge ${member.averageQualityScore >= 80 ? 'badge-green' : 'badge-amber'}`} style={{ fontSize: '11px' }}>
@@ -394,7 +395,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
                 <input 
                   type="text"
                   required
-                  placeholder="Ex: Énergie & Gaz — Rétention Particuliers"
+                  placeholder="Ex: Énergie & Gaz · Rétention Particuliers"
                   value={campName}
                   onChange={e => setCampName(e.target.value)}
                   style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', color: 'white' }}

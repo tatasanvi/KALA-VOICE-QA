@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { UserRole, TrainingSession } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface TrainingViewProps {
   onNavigate: (view: any) => void;
@@ -18,7 +19,9 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
 
   const [showAssignModal, setShowAssignModal] = useState<boolean>(false);
   const [selectedModuleId, setSelectedModuleId] = useState<string>(modules[0].id);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0].id);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? '');
+
+  if (agents.length === 0) return <EmptyState title="Aucune session de formation" />;
   const [sessionDate, setSessionDate] = useState<string>('2024-04-22');
 
   const handleAssignSession = () => {
@@ -44,6 +47,7 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
     storageService.addTrainingSession(newSession);
     setShowAssignModal(false);
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -77,11 +81,11 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
             </div>
             <div>
               <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Uplift Moyen Post-Formation</div>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: '#6db89a' }}>+14.8%</div>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-muted)' }}>non mesuré</div>
             </div>
           </div>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-            Progression moyenne constatée sur la note QA des appels réels dans les 30 jours suivant la validation d'un module.
+            Cet indicateur sera calculé à partir des évaluations réelles avant et après la validation d'un module.
           </p>
         </div>
 
@@ -104,7 +108,7 @@ export const TrainingView: React.FC<TrainingViewProps> = () => {
         <div className="glass-panel" style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px' }}>🌟</span>
+              
               <div>
                 <div style={{ fontSize: '11px', color: '#d9ae55', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Cas d'École Pilote

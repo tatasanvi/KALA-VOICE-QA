@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Page de Réinitialisation de Mot de Passe (/reset-password)
+// KALA VOICE QA · Page de Réinitialisation de Mot de Passe (/reset-password)
 // Saisie du nouveau mot de passe avec indicateur de robustesse
 // =============================================================================
 import React, { useState } from 'react';

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  TrendingUp, Target, Plus, CheckCircle2, 
-  Calendar, Award, Sparkles, BookOpen, User, Clock, ArrowRight
-} from 'lucide-react';
+import { TrendingUp, Target, Plus, CheckCircle2, Calendar, Award, Sparkles, BookOpen, User, Clock, ArrowRight, Check } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { CoachingPlan, UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
+import { Avatar } from '../common/Avatar';
 
 interface CoachingViewProps {
   onNavigate: (view: any) => void;
@@ -17,10 +16,13 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
   const coachingPlans = storageService.getCoachingPlans();
   const trainingSessions = storageService.getTrainingSessions();
 
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0].id);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? '');
+
   const selectedAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+  if (agents.length === 0 || !selectedAgent) return <EmptyState title="Aucun plan de coaching" />;
   const activePlan = coachingPlans.find(cp => cp.agentId === selectedAgent.id);
   const agentSessions = trainingSessions.filter(ts => ts.agentId === selectedAgent.id);
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
@@ -69,11 +71,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
       {/* Profil Synthétique Agent & KPI Coaching */}
       <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <img 
-            src={selectedAgent.avatarUrl} 
-            alt={selectedAgent.name} 
-            style={{ width: '60px', height: '60px', borderRadius: 'var(--radius-full)', border: '2px solid var(--primary)', objectFit: 'cover' }}
-          />
+          <Avatar name={selectedAgent.name} size={64} />
           <div>
             <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{selectedAgent.name}</h2>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
@@ -150,7 +148,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
                 Programme d'Accompagnement Spécifique
               </span>
               <h3 style={{ fontSize: '18px', fontWeight: 800, marginTop: '2px' }}>
-                Plan de Coaching Individuel — {activePlan.agentName}
+                Plan de Coaching Individuel · {activePlan.agentName}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 Formateur référent : <strong>{activePlan.trainerName}</strong> • Date cible de clôture : {activePlan.targetCompletionDate}
@@ -172,7 +170,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
             {activePlan.objectives.map((obj) => {
               const statusColor = obj.status === 'VALIDÉ' ? '#6db89a' : obj.status === 'EN_COURS' ? '#9fb7d6' : '#d9ae55';
               const statusBg = obj.status === 'VALIDÉ' ? 'rgba(52,211,153,0.12)' : obj.status === 'EN_COURS' ? 'rgba(96,165,250,0.12)' : 'rgba(251,191,36,0.12)';
-              const statusLabel = obj.status === 'VALIDÉ' ? '✅ Objectif Atteint' : obj.status === 'EN_COURS' ? '🔄 En Cours' : '📋 À Faire';
+              const statusLabel = obj.status === 'VALIDÉ' ? 'Objectif atteint' : obj.status === 'EN_COURS' ? 'En cours' : 'À faire';
               return (
                 <div 
                   key={obj.id} 
@@ -336,7 +334,7 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                         {sess.simulationExercisesCompleted.map((sim, i) => (
                           <div key={i} style={{ fontSize: '11.5px', color: '#cbd5e1' }}>
-                            ✓ {sim.title} ({sim.score}/100)
+                            <Check size={12} /> {sim.title} ({sim.score}/100)
                           </div>
                         ))}
                       </div>

@@ -33,7 +33,7 @@ router.post('/login', (req: Request, res: Response): void => {
 
   const token = signToken({ userId: user.id, email: user.email, role: user.role, name: user.name });
 
-  logAudit(user.id, user.name, user.role, 'CHANGEMENT_ROLE', 'Session', `Connexion réussie depuis ${req.ip}`, req.ip);
+  logAudit(user.id, user.name, user.role, 'CONNEXION', 'Session', `Connexion réussie depuis ${req.ip}`, req.ip);
 
   res.json({
     token,
@@ -41,7 +41,10 @@ router.post('/login', (req: Request, res: Response): void => {
       id: user.id, name: user.name, email: user.email,
       role: user.role, department: user.department,
       phone: user.phone, avatarUrl: user.avatar_url,
-      isActive: Boolean(user.is_active), createdAt: user.created_at
+      isActive: Boolean(user.is_active), createdAt: user.created_at,
+      // Vrai pour les comptes de démonstration : un déploiement réel doit
+      // imposer un changement de mot de passe avant tout usage.
+      mustChangePassword: Boolean(user.must_change_password)
     }
   });
 });

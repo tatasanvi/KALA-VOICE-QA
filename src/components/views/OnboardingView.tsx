@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Parcours d'Onboarding Léger (/onboarding)
+// KALA VOICE QA · Parcours d'Onboarding Léger (/onboarding)
 // Configuration du profil conseiller/manager lors de la première connexion
 // =============================================================================
 import React, { useState } from 'react';
@@ -10,6 +10,7 @@ import {
   Building, Phone, Bell, Layout
 } from 'lucide-react';
 import { UserRole } from '../../types';
+import { Avatar } from '../common/Avatar';
 
 export const OnboardingView: React.FC = () => {
   const navigate = useNavigate();
@@ -23,13 +24,7 @@ export const OnboardingView: React.FC = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [soundFeedback, setSoundFeedback] = useState<boolean>(true);
 
-  const avatars = [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-  ];
-  const [selectedAvatar, setSelectedAvatar] = useState<string>(user?.avatarUrl || avatars[0]);
+  const [selectedAvatar] = useState<string>('');
 
   const handleComplete = () => {
     updateUserProfile({
@@ -114,29 +109,10 @@ export const OnboardingView: React.FC = () => {
               />
             </div>
 
-            <div style={{ marginBottom: '22px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                Sélectionnez un Avatar Métier
-              </label>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                {avatars.map((av, idx) => (
-                  <img
-                    key={idx}
-                    src={av}
-                    alt="avatar option"
-                    onClick={() => setSelectedAvatar(av)}
-                    style={{
-                      width: '54px',
-                      height: '54px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                      border: `2px solid ${selectedAvatar === av ? '#4a6fa5' : 'transparent'}`,
-                      boxShadow: selectedAvatar === av ? '0 0 0 2px rgba(148, 163, 184, 0.6)' : 'none',
-                      transition: 'all 0.2s'
-                    }}
-                  />
-                ))}
+            <div style={{ marginBottom: '22px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Avatar name={name} size={54} />
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                Votre avatar reprend vos initiales : aucune photo n'est stockée.
               </div>
             </div>
 

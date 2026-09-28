@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { ReportService } from '../../services/reportService';
-import { UserRole, Call } from '../../types';
+import { UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface ReportsViewProps {
   currentRole: UserRole;
@@ -18,12 +19,14 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
   const campaigns = storageService.getCampaigns();
   const sessions = storageService.getTrainingSessions();
 
-  const [selectedReportType, setSelectedReportType] = useState<string>(calls.length > 0 ? 'CALL' : 'QUALITY');
-  const [selectedCallId, setSelectedCallId] = useState<string>(calls[0]?.id || '');
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id || '');
+  const [selectedReportType, setSelectedReportType] = useState<string>('CALL');
+  const [selectedCallId, setSelectedCallId] = useState<string>(calls[0]?.id ?? '');
+  const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? '');
+
 
   const currentCall = (calls.find(c => c.id === selectedCallId) || calls[0]) as Call | undefined;
   const currentAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+  if (calls.length === 0 || agents.length === 0 || !currentCall || !currentAgent) return <EmptyState title="Aucun rapport disponible" />;
 
   const handlePrintCurrentReport = () => {
     if (selectedReportType === 'CALL') {
@@ -36,6 +39,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
   const handleExportCSV = () => {
     ReportService.exportCallsToCSV(calls);
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -130,24 +134,13 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
                   </select>
                 </div>
               </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Conseiller</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700 }}>{currentCall.agentName}</div>
-                </div>
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Client</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700 }}>{currentCall.customerNameMasked}</div>
-                </div>
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Score Qualité Attribué</div>
-                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#6db89a' }}>{currentCall.qualityScore ?? 'Non évalué'}</div>
-                </div>
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Environnement Acoustique</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700 }}>Bruit {currentCall.audioMetadata.estimatedNoiseLevel} ({currentCall.audioMetadata.snrDb} dB)</div>
-                </div>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Score Qualité Attribué</div>
+                <div style={{ fontSize: '16px', fontWeight: 800, color: '#6db89a' }}>{currentCall.qualityScore} / 100</div>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Environnement Acoustique</div>
+                <div style={{ fontSize: '14px', fontWeight: 700 }}>Bruit {currentCall.audioMetadata.estimatedNoiseLevel}</div>
               </div>
 
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '13.5px', lineHeight: 1.6 }}>

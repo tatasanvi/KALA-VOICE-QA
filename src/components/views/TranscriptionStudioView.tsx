@@ -8,6 +8,7 @@ import { audioSignalService } from '../../services/audioSignalService';
 import { AudioPlayer } from '../common/AudioPlayer';
 import { RealTranscription } from '../common/RealTranscription';
 import { Call, UserRole, TranscriptionSegment } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 interface TranscriptionStudioViewProps {
   selectedCallId: string;
@@ -17,10 +18,13 @@ interface TranscriptionStudioViewProps {
 
 export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = ({ 
   selectedCallId, 
-  onSelectCall 
+  onSelectCall,
+  currentRole
 }) => {
-  const [calls, setCalls] = useState<Call[]>(() => storageService.getCalls());
-  const currentCall = (calls.find(c => c.id === selectedCallId) || calls[0]) as Call | undefined;
+  // Ingestion réservée aux rôles superviseur et au-dessus (contrôle réel côté backend).
+  const canImport = currentRole === 'ADMIN' || currentRole === 'QUALITE_FORMATION';
+  const calls = storageService.getCalls();
+  const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
 
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [editingSegmentId, setEditingSegmentId] = useState<string | null>(null);
@@ -42,70 +46,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
     return () => unsub();
   }, []);
 
-  const handleImportSaved = () => {
-    setShowImportModal(false);
-    const updated = storageService.getCalls();
-    if (updated.length > 0) {
-      onSelectCall(updated[0].id);
-    }
-  };
-
-  if (!currentCall) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div className="glass-panel" style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          textAlign: 'center', padding: '64px 32px', gap: '20px',
-          border: '2px dashed rgba(74, 111, 165, 0.3)',
-          background: 'rgba(74, 111, 165, 0.04)'
-        }}>
-          <div style={{
-            width: '72px', height: '72px', borderRadius: '50%',
-            background: 'rgba(74, 111, 165, 0.12)',
-            border: '2px solid rgba(74, 111, 165, 0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <FileAudio size={32} color="var(--primary-light)" />
-          </div>
-          <div>
-            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0' }}>
-              Aucun enregistrement audio
-            </h2>
-            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.6, margin: '0 auto' }}>
-              Importez un fichier audio pour visualiser la transcription Whisper, éditer les segments horodatés et analyser le signal vocal.
-            </p>
-          </div>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowImportModal(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', padding: '10px 24px' }}
-          >
-            <UploadCloud size={16} />
-            <span>Importer et transcrire un audio</span>
-          </button>
-        </div>
-
-        {/* Modal d'import */}
-        {showImportModal && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.75)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
-          }} onClick={() => setShowImportModal(false)}>
-            <div className="glass-panel" style={{ width: '760px', maxWidth: '96%', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}
-              onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>Importer un nouvel audio</h3>
-                <button className="btn btn-secondary btn-sm" onClick={() => setShowImportModal(false)}>
-                  <X size={14} />
-                </button>
-              </div>
-              <RealTranscription onSaved={handleImportSaved} />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
+  if (calls.length === 0 || !currentCall) return <EmptyState title="Aucune transcription à afficher" />;
 
   const handleStartEdit = (segment: TranscriptionSegment) => {
     setEditingSegmentId(segment.id);
@@ -129,6 +70,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
   const trans = currentCall.transcription;
   const meta = currentCall.audioMetadata;
 
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       {/* Barre de Sélection d'Appel & Import */}
@@ -146,7 +88,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
               >
                 {calls.map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.callNumber} — {c.agentName} ({c.audioMetadata.estimatedNoiseLevel} bruit)
+                    {c.callNumber} · {c.agentName} ({c.audioMetadata.estimatedNoiseLevel} bruit)
                   </option>
                 ))}
               </select>
@@ -174,13 +116,13 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
             </button>
           </div>
 
-          <button 
+          {canImport && <button 
             className="btn btn-secondary btn-sm"
             onClick={() => setShowImportModal(true)}
           >
             <UploadCloud size={14} />
             <span>Importer un Audio</span>
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -203,10 +145,10 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Volume2 size={14} color="#6db89a" /> Qualité & Bruit Estimé
           </div>
-          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px', color: meta.snrDb > 15 ? '#6db89a' : '#d9ae55' }}>
+          <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px' }}>
             {meta.estimatedNoiseLevel}
           </div>
-          <div className="kpi-subtext">SNR mesuré : {meta.snrDb} dB</div>
+          {meta.snrDb !== undefined && <div className="kpi-subtext">SNR mesuré : {meta.snrDb} dB</div>}
         </div>
 
         <div className="kpi-card" style={{ padding: '14px 18px' }}>

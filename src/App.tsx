@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Application Principale (App.tsx)
+// KALA VOICE QA · Application Principale (App.tsx)
 // Routage React Router, Protection des Routes RBAC, Authentification & Layout Métier
 // =============================================================================
 import React, { useState, useEffect } from 'react';
@@ -38,8 +38,33 @@ import { SettingsAuditView } from './components/views/SettingsAuditView';
 import { UserManagementView } from './components/views/UserManagementView';
 
 import { authApi } from './services/apiClient';
+import { PrivacyView } from './components/views/PrivacyView';
 
-// ─── Layout Authentifié avec Sidebar, Navbar & En-tête Dynamique ─────────────
+// ─── Layout Authentifié avec Sidebar, Navbar & Bannière Master 2 ───────────────
+const SessionStrip: React.FC<{ isApiOnline: boolean }> = ({ isApiOnline }) => {
+  const { user, role } = useAuth();
+  return (
+    <div style={{
+      background: 'rgba(255, 255, 255, 0.03)',
+      borderBottom: '1px solid var(--border-subtle)',
+      padding: '6px 24px', display: 'flex', alignItems: 'center', gap: '10px',
+      fontSize: '11.5px', color: 'var(--text-secondary)', flexWrap: 'wrap'
+    }}>
+      <span style={{
+        display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%',
+        background: isApiOnline ? '#6db89a' : '#d98383'
+      }} />
+      <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+        {user ? `${user.name} · ${role}` : 'Session non authentifiée'}
+      </span>
+      <span style={{ color: 'var(--text-muted)' }}>·</span>
+      <span style={{ color: 'var(--text-muted)' }}>
+        {isApiOnline ? 'Serveur KALA connecté' : 'Serveur KALA injoignable'}
+      </span>
+    </div>
+  );
+};
+
 const AppLayout: React.FC = () => {
   const location = useLocation();
   const [isApiOnline, setIsApiOnline] = useState<boolean>(true);
@@ -65,10 +90,11 @@ const AppLayout: React.FC = () => {
     if (path.startsWith('/equipes')) return "Structure des Équipes & Plateaux Télécom";
     if (path.startsWith('/campagnes')) return "Structure des Campagnes Métiers";
     if (path.startsWith('/rapports')) return "Rapports d'Audit & Synthèses Métiers";
-    if (path.startsWith('/experimentation')) return "Laboratoire d'Évaluation & Benchmark ASR";
+    if (path.startsWith('/donnees-personnelles')) return "Protection des Données (RGPD)";
+    if (path.startsWith('/experimentation')) return "Laboratoire Expérimental ASR (Mémoire Master IA)";
     if (path.startsWith('/parametres')) return "Sécurité, Traçabilité & Paramètres Système";
     if (path.startsWith('/admin/users')) return "Administration & Gestion des Comptes Utilisateurs";
-    return "KALA VOICE QA — Plateforme Intelligente d'Analyse Vocale";
+    return "KALA Voice QA";
   };
 
   return (
@@ -82,6 +108,9 @@ const AppLayout: React.FC = () => {
           activeViewTitle={getPageTitle(location.pathname)} 
           isOnline={isApiOnline}
         />
+
+        {/* État réel de la session : utilisateur connecté et services. Aucun chiffre estimé. */}
+        <SessionStrip isApiOnline={isApiOnline} />
 
         <main className="content-area">
           <Outlet />
@@ -320,12 +349,13 @@ export const App: React.FC = () => {
             {/* Rapports & Expérimentation */}
             <Route path="/rapports" element={<ReportsRouteWrapper />} />
             <Route path="/experimentation" element={<ExperimentLabRouteWrapper />} />
+            <Route path="/donnees-personnelles" element={<PrivacyView />} />
 
             {/* Administration & Paramètres (RBAC Protégé) */}
             <Route 
               path="/parametres" 
               element={
-                <RoleGuard allowedRoles={['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER']}>
+                <RoleGuard allowedRoles={['ADMIN', 'QUALITE_FORMATION']}>
                   <SettingsRouteWrapper />
                 </RoleGuard>
               } 

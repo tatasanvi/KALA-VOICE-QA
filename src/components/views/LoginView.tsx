@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Page de Connexion Principale (/login)
+// KALA VOICE QA · Page de Connexion Principale (/login)
 // Design Dark Tech Neo-Futuriste • Authentification Réelle & Accès Démo 1-Clic
 // =============================================================================
 import React, { useState } from 'react';
@@ -63,29 +63,16 @@ export const LoginView: React.FC = () => {
     }
   };
 
-  // Profils pré-configurés pour tester le prototype
-  const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string; badge: string }[] = [
-    { 
-      role: 'QA_MANAGER', 
-      title: 'Responsable Qualité & Supervision', 
-      email: 'c.delattre@kalavoice.ai', 
-      color: '#6db89a', 
-      badge: 'Supervision & Audit QA',
-      desc: 'Supervision des appels sortants, écoute des enregistrements importés, grilles d\'évaluation et conformité.' 
-    },
-    { 
-      role: 'ADMIN', 
-      title: 'Administrateur & Ingénieur IA Vocale', 
-      email: 'a.moreau@kalavoice.ai', 
-      color: '#b3aed1', 
-      badge: 'Paramétrage & Modèles ASR',
-      desc: 'Banc d\'essai ASR : Whisper large-v3, débruitage DeepFilterNet3, configuration des critères et gestion des utilisateurs.' 
-    },
+  // Raccourcis de connexion 1-clic pour le jury de soutenance
+  const demoAccounts: { role: UserRole; title: string; email: string; color: string; desc: string }[] = [
+    { role: 'ADMIN', title: 'Administrateur', email: 'admin@kalavoice.ai', color: '#d98383', desc: 'Accès total, gestion des utilisateurs et journal d\'audit' },
+    { role: 'QUALITE_FORMATION', title: 'Qualité & Formation', email: 'qualite@kalavoice.ai', color: '#9fb7d6', desc: 'Import et transcription, évaluations, coaching, contestations' },
+    { role: 'AGENT', title: 'Conseiller Client', email: 'agent@kalavoice.ai', color: '#94a3b8', desc: 'Consultation de ses propres résultats et contestation' },
   ];
 
   const handleQuickLogin = (demoEmail: string) => {
     setEmail(demoEmail);
-    setPassword('kala2024!');
+
     setErrorMessage(null);
   };
 
@@ -216,7 +203,7 @@ export const LoginView: React.FC = () => {
                   className="input-field"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ex: a.moreau@kalavoice.ai"
+                  placeholder="ex: admin@kalavoice.ai"
                   required
                   style={{
                     width: '100%',
@@ -377,8 +364,8 @@ export const LoginView: React.FC = () => {
           </h3>
 
           <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0 0 20px 0' }}>
-            Cliquez sur un profil pour pré-remplir instantanément les identifiants et tester l'application sous différents rôles RBAC.
-            Mot de passe unique : <code style={{ background: 'rgba(74, 111, 165, 0.15)', padding: '2px 6px', borderRadius: '4px', color: '#b4c6de' }}>kala2024!</code>
+            Cliquez sur un profil pour pré-remplir l'adresse e-mail, puis saisissez le mot de passe du compte.
+            Il est défini par la variable DEMO_PASSWORD du backend et n'est pas affiché ici.
           </p>
 
           {/* Grille des profils démo */}

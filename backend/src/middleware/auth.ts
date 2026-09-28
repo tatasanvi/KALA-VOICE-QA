@@ -2,9 +2,29 @@
 // KALA VOICE QA — Middleware Auth JWT & RBAC
 // =============================================================================
 import { Request, Response, NextFunction } from 'express';
+import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 
-export const JWT_SECRET = process.env.JWT_SECRET ?? 'kala-voice-qa-secret-dev-2024';
+// Le secret de signature vient de l'environnement. En production, son absence
+// est bloquante : jamais de secret en dur utilisable hors développement.
+function resolveJwtSecret(): string {
+  const fromEnv = process.env.JWT_SECRET?.trim();
+  if (fromEnv) return fromEnv;
+
+  if (process.env.NODE_ENV === 'production') {
+    console.error('JWT_SECRET manquant : définissez-le dans l\'environnement avant de démarrer en production.');
+    process.exit(1);
+  }
+
+  // Développement seulement : secret aléatoire régénéré à chaque démarrage.
+  // Les sessions ouvertes avant un redémarrage deviennent donc invalides.
+  const generated = crypto.randomBytes(32).toString('hex');
+  console.warn('⚠️  JWT_SECRET absent : secret de développement aléatoire généré pour cette session.');
+  console.warn('    Définissez JWT_SECRET dans backend/.env pour garder vos sessions entre deux redémarrages.');
+  return generated;
+}
+
+export const JWT_SECRET = resolveJwtSecret();
 export const JWT_EXPIRES = '8h'; // Session de travail journalière
 
 export interface JwtPayload {
@@ -62,9 +82,8 @@ export const requireRole = (...roles: string[]) =>
 export const signToken = (payload: JwtPayload): string =>
   jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
 
-export const ADMIN_ROLES  = ['ADMIN'];
-export const MANAGER_UP   = ['ADMIN', 'MANAGER'];
-export const SUPERVISOR_UP = ['ADMIN', 'MANAGER', 'SUPERVISOR'];
-export const QA_UP        = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER'];
-export const TRAINER_UP   = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER'];
-export const ALL_ROLES    = ['ADMIN', 'MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER', 'AGENT'];
+// Trois rôles : ADMIN, QUALITE_FORMATION (qualité, formation et supervision), AGENT.
+export const ROLES = ['ADMIN', 'QUALITE_FORMATION', 'AGENT'] as const;
+export const ADMIN_ONLY = ['ADMIN'];
+export const STAFF_UP   = ['ADMIN', 'QUALITE_FORMATION'];
+export const ALL_ROLES  = ['ADMIN', 'QUALITE_FORMATION', 'AGENT'];

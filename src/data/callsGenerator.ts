@@ -214,7 +214,6 @@ export function generateCallsDataset(): Call[] {
         durationSeconds: duration,
         sampleRateHz: 16000,
         channels: 1,
-        snrDb: noise.snr,
         estimatedNoiseLevel: noise.level,
         noiseType: noise.type,
         audioQualityScore: noise.score,

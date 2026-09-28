@@ -14,17 +14,14 @@ interface LoginModalProps {
 }
 
 const PRESET_ACCOUNTS = [
-  { email: 'a.moreau@kalavoice.ai', name: 'Alexandre Moreau', role: 'ADMIN', roleLabel: 'Administrateur', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150' },
-  { email: 'c.delattre@kalavoice.ai', name: 'Claire Delattre', role: 'QA_MANAGER', roleLabel: 'Resp. Qualité', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=150' },
-  { email: 'm.vasseur@kalavoice.ai', name: 'Marc Vasseur', role: 'SUPERVISOR', roleLabel: 'Superviseur', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150' },
-  { email: 'p.simon@kalavoice.ai', name: 'Patrick Simon', role: 'TRAINER', roleLabel: 'Formateur', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150' },
-  { email: 'j.dupont@kalavoice.ai', name: 'Jean Dupont', role: 'AGENT', roleLabel: 'Conseiller Client', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150' },
-  { email: 's.laurent@kalavoice.ai', name: 'Sophie Laurent', role: 'MANAGER', roleLabel: 'Directrice Opé', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150' },
+  { email: 'admin@kalavoice.ai', name: 'Alexandre Moreau', role: 'ADMIN', roleLabel: 'Administrateur', avatar: '' },
+  { email: 'qualite@kalavoice.ai', name: 'Claire Delattre', role: 'QUALITE_FORMATION', roleLabel: 'Qualité & Formation', avatar: '' },
+  { email: 'agent@kalavoice.ai', name: 'Jean Dupont', role: 'AGENT', roleLabel: 'Conseiller Client', avatar: '' },
 ];
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
-  const [email, setEmail] = useState('c.delattre@kalavoice.ai');
-  const [password, setPassword] = useState('kala2024!');
+  const [email, setEmail] = useState('qualite@kalavoice.ai');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,7 +60,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
   const handleQuickSelect = (acc: typeof PRESET_ACCOUNTS[0]) => {
     setEmail(acc.email);
-    setPassword('kala2024!');
+
   };
 
   return (
@@ -145,7 +142,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
           {/* Sélection rapide de profil démo */}
           <div style={{ marginBottom: '20px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              ⚡ Connexion Rapide (Profils Équipe Démo) :
+              Connexion rapide (profils de démonstration) :
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
               {PRESET_ACCOUNTS.map(acc => {
@@ -216,7 +213,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
             <div>
               <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '6px' }}>
-                Mot de Passe (défaut démo : kala2024!)
+                Mot de passe
               </label>
               <div style={{ position: 'relative' }}>
                 <Key size={15} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '11px' }} />

@@ -7,6 +7,7 @@ import { storageService } from '../../services/storageService';
 import { ReportService } from '../../services/reportService';
 import { AudioUploadModal } from '../common/AudioUploadModal';
 import { CallDetailModal } from '../common/CallDetailModal';
+import { RealCallsPanel } from '../common/RealCallsPanel';
 import { Call, UserRole, CallStatus } from '../../types';
 
 interface CallsViewProps {
@@ -58,6 +59,9 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
   const [selectedResolution, setSelectedResolution] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
+  const [realCallsRefresh, setRealCallsRefresh] = useState<number>(0);
+  // L'ingestion est réservée aux rôles superviseur et au-dessus (contrôle réel côté backend).
+  const canImport = currentRole === 'ADMIN' || currentRole === 'QUALITE_FORMATION';
   const [selectedCall, setSelectedCall] = useState<Call | null>(() => {
     if (initialCallId) {
       return calls.find(c => c.id === initialCallId) || null;
@@ -133,22 +137,12 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
           </p>
         </div>
 
-        <button 
-          className="btn btn-primary"
-          onClick={() => setShowUploadModal(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 18px', fontSize: '13px' }}
-        >
-          <UploadCloud size={16} />
-          <span>Importer un enregistrement audio</span>
-        </button>
-      </div>
-
       {/* Bandeau de statuts rapides */}
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <button
           onClick={() => setSelectedStatus('ALL')}
           style={{
-            padding: '7px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+            padding: '7px 14px', borderRadius: 'var(--radius-sm)', fontSize: '12px', fontWeight: 700,
             background: selectedStatus === 'ALL' ? 'rgba(74, 111, 165,0.2)' : 'rgba(255,255,255,0.04)',
             border: `1px solid ${selectedStatus === 'ALL' ? 'rgba(74, 111, 165,0.5)' : 'rgba(255,255,255,0.1)'}`,
             color: selectedStatus === 'ALL' ? 'var(--primary-light)' : 'var(--text-muted)',
@@ -162,7 +156,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
             key={key}
             onClick={() => setSelectedStatus(key)}
             style={{
-              padding: '7px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+              padding: '7px 14px', borderRadius: 'var(--radius-sm)', fontSize: '12px', fontWeight: 700,
               background: selectedStatus === key ? `${val.color}22` : 'rgba(255,255,255,0.04)',
               border: `1px solid ${selectedStatus === key ? `${val.color}55` : 'rgba(255,255,255,0.1)'}`,
               color: selectedStatus === key ? val.color : 'var(--text-muted)',
@@ -253,14 +247,14 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
               Exporter CSV
             </button>
 
-            <button 
+            {canImport && <button 
               className="btn btn-primary btn-sm"
               onClick={() => setShowUploadModal(true)}
               style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
             >
               <UploadCloud size={13} />
               <span>Ingérer Audio</span>
-            </button>
+            </button>}
           </div>
         </div>
         <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
@@ -410,7 +404,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
                       c.audioMetadata.estimatedNoiseLevel === 'MODÉRÉ' ? 'badge-amber' : 'badge-red'
                     }`} style={{ fontSize: '10.5px' }}>
                       <Volume2 size={10} style={{ display: 'inline', marginRight: '2px' }} />
-                      {c.audioMetadata.estimatedNoiseLevel} ({c.audioMetadata.snrDb} dB)
+                      {c.audioMetadata.estimatedNoiseLevel}{c.audioMetadata.snrDb !== undefined ? ` (${c.audioMetadata.snrDb} dB)` : ''}
                     </span>
                     <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
                       Qualité : {c.audioMetadata.audioQualityScore}/100

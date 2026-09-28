@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Gardes de Sécurité de Routage (ProtectedRoute & RoleGuard)
+// KALA VOICE QA · Gardes de Sécurité de Routage (ProtectedRoute & RoleGuard)
 // Contrôle d'authentification et permissions RBAC pour React Router
 // =============================================================================
 import React from 'react';

@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Page Mot de Passe Oublié (/forgot-password)
+// KALA VOICE QA · Page Mot de Passe Oublié (/forgot-password)
 // Demande de lien de réinitialisation sécurisé par email
 // =============================================================================
 import React, { useState } from 'react';

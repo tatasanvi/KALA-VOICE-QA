@@ -6,24 +6,21 @@ import {
 import { storageService } from '../../services/storageService';
 import { usersApi } from '../../services/apiClient';
 import { User, UserRole } from '../../types';
+import { Avatar } from '../common/Avatar';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
 const ROLES: { value: UserRole; label: string; badge: string; color: string }[] = [
-  { value: 'ADMIN',      label: 'Administrateur',       badge: 'badge-red',    color: '#d98383' },
-  { value: 'MANAGER',    label: 'Manager',              badge: 'badge-orange', color: '#fb923c' },
-  { value: 'SUPERVISOR', label: 'Superviseur',          badge: 'badge-blue',   color: '#9fb7d6' },
-  { value: 'QA_MANAGER', label: 'Responsable QA',       badge: 'badge-purple', color: '#b3aed1' },
-  { value: 'TRAINER',    label: 'Formateur',            badge: 'badge-green',  color: '#6db89a' },
-  { value: 'AGENT',      label: 'Conseiller',           badge: 'badge-gray',   color: '#94a3b8' },
+  { value: 'ADMIN',             label: 'Administrateur',     badge: 'badge-red',  color: '#d98383' },
+  { value: 'QUALITE_FORMATION', label: 'Qualité & Formation', badge: 'badge-blue', color: '#9fb7d6' },
+  { value: 'AGENT',             label: 'Conseiller',          badge: 'badge-gray', color: '#94a3b8' },
 ];
 
-const ROLE_ICONS: Record<UserRole, string> = {
-  ADMIN: '🔴', MANAGER: '🟠', SUPERVISOR: '🔵',
-  QA_MANAGER: '🟣', TRAINER: '🟢', AGENT: '⚪',
+const ROLE_DOTS: Record<UserRole, string> = {
+  ADMIN: '#d98383', QUALITE_FORMATION: '#9fb7d6', AGENT: '#94a3b8',
 };
 
-const getRoleMeta = (role: UserRole) => ROLES.find(r => r.value === role) ?? ROLES[5];
+const getRoleMeta = (role: UserRole) => ROLES.find(r => r.value === role) ?? ROLES[ROLES.length - 1];
 
 // ─── Type du formulaire ────────────────────────────────────────────────────
 type FormMode = 'create' | 'edit';
@@ -171,7 +168,7 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'
                   }}
                 >
-                  <span style={{ fontSize: '18px' }}>{ROLE_ICONS[r.value]}</span>
+                  <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: ROLE_DOTS[r.value] }} />
                   <span>{r.label}</span>
                 </button>
               ))}
@@ -261,7 +258,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ user, onConfirm, onClose }) =
           {user.name} ({user.email})
         </p>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '24px' }}>
-          ⚠️ Cette action est irréversible et sera enregistrée dans le journal d'audit.
+          Cette action est irréversible et sera enregistrée dans le journal d'audit.
         </p>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
           <button className="btn btn-secondary" onClick={onClose}>Annuler</button>
@@ -314,14 +311,14 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   const handleSave = async (data: UserFormData) => {
     if (modal?.mode === 'create') {
       const created = storageService.createUser(data);
-      notify(`✅ Compte de ${data.name} créé avec succès.`);
+      notify(`Compte de ${data.name} créé avec succès.`);
       refresh();
       setModal(null);
       // Appel API en arrière-plan
-      await usersApi.create({ ...data, password: 'kala2024!' });
+      await usersApi.create({ ...data, password: (data as any).password });
     } else if (modal?.mode === 'edit' && modal.user) {
       storageService.updateUser({ ...modal.user, ...data });
-      notify(`✅ Compte de ${data.name} mis à jour.`);
+      notify(`Compte de ${data.name} mis à jour.`);
       refresh();
       setModal(null);
       // Appel API en arrière-plan
@@ -333,7 +330,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
     if (!deleteTarget) return;
     const target = deleteTarget;
     storageService.deleteUser(target.id);
-    notify(`🗑️ Compte de ${target.name} supprimé.`);
+    notify(`Compte de ${target.name} supprimé.`);
     setDeleteTarget(null);
     refresh();
     // Appel API en arrière-plan
@@ -342,7 +339,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
   const handleToggle = async (user: User) => {
     storageService.toggleUserActive(user.id);
-    notify(`${user.isActive ? '🔒 Compte désactivé' : '✅ Compte activé'} : ${user.name}`);
+    notify(`${user.isActive ? 'Compte désactivé' : 'Compte activé'} : ${user.name}`);
     refresh();
     // Appel API en arrière-plan
     await usersApi.toggleActive(user.id);
@@ -493,10 +490,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '16px', overflow: 'hidden'
                         }}>
-                          {user.avatarUrl
-                            ? <img src={user.avatarUrl} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                            : <span>{ROLE_ICONS[user.role]}</span>
-                          }
+                          <Avatar name={user.name} size={30} />
                         </div>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: '13.5px' }}>
@@ -509,7 +503,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
                     </td>
                     <td>
                       <span className={`badge ${roleMeta.badge}`} style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', width: 'fit-content' }}>
-                        {ROLE_ICONS[user.role]} {roleMeta.label}
+                        <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: ROLE_DOTS[user.role] }} /> {roleMeta.label}
                       </span>
                     </td>
                     <td style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>
@@ -569,7 +563,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
 
                         {/* Indicateur compte courant */}
                         {isSelf && (
-                          <span title="Compte courant — protégé" style={{ color: 'var(--primary-light)', padding: '6px' }}>
+                          <span title="Compte courant · protégé" style={{ color: 'var(--primary-light)', padding: '6px' }}>
                             <ShieldCheck size={14} />
                           </span>
                         )}
@@ -584,7 +578,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       </div>
 
       <p style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', fontStyle: 'italic' }}>
-        💡 Toutes les actions sur les comptes sont tracées dans le journal d'audit — conformité RGPD.
+        Toutes les actions sur les comptes sont tracées dans le journal d'audit · conformité RGPD.
         Vous ne pouvez pas supprimer ni désactiver votre propre compte.
       </p>
     </div>

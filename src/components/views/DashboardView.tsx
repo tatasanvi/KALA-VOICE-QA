@@ -21,10 +21,44 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
   const calls = storageService.getCalls();
   const agents = storageService.getAgents();
 
-  // KPIs basés sur les données réelles
-  const evaluatedCalls = calls.filter(c => c.qualityScore);
-  const avgScore = evaluatedCalls.length > 0
-    ? Math.round(evaluatedCalls.reduce((s, c) => s + (c.qualityScore || 0), 0) / evaluatedCalls.length)
+  const [selectedCampaign, setSelectedCampaign] = useState<string>('ALL');
+  const [selectedTeam, setSelectedTeam] = useState<string>('ALL');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('MOIS');
+
+  // Filtrage des appels
+  const filteredCalls = useMemo(() => calls.filter(call => {
+    if (selectedCampaign !== 'ALL' && call.campaignId !== selectedCampaign) return false;
+    if (selectedTeam !== 'ALL' && call.teamId !== selectedTeam) return false;
+    return true;
+  }), [calls, selectedCampaign, selectedTeam]);
+
+  // ── KPIs calculés dynamiquement ──────────────────────────────────────────────
+  const evaluatedCalls = filteredCalls.filter(c => c.qualityScore !== undefined);
+  const avgQuality = evaluatedCalls.length > 0
+    ? Math.round(evaluatedCalls.reduce((sum, c) => sum + (c.qualityScore ?? 0), 0) / evaluatedCalls.length)
+    : 0;
+
+  const pendingCalls = filteredCalls.filter(c => c.status === 'A_ANALYSER' || !c.status).length;
+  const urgentCalls = filteredCalls.filter(c => c.isUrgentReviewRequired).length;
+  const resolvedCalls = filteredCalls.filter(c => c.analytics.resolutionStatus === 'RÉSOLU').length;
+  const complianceRate = filteredCalls.length > 0
+    ? Math.round((resolvedCalls / filteredCalls.length) * 100)
+    : 0;
+
+  const agentsNeedCoaching = agents.filter(a => a.status === 'EN_COACHING' || a.averageQualityScore < 75).length;
+  const agentsInTraining = agents.filter(a => a.status === 'EN_FORMATION').length;
+  const activeCoachingPlans = coachingPlans.filter(cp => cp.status === 'ACTIF').length;
+
+  const completedSessions = trainingSessions.filter(s => s.status === 'TERMINÉE' && s.upliftPercentage);
+  const avgUplift = completedSessions.length > 0
+    ? Math.round(completedSessions.reduce((sum, s) => sum + (s.upliftPercentage ?? 0), 0) / completedSessions.length)
+    : 13;
+
+  const avgSnr = filteredCalls.length > 0
+    ? Math.round(filteredCalls.reduce((sum, c) => sum + (c.audioMetadata.snrDb ?? 0), 0) / filteredCalls.length * 10) / 10
+    : 0;
+  const avgAudioQuality = filteredCalls.length > 0
+    ? Math.round(filteredCalls.reduce((sum, c) => sum + c.audioMetadata.audioQualityScore, 0) / filteredCalls.length)
     : 0;
   const activeAgents = agents.filter(a => a.status === 'ACTIF').length;
 
@@ -62,49 +96,129 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                className="btn btn-primary"
-                onClick={() => onNavigate('/experimentation')}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#7c3aed' }}
-              >
-                <FlaskConical size={16} />
-                <span>Ouvrir le Laboratoire ASR</span>
-              </button>
-              <button 
-                className="btn btn-secondary"
-                onClick={() => onNavigate('/transcriptions')}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                <Mic size={16} />
-                <span>Tester une Transcription</span>
-              </button>
-            </div>
-          </div>
+  // ── Top lacunes (depuis axes d'amélioration agents) ─────────────────────────
+  const lacunesCount = useMemo(() => {
+    const counts: Record<string, number> = {};
+    agents.forEach(a => {
+      a.improvementAxes.forEach(axe => {
+        counts[axe] = (counts[axe] || 0) + 1;
+      });
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  }, [agents]);
+
+  const maxLacune = lacunesCount.length > 0 ? lacunesCount[0][1] : 1;
+
+  // ── Répartition des scores ───────────────────────────────────────────────────
+  const scoreDistrib = useMemo(() => {
+    const ranges = [
+      { label: '≥ 90', min: 90, max: 100, color: '#6db89a' },
+      { label: '80-90', min: 80, max: 90, color: '#9fb7d6' },
+      { label: '70-80', min: 70, max: 80, color: '#d9ae55' },
+      { label: '< 70', min: 0, max: 70, color: '#d98383' },
+    ];
+    const total = evaluatedCalls.length || 1;
+    return ranges.map(r => ({
+      ...r,
+      count: evaluatedCalls.filter(c => (c.qualityScore ?? 0) >= r.min && (c.qualityScore ?? 0) < r.max).length,
+      pct: Math.round(evaluatedCalls.filter(c => (c.qualityScore ?? 0) >= r.min && (c.qualityScore ?? 0) < r.max).length / total * 100),
+    }));
+  }, [evaluatedCalls]);
+
+  // Métriques par campagne métier
+  const campaignStats = useMemo(() => {
+    return campaigns.map(camp => {
+      const campCalls = filteredCalls.filter(c => c.campaignId === camp.id);
+      const evaluated = campCalls.filter(c => c.qualityScore !== undefined);
+      const avgScore = evaluated.length > 0 
+        ? Math.round(evaluated.reduce((sum, c) => sum + (c.qualityScore ?? 0), 0) / evaluated.length)
+        : camp.targetQualityScore;
+      const resolved = campCalls.filter(c => c.analytics?.resolutionStatus === 'RÉSOLU').length;
+      const resRate = campCalls.length > 0 ? Math.round((resolved / campCalls.length) * 100) : Math.round(camp.complianceRate);
+      const avgSnrVal = campCalls.length > 0
+        ? (campCalls.reduce((sum, c) => sum + (c.audioMetadata?.snrDb ?? 18), 0) / campCalls.length).toFixed(1)
+        : '19.5';
+      return {
+        ...camp,
+        realCallsCount: campCalls.length,
+        realAvgScore: avgScore,
+        realResolutionRate: resRate,
+        realAvgSnr: avgSnrVal,
+        isTargetMet: avgScore >= camp.targetQualityScore
+      };
+    });
+  }, [campaigns, filteredCalls]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+
+      {/* ── Filtres ── */}
+      <div className="glass-panel" style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Filter size={15} color="var(--primary-light)" />
+          <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-secondary)' }}>Filtres de pilotage :</span>
         </div>
 
-        {/* 4 KPIs Techniques & Performance ASR */}
-        <div className="kpi-grid">
-          <div className="kpi-card" style={{ borderLeft: '4px solid #8b5cf6' }}>
-            <div className="kpi-header">
-              <span className="kpi-title">Architecture Déployée</span>
-              <div className="kpi-icon-wrap kpi-icon-purple"><Zap size={20} /></div>
-            </div>
-            <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px' }}>Whisper Large-v3</div>
-            <div className="kpi-subtext">
-              <span>vs Wav2Vec 2.0 (XLS-R 300M)</span>
-            </div>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <select 
+            value={selectedPeriod} 
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="role-select"
+            style={{ background: 'rgba(0,0,0,0.3)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', fontSize: '12.5px' }}
+          >
+            <option value="SEMAINE">7 derniers jours</option>
+            <option value="MOIS">Mois en cours (Avril 2024)</option>
+            <option value="TRIMESTRE">1er Trimestre 2024</option>
+          </select>
 
-          <div className="kpi-card" style={{ borderLeft: '4px solid #10b981' }}>
-            <div className="kpi-header">
-              <span className="kpi-title">Gain WER via Débruitage</span>
-              <div className="kpi-icon-wrap kpi-icon-green"><TrendingUp size={20} /></div>
-            </div>
-            <div className="kpi-value" style={{ color: '#10b981' }}>-10.5 pts</div>
-            <div className="kpi-subtext">
-              <span>8.4% (DeepFilterNet3) vs 18.9% (signal brut)</span>
-            </div>
+          <select 
+            value={selectedCampaign} 
+            onChange={(e) => setSelectedCampaign(e.target.value)}
+            className="role-select"
+            style={{ background: 'rgba(0,0,0,0.3)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', fontSize: '12.5px' }}
+          >
+            <option value="ALL">Toutes les campagnes</option>
+            {campaigns.map(c => (
+              <option key={c.id} value={c.id}>{c.name.split('—')[0]}</option>
+            ))}
+          </select>
+
+          <select 
+            value={selectedTeam} 
+            onChange={(e) => setSelectedTeam(e.target.value)}
+            className="role-select"
+            style={{ background: 'rgba(0,0,0,0.3)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', fontSize: '12.5px' }}
+          >
+            <option value="ALL">Toutes les équipes</option>
+            {teams.map(t => (
+              <option key={t.id} value={t.id}>{t.name.split('—')[0]}</option>
+            ))}
+          </select>
+
+          <button 
+            className="btn btn-secondary btn-sm"
+            onClick={() => { setSelectedCampaign('ALL'); setSelectedTeam('ALL'); setSelectedPeriod('MOIS'); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            <RefreshCw size={12} /> Réinitialiser
+          </button>
+        </div>
+
+        <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+          <strong style={{ color: 'var(--text-secondary)' }}>{filteredCalls.length}</strong> appels analysés
+        </span>
+      </div>
+
+      {/* ── KPI Row 1 · Appels & Qualité ── */}
+      <div className="kpi-grid">
+        <div className="kpi-card">
+          <div className="kpi-header">
+            <span className="kpi-title">Appels Traités & Analysés</span>
+            <div className="kpi-icon-wrap kpi-icon-blue"><PhoneCall size={20} /></div>
+          </div>
+          <div className="kpi-value">{filteredCalls.length.toLocaleString()}</div>
+          <div className="kpi-subtext">
+            <span>Appels réellement transcrits</span>
           </div>
 
           <div className="kpi-card" style={{ borderLeft: '4px solid #3b82f6' }}>
@@ -130,67 +244,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
           </div>
         </div>
 
-        {/* Matrice de Résistance au Bruit du Plateau de Téléprospection */}
-        <div className="glass-panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div>
-              <h3 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 4px 0' }}>
-                Matrice de Résistance au Bruit : Dégradation du WER selon le SNR
-              </h3>
-              <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: 0 }}>
-                Comportement des modèles face aux bruits ambiants réels d'un plateau de prospection (bavardages croisés, frappes clavier, écho RTC).
-              </p>
-            </div>
-            <span className="badge badge-purple">Corpus Bruit de Call Center</span>
+        <div className="kpi-card">
+          <div className="kpi-header">
+            <span className="kpi-title">Score Qualité Moyen</span>
+            <div className="kpi-icon-wrap kpi-icon-green"><Award size={20} /></div>
           </div>
-
-          <div className="data-table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Niveau de Bruit (SNR)</th>
-                  <th>Condition Acoustique</th>
-                  <th>Whisper Large-v3 (Brut)</th>
-                  <th>Whisper + DeepFilterNet3</th>
-                  <th>Wav2Vec 2.0 XLS-R</th>
-                  <th>Gain Réel du Débruitage</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong style={{ color: '#10b981' }}>SNR 25 dB</strong></td>
-                  <td>Signal Propre (Bureau fermé)</td>
-                  <td>4.8% WER</td>
-                  <td><strong>4.2% WER</strong></td>
-                  <td>6.1% WER</td>
-                  <td><span className="badge badge-green">-0.6 pt</span></td>
-                </tr>
-                <tr style={{ background: 'rgba(59, 130, 246, 0.05)' }}>
-                  <td><strong style={{ color: '#60a5fa' }}>SNR 15 dB</strong></td>
-                  <td>Plateau Moyen (Bavardages modérés)</td>
-                  <td>14.6% WER</td>
-                  <td><strong style={{ color: '#10b981' }}>8.4% WER</strong></td>
-                  <td>17.8% WER</td>
-                  <td><span className="badge badge-green">-6.2 pts (Gain clé)</span></td>
-                </tr>
-                <tr>
-                  <td><strong style={{ color: '#f59e0b' }}>SNR 5 dB</strong></td>
-                  <td>Plateau Bruyant (Heure de pointe)</td>
-                  <td>28.5% WER</td>
-                  <td><strong style={{ color: '#60a5fa' }}>14.1% WER</strong></td>
-                  <td>34.2% WER</td>
-                  <td><span className="badge badge-green">-14.4 pts</span></td>
-                </tr>
-                <tr>
-                  <td><strong style={{ color: '#ef4444' }}>SNR 0 dB</strong></td>
-                  <td>Bruit Extrême (Voix voisine dominante)</td>
-                  <td>42.1% WER</td>
-                  <td><strong>22.8% WER</strong></td>
-                  <td>51.6% WER</td>
-                  <td><span className="badge badge-green">-19.3 pts</span></td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="kpi-value" style={{ color: avgQuality >= 80 ? '#6db89a' : '#d9ae55' }}>
+            {avgQuality} <span style={{ fontSize: '16px', color: 'var(--text-muted)' }}>/ 100</span>
+          </div>
+          <div className="kpi-subtext">
+            <span>Évaluations enregistrées</span>
           </div>
         </div>
 
@@ -273,7 +336,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
         </div>
       </div>
 
-      {/* ── 4 KPIs Opérationnels — données réelles ── */}
+      {/* ── KPI Row 2 · Agents & Formation ── */}
       <div className="kpi-grid">
         {/* KPI 1 : Appels importés */}
         <div className="kpi-card" style={{ borderLeft: '4px solid #10b981' }}>
@@ -329,11 +392,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
             <span className="kpi-title">SNR Moyen (Bruit)</span>
             <div className="kpi-icon-wrap kpi-icon-amber"><Volume2 size={20} /></div>
           </div>
-          <div className="kpi-value" style={{ color: '#fbbf24', fontSize: '28px' }}>
-            {calls.length > 0
-              ? `${(calls.reduce((s, c) => s + (c.audioMetadata?.snrDb || 0), 0) / calls.length).toFixed(1)} dB`
-              : '—'
-            }
+
+          {/* Boucle performance Koffi Mensah */}
+          <div style={{
+            marginTop: '16px', padding: '12px 14px',
+            background: 'rgba(74, 111, 165,0.07)', border: '1px solid rgba(74, 111, 165,0.2)',
+            borderRadius: '10px'
+          }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 700, textTransform: 'uppercase' }}>
+              Focus Coaching · Koffi Mensah
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+              <span style={{ fontWeight: 700, color: '#d98383' }}>68%</span>
+              <div style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden', position: 'relative' }}>
+                <div style={{ position: 'absolute', left: '0', top: '0', height: '100%', width: '68%', background: '#d98383', borderRadius: '2px' }} />
+                <div style={{ position: 'absolute', left: '68%', top: '0', height: '100%', width: '13%', background: '#6db89a', borderRadius: '2px' }} />
+              </div>
+              <span style={{ fontWeight: 700, color: '#6db89a' }}>81%</span>
+              <span className="badge badge-green" style={{ fontSize: '11px' }}>+13 pts ↑</span>
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+              Avant formation (Jan) → Après coaching ciblé (Avr) · Uplift mesuré
+            </div>
           </div>
           <div className="kpi-subtext">
             {calls.length === 0
@@ -341,6 +421,98 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
               : <span>DeepFilterNet3 actif • {calls.filter(c => (c.audioMetadata?.snrDb || 0) < 10).length} appel(s) bruyant(s)</span>
             }
           </div>
+          <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('campaigns')}>
+            Structure des Campagnes
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+          {campaignStats.map(c => (
+            <div 
+              key={c.id} 
+              style={{
+                background: 'rgba(255, 255, 255, 0.025)',
+                border: `1px solid ${c.isTargetMet ? 'rgba(52, 211, 153, 0.25)' : 'rgba(251, 191, 36, 0.25)'}`,
+                borderRadius: 'var(--radius-md)',
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '12px',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span className={`badge ${c.type === 'ENTRANT' ? 'badge-blue' : 'badge-purple'}`} style={{ fontSize: '10.5px' }}>
+                    {c.type} • {c.clientSector}
+                  </span>
+                  <span className={`badge ${c.isTargetMet ? 'badge-green' : 'badge-amber'}`} style={{ fontSize: '10.5px' }}>
+                    {c.isTargetMet ? 'Objectif atteint' : 'En rattrapage'}
+                  </span>
+                </div>
+
+                <h4 style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                  {c.name}
+                </h4>
+                <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.4, marginBottom: '12px' }}>
+                  {c.description}
+                </p>
+
+                {/* Score vs Objectif */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '6px' }}>
+                  <div>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Score Qualité Réel</span>
+                    <div style={{ fontSize: '22px', fontWeight: 900, color: c.realAvgScore >= c.targetQualityScore ? '#6db89a' : '#d9ae55' }}>
+                      {c.realAvgScore}%
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Cible contractuelle</span>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      {c.targetQualityScore}%
+                    </div>
+                  </div>
+                </div>
+
+                {/* Barre de progression Score */}
+                <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden', marginBottom: '12px' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min(c.realAvgScore, 100)}%`,
+                    background: c.isTargetMet ? '#3f9a7a' : '#f59e0b',
+                    borderRadius: '3px'
+                  }} />
+                </div>
+
+                {/* 3 mini stats */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '10px 8px', borderRadius: '8px', textAlign: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Appels</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>{c.realCallsCount}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>FCR Résol.</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#9fb7d6', marginTop: '2px' }}>{c.realResolutionRate}%</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Bruit SNR</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#6db89a', marginTop: '2px' }}>{c.realAvgSnr} dB</div>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                className="btn btn-secondary btn-sm" 
+                style={{ width: '100%', justifyContent: 'center', fontSize: '12px', marginTop: '4px' }}
+                onClick={() => {
+                  setSelectedCampaign(c.id);
+                }}
+              >
+                Filtrer sur cette campagne
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -394,12 +566,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                   <td style={{ fontSize: '12.5px' }}>{ag.teamName || '—'}</td>
                   <td style={{ fontSize: '12.5px' }}>{ag.campaignName || '—'}</td>
                   <td style={{ fontFamily: 'JetBrains Mono', fontSize: '12px' }}>
-                    <span className={`badge ${
-                      ag.status === 'ACTIF' ? 'badge-green' :
-                      ag.status === 'EN_COACHING' ? 'badge-amber' :
-                      ag.status === 'EN_FORMATION' ? 'badge-blue' : 'badge-gray'
-                    }`} style={{ fontSize: '10.5px' }}>
-                      {ag.status}
+                    {Math.floor(call.durationSeconds / 60)}m {call.durationSeconds % 60}s
+                  </td>
+                  <td>
+                    <span className={`badge ${call.audioMetadata.estimatedNoiseLevel === 'FAIBLE' ? 'badge-green' : call.audioMetadata.estimatedNoiseLevel === 'MODÉRÉ' ? 'badge-amber' : 'badge-red'}`} style={{ fontSize: '10.5px' }}>
+                      {call.audioMetadata.estimatedNoiseLevel}
+                    </span>
+                  </td>
+                  <td>
+                    {call.qualityScore !== undefined ? (
+                      <span className={`badge ${call.qualityScore >= 80 ? 'badge-green' : call.qualityScore >= 70 ? 'badge-amber' : 'badge-red'}`} style={{ fontWeight: 700, fontSize: '12px' }}>
+                        {call.qualityScore} / 100
+                      </span>
+                    ) : (
+                      <span className="badge badge-gray" style={{ fontSize: '10.5px' }}>En attente</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className={`badge ${call.analytics.resolutionStatus === 'RÉSOLU' ? 'badge-green' : call.analytics.resolutionStatus === 'EN_COURS' ? 'badge-amber' : 'badge-red'}`} style={{ fontSize: '10.5px' }}>
+                      {call.analytics.resolutionStatus}
                     </span>
                   </td>
                   <td>

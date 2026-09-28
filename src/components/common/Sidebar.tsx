@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Barre de Navigation Latérale (Sidebar)
+// KALA VOICE QA · Barre de Navigation Latérale (Sidebar)
 // Organisation structurée en 6 sections métiers, profil utilisateur & déconnexion
 // =============================================================================
 import React from 'react';
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
+import { Avatar } from './Avatar';
 
 export type ViewType = 
   | 'dashboard'
@@ -51,19 +52,21 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   };
 
   const roleLabels: Record<UserRole, { label: string; badge: string; color: string }> = {
-    ADMIN:      { label: 'Administrateur', badge: 'badge-red',    color: '#d98383' },
-    MANAGER:    { label: 'Manager Ops',    badge: 'badge-orange', color: '#fb923c' },
-    SUPERVISOR: { label: 'Superviseur',    badge: 'badge-blue',   color: '#9fb7d6' },
-    QA_MANAGER: { label: 'Resp. Qualité',  badge: 'badge-purple', color: '#b3aed1' },
-    TRAINER:    { label: 'Formateur',      badge: 'badge-green',  color: '#6db89a' },
-    AGENT:      { label: 'Conseiller',     badge: 'badge-gray',   color: '#94a3b8' },
+    ADMIN:             { label: 'Administrateur',     badge: 'badge-red',   color: '#d98383' },
+    QUALITE_FORMATION: { label: 'Qualité & Formation', badge: 'badge-blue',  color: '#9fb7d6' },
+    AGENT:             { label: 'Conseiller',          badge: 'badge-gray',  color: '#94a3b8' },
   };
 
   const currentRoleMeta = role ? roleLabels[role] : roleLabels.AGENT;
 
   // Filtrage RBAC des sections
+  const isAgent = role === 'AGENT';
+  // Le conseiller n'accède qu'à ses propres données : pas de pilotage global,
+  // ni de vues d'équipe (le backend renvoie 403 sur ces données de toute façon).
+  const showPilotage = !isAgent;
+  const showPerformance = !isAgent;
   const showAdminSection = role === 'ADMIN';
-  const showExperimentation = role === 'ADMIN' || role === 'MANAGER' || role === 'QA_MANAGER';
+  const showExperimentation = role === 'ADMIN' || role === 'QUALITE_FORMATION';
 
   return (
     <aside className="sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
@@ -83,7 +86,8 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       </div>
 
       <div style={{ flex: 1, paddingBottom: '16px' }}>
-        {/* 1. INTELLIGENCE VOCALE & ASR */}
+        {/* 1. PILOTAGE */}
+        {showPilotage && (
         <div className="nav-section">
           <div className="nav-section-title" style={{ color: '#b3aed1', letterSpacing: '0.6px' }}>
             Intelligence Vocale & ASR
@@ -109,6 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <span className="badge badge-green" style={{ marginLeft: 'auto', fontSize: '10px' }}>Live</span>
           </button>
         </div>
+        )}
 
         {/* 2. OPÉRATIONS PLATEAU (APPELS & QUALITÉ) */}
         <div className="nav-section">
@@ -121,8 +126,8 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             onClick={() => handleNavigate('/dashboard')}
             style={{ width: '100%', background: 'none', textAlign: 'left' }}
           >
-            <LayoutDashboard size={18} />
-            <span>Supervision Plateau</span>
+            <PhoneCall size={18} />
+            <span>Appels & Enregistrements</span>
           </button>
 
           <button 
@@ -142,12 +147,85 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           >
             <CheckCircle2 size={18} />
             <span>Contrôle Qualité (QA)</span>
-            <span className="nav-badge urgent">Grille</span>
           </button>
         </div>
 
-        {/* 3. ADMINISTRATION (si rôle ADMIN) */}
-        {role === 'ADMIN' && (
+        {/* 3. PERFORMANCE */}
+        {showPerformance && (
+        <div className="nav-section">
+          <div className="nav-section-title">Performance</div>
+
+          <button 
+            className={`nav-item ${isActive('/agents') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/agents')}
+            style={{ width: '100%', background: 'none', textAlign: 'left' }}
+          >
+            <Users size={18} />
+            <span>Profils Conseillers</span>
+          </button>
+
+          <button 
+            className={`nav-item ${isActive('/equipes') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/equipes')}
+            style={{ width: '100%', background: 'none', textAlign: 'left' }}
+          >
+            <FolderGit2 size={18} />
+            <span>Équipes & Plateaux</span>
+          </button>
+
+          <button 
+            className={`nav-item ${isActive('/campagnes') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/campagnes')}
+            style={{ width: '100%', background: 'none', textAlign: 'left' }}
+          >
+            <Flag size={18} />
+            <span>Campagnes Métiers</span>
+          </button>
+        </div>
+        )}
+
+        {/* 4. AMÉLIORATION */}
+        <div className="nav-section">
+          <div className="nav-section-title">Amélioration Continue</div>
+
+          <button 
+            className={`nav-item ${isActive('/coaching') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/coaching')}
+            style={{ width: '100%', background: 'none', textAlign: 'left' }}
+          >
+            <TrendingUp size={18} />
+            <span>Coaching & Lacunes</span>
+          </button>
+
+          <button 
+            className={`nav-item ${isActive('/formation') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/formation')}
+            style={{ width: '100%', background: 'none', textAlign: 'left' }}
+          >
+            <GraduationCap size={18} />
+            <span>Académie & Uplift</span>
+          </button>
+        </div>
+
+        {/* 5. RECHERCHE SCIENTIFIQUE (MASTER 2) */}
+        {showExperimentation && (
+          <div className="nav-section">
+            <div className="nav-section-title" style={{ color: '#b3aed1' }}>Recherche Scientifique</div>
+
+            <button 
+              className={`nav-item ${isActive('/experimentation') ? 'active' : ''}`}
+              onClick={() => handleNavigate('/experimentation')}
+              style={{ width: '100%', background: 'none', textAlign: 'left' }}
+            >
+              <FlaskConical size={18} color="#b3aed1" />
+              <span style={{ color: '#e9d5ff', fontWeight: 600 }}>Expérimentation ASR</span>
+              <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: '10px' }}>WER/CER</span>
+            </button>
+          </div>
+        )}
+
+        {/* 6. ADMINISTRATION & SÉCURITÉ */}
+        {showAdminSection && (
           <div className="nav-section">
             <div className="nav-section-title" style={{ color: '#d98383' }}>Système</div>
 
@@ -176,18 +254,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', overflow: 'hidden', flex: 1 }}
             title="Consulter votre profil"
           >
-            <img
-              src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
-              alt={user?.name || 'Utilisateur'}
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: `1.5px solid ${currentRoleMeta.color}`,
-                flexShrink: 0
-              }}
-            />
+            <Avatar name={user?.name} size={34} />
             <div style={{ overflow: 'hidden' }}>
               <div style={{
                 fontSize: '12.5px',
@@ -228,6 +295,16 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <LogOut size={16} />
           </button>
         </div>
+
+        <button
+          onClick={() => handleNavigate('/donnees-personnelles')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: '8px 4px 0',
+            fontSize: '11px', color: 'var(--text-muted)', textAlign: 'left', width: '100%'
+          }}
+        >
+          Protection des données (RGPD)
+        </button>
       </div>
     </aside>
   );

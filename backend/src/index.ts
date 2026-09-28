@@ -2,6 +2,7 @@
 // KALA VOICE QA — Serveur Express Principal
 // Backend REST API | Master IA & Big Data
 // =============================================================================
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { createTables } from './db/migrate.js';
@@ -11,7 +12,7 @@ import authRouter from './routes/auth.js';
 import usersRouter from './routes/users.js';
 import callsRouter from './routes/calls.js';
 import transcriptionsRouter from './routes/transcriptions.js';
-import transcribeRouter from './routes/transcribe.js';
+import revisionsRouter from './routes/revisions.js';
 import {
   qualityRouter, criteriaRouter, agentsRouter, teamsRouter,
   campaignsRouter, coachingRouter, trainingRouter,
@@ -45,7 +46,7 @@ app.use('/api/auth',        authRouter);
 app.use('/api/users',       usersRouter);
 app.use('/api/calls',       callsRouter);
 app.use('/api/transcriptions', transcriptionsRouter);
-app.use('/api/transcribe',     transcribeRouter);    // Groq Whisper (dev local + Vercel fallback)
+app.use('/api/revisions',   revisionsRouter);
 app.use('/api/evaluations', qualityRouter);
 app.use('/api/criteria',    criteriaRouter);
 app.use('/api/agents',      agentsRouter);
@@ -85,7 +86,6 @@ app.listen(PORT, () => {
   console.log('║     GET  /api/calls  (tous rôles)                    ║');
   console.log('║     GET  /api/dashboard/metrics                      ║');
   console.log('║     GET  /api/health                                 ║');
-  console.log('║  🔑 Mot de passe démo : kala2024!                   ║');
   console.log('╚══════════════════════════════════════════════════════╝\n');
 });
 

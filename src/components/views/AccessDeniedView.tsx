@@ -1,5 +1,5 @@
 // =============================================================================
-// KALA VOICE QA — Écran 403 : Accès Restreint (RBAC Security)
+// KALA VOICE QA · Écran 403 : Accès Restreint (RBAC Security)
 // Protection des routes d'administration et d'audit contre les accès non autorisés
 // =============================================================================
 import React from 'react';
@@ -20,10 +20,7 @@ export const AccessDeniedView: React.FC<AccessDeniedViewProps> = ({
 
   const roleLabels: Record<string, string> = {
     ADMIN: 'Administrateur Système',
-    MANAGER: 'Manager Opérations',
-    SUPERVISOR: 'Superviseur de Plateau',
-    QA_MANAGER: 'Responsable Qualité & Audit',
-    TRAINER: 'Formateur Métier',
+    QUALITE_FORMATION: 'Qualité & Formation',
     AGENT: 'Conseiller Client'
   };
 

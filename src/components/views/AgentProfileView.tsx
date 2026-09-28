@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  User, Award, TrendingUp, Calendar, CheckCircle2, 
-  Target, BookOpen, Clock, ShieldCheck, Play
-} from 'lucide-react';
+import { User, Award, TrendingUp, Calendar, CheckCircle2, Target, BookOpen, Clock, ShieldCheck, Play, Check } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { UserRole } from '../../types';
+import { EmptyState } from '../common/EmptyState';
+import { Avatar } from '../common/Avatar';
 
 interface AgentProfileViewProps {
   selectedAgentId: string;
@@ -22,6 +21,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
 }) => {
   const agents = storageService.getAgents();
   const currentAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
+  if (agents.length === 0 || !currentAgent) return <EmptyState title="Aucun conseiller enregistré" />;
   const calls = storageService.getCalls().filter(c => c.agentId === currentAgent.id);
   const coachingPlan = storageService.getCoachingPlanByAgentId(currentAgent.id);
   const sessions = storageService.getTrainingSessions().filter(s => s.agentId === currentAgent.id);
@@ -29,6 +29,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
   const firstScore = currentAgent.monthlyScores[0]?.score ?? Math.round(currentAgent.averageQualityScore);
   const lastScore = currentAgent.monthlyScores[currentAgent.monthlyScores.length - 1]?.score ?? Math.round(currentAgent.averageQualityScore);
   const scoreDiff = lastScore - firstScore;
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -57,11 +58,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
       {/* Carte d'Identité & Statistiques Globales */}
       <div className="glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <img 
-            src={currentAgent.avatarUrl} 
-            alt={currentAgent.name} 
-            style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-full)', border: '3px solid var(--primary)', objectFit: 'cover' }}
-          />
+          <Avatar name={currentAgent.name} size={64} />
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: 800 }}>{currentAgent.name}</h1>
             <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -100,7 +97,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Target size={20} color="var(--primary-light)" />
               <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Plan de Coaching Actif — {coachingPlan.trainerName}</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Plan de Coaching Actif · {coachingPlan.trainerName}</h3>
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{coachingPlan.overallObjectiveSummary}</p>
               </div>
             </div>
@@ -124,7 +121,7 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
                 <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.3 }}>{obj.title}</div>
                 {obj.resultat && (
                   <div style={{ fontSize: '11px', color: '#6db89a', marginTop: '4px', fontWeight: 600 }}>
-                    ✓ {obj.resultat}
+                    <Check size={12} /> {obj.resultat}
                   </div>
                 )}
               </div>

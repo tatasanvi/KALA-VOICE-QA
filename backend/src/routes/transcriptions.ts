@@ -10,7 +10,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import db from '../db/index.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireRole, STAFF_UP } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 
 const router = Router();
@@ -81,7 +81,7 @@ async function postToAsr(form: FormData): Promise<{ status: number; body: any }>
 }
 
 // POST /api/transcriptions — transcription du signal brut ; débruitage uniquement en comparaison facultative
-router.post('/', requireAuth, handleUpload, async (req: Request, res: Response): Promise<void> => {
+router.post('/', requireAuth, requireRole(...STAFF_UP), handleUpload, async (req: Request, res: Response): Promise<void> => {
   if (!req.file) {
     res.status(400).json({ error: 'Aucun fichier audio reçu.' });
     return;
