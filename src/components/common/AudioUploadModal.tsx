@@ -40,10 +40,10 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
               }}>
                 <UploadCloud size={16} color="white" />
               </div>
-              <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Ingestion & Analyse d'Enregistrement Audio</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Import & Analyse d'Enregistrement Audio</h2>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 36px' }}>
-              Transcription réelle par Whisper-small, sur le signal brut.
+              Import de fichier audio, assignation conseiller et transcription automatique Whisper large-v3-turbo.
             </p>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>

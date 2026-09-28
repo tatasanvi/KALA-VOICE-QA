@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Volume2, Sparkles, AlertTriangle } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, VolumeX, Sparkles, AlertTriangle, FastForward } from 'lucide-react';
 import { audioSignalService, AudioPlayMode } from '../../services/audioSignalService';
+import { audioStorageService } from '../../services/audioStorageService';
 import { AudioMetadata } from '../../types';
 
 interface AudioPlayerProps {
@@ -13,20 +14,44 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [playMode, setPlayMode] = useState<AudioPlayMode>('KALA_DENOISED');
+  const [playbackRate, setPlaybackRate] = useState<number>(1.0);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [audioLoaded, setAudioLoaded] = useState<boolean>(false);
 
   useEffect(() => {
+    let isCancelled = false;
+
+    // Charger l'URL audio réelle depuis IndexedDB ou metadata
+    const loadAudioSource = async () => {
+      let url = metadata.originalUrl || null;
+      if (!url && metadata.id) {
+        url = await audioStorageService.getAudioUrl(metadata.id);
+      }
+      if (!isCancelled && url) {
+        audioSignalService.loadAudio(url, metadata.durationSeconds);
+        setAudioLoaded(true);
+      } else if (!isCancelled) {
+        audioSignalService.loadAudio(null, metadata.durationSeconds);
+        setAudioLoaded(false);
+      }
+    };
+
+    loadAudioSource();
+
     const unsubTime = audioSignalService.onTimeUpdate((time) => {
-      setCurrentTime(time);
+      if (!isCancelled) setCurrentTime(time);
     });
     const unsubState = audioSignalService.onStateChange((playing) => {
-      setIsPlaying(playing);
+      if (!isCancelled) setIsPlaying(playing);
     });
 
     return () => {
+      isCancelled = true;
+      audioSignalService.pause();
       unsubTime();
       unsubState();
     };
-  }, []);
+  }, [metadata.id, metadata.originalUrl, metadata.durationSeconds]);
 
   const handleTogglePlay = () => {
     if (isPlaying) {
@@ -51,34 +76,64 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
     audioSignalService.setPlayMode(mode);
   };
 
+  const cyclePlaybackRate = () => {
+    const rates = [1.0, 1.25, 1.5, 0.75];
+    const nextIndex = (rates.indexOf(playbackRate) + 1) % rates.length;
+    const nextRate = rates[nextIndex];
+    setPlaybackRate(nextRate);
+    audioSignalService.setPlaybackRate(nextRate);
+  };
+
+  const toggleMute = () => {
+    if (isMuted) {
+      audioSignalService.setVolume(1.0);
+      setIsMuted(false);
+    } else {
+      audioSignalService.setVolume(0);
+      setIsMuted(true);
+    }
+  };
+
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const progressPercent = (currentTime / metadata.durationSeconds) * 100;
-  const samples = metadata.waveformSamples || [0.3, 0.6, 0.8, 0.4, 0.7, 0.9, 0.5, 0.3];
+  const durationSec = metadata.durationSeconds || 1;
+  const progressPercent = Math.min(100, Math.max(0, (currentTime / durationSec) * 100));
+  const samples = metadata.waveformSamples && metadata.waveformSamples.length > 0 
+    ? metadata.waveformSamples 
+    : [0.3, 0.6, 0.8, 0.4, 0.7, 0.9, 0.5, 0.3, 0.5, 0.8, 0.7, 0.4];
 
   return (
     <div className="audio-player-card">
-      {/* Header du lecteur avec sélecteur de mode de débruitage */}
+      {/* Header du lecteur avec informations et statut du flux */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-sm)', background: 'rgba(74, 111, 165, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9fb7d6' }}>
             <Volume2 size={18} />
           </div>
           <div>
-            <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {metadata.filename}
+            <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>{metadata.filename}</span>
+              {audioLoaded ? (
+                <span className="badge badge-green" style={{ fontSize: '9.5px', padding: '1px 6px' }}>
+                  Fichier audio chargé
+                </span>
+              ) : (
+                <span className="badge badge-gray" style={{ fontSize: '9.5px', padding: '1px 6px' }}>
+                  Mode simulation
+                </span>
+              )}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Échantillonnage : {metadata.sampleRateHz / 1000} kHz Mono • Durée : {formatTime(metadata.durationSeconds)}
+              Échantillonnage : {metadata.sampleRateHz ? metadata.sampleRateHz / 1000 : 16} kHz Mono • Durée : {formatTime(metadata.durationSeconds)}
             </div>
           </div>
         </div>
 
-        {/* Toggle Double Flux Audio : Original bruité vs Débruité KALA */}
+        {/* Toggle Mode Audio */}
         <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0, 0, 0, 0.5)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
           <button 
             className={`btn btn-sm ${playMode === 'ORIGINAL_NOISY' ? 'btn-primary' : 'btn-secondary'}`}
@@ -86,7 +141,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
             style={{ fontSize: '11.5px', padding: '4px 10px' }}
           >
             <AlertTriangle size={13} color={playMode === 'ORIGINAL_NOISY' ? '#fff' : '#f59e0b'} />
-            <span>Audio Original (Bruité)</span>
+            <span>Signal Brut</span>
           </button>
           <button 
             className={`btn btn-sm ${playMode === 'KALA_DENOISED' ? 'btn-primary' : 'btn-secondary'}`}
@@ -94,7 +149,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
             style={{ fontSize: '11.5px', padding: '4px 10px', marginLeft: '4px' }}
           >
             <Sparkles size={13} color="#b4c6de" />
-            <span>Débruité KALA (simulation)</span>
+            <span>Filtre Vocal Débruité</span>
           </button>
         </div>
       </div>
@@ -104,6 +159,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
         className="waveform-track"
         onClick={handleSeek}
         title="Cliquez pour naviguer dans l'enregistrement audio"
+        style={{ cursor: 'pointer', position: 'relative' }}
       >
         <div 
           className="waveform-playhead" 
@@ -126,7 +182,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
 
       {/* Contrôles et Métriques Techniques */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', flexWrap: 'wrap', gap: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Play / Pause principal */}
           <button 
             className="btn btn-primary"
             onClick={handleTogglePlay}
@@ -136,6 +193,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
             {isPlaying ? <Pause size={18} /> : <Play size={18} style={{ marginLeft: '2px' }} />}
           </button>
 
+          {/* Revenir au début */}
           <button 
             className="btn btn-secondary btn-sm"
             onClick={() => {
@@ -144,11 +202,34 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ metadata, onTimeSeek }
               if (onTimeSeek) onTimeSeek(0);
             }}
             title="Revenir au début"
+            style={{ padding: '6px 8px' }}
           >
             <RotateCcw size={14} />
           </button>
 
-          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+          {/* Vitesse de lecture */}
+          <button 
+            className="btn btn-secondary btn-sm"
+            onClick={cyclePlaybackRate}
+            title="Changer la vitesse de lecture"
+            style={{ padding: '4px 8px', fontSize: '11px', fontWeight: 700, minWidth: '46px' }}
+          >
+            <FastForward size={12} style={{ marginRight: '3px' }} />
+            {playbackRate}x
+          </button>
+
+          {/* Muet / Son */}
+          <button 
+            className="btn btn-secondary btn-sm"
+            onClick={toggleMute}
+            title={isMuted ? "Rétablir le son" : "Couper le son"}
+            style={{ padding: '6px 8px' }}
+          >
+            {isMuted ? <VolumeX size={14} color="#ef4444" /> : <Volume2 size={14} />}
+          </button>
+
+          {/* Horodatage */}
+          <div style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginLeft: '4px' }}>
             <span style={{ color: 'var(--primary-light)' }}>{formatTime(currentTime)}</span>
             <span style={{ color: 'var(--text-muted)' }}> / {formatTime(metadata.durationSeconds)}</span>
           </div>

@@ -1,4 +1,4 @@
-# 🎙️ KALA VOICE QA
+#  KALA VOICE QA
 
 > **Plateforme Intelligente d'Analyse Vocale, Qualité & Coaching pour Centres de Contacts**
 >
@@ -50,25 +50,25 @@ AUDIO → TRANSCRIPTION → ANALYSE IA → CONTRÔLE QUALITÉ → COACHING → F
 
 ---
 
-## 🚀 Fonctionnalités Clés
+##  Fonctionnalités Clés
 
 | Module | Description |
 |--------|-------------|
-| 🎯 **Tableau de Bord Exécutif** | KPIs temps réel, métriques centre d'appels |
-| 📞 **Registre des Appels** | Gestion et filtrage des enregistrements |
-| 🎙️ **Studio de Transcription** | Transcription synchronisée avec lecteur audio interactif |
-| 🧠 **Analyse NLP** | Sentiment, entités, mots-clés, sujets détectés |
-| ✅ **Contrôle Qualité** | Évaluation multicritères assistée IA |
-| 💪 **Coaching & Recommandations** | Plans de développement personnalisés |
-| 🎓 **Académie de Formation** | Modules de formation intégrés |
-| 👤 **Fiches Conseillers 360°** | Profils détaillés et évolution des performances |
-| 📊 **Rapports & Synthèses** | Exports PDF/CSV automatisés |
-| 🔬 **Laboratoire Expérimental ASR** | Benchmark WER/CER/RTF sur pipelines de débruitage |
-| 🔒 **Audit & Sécurité** | Traçabilité complète, RGPD-compliant |
+|  **Tableau de Bord Exécutif** | KPIs temps réel, métriques centre d'appels |
+|  **Registre des Appels** | Gestion et filtrage des enregistrements |
+|  **Studio de Transcription** | Transcription synchronisée avec lecteur audio interactif |
+|  **Analyse NLP** | Sentiment, entités, mots-clés, sujets détectés |
+|  **Contrôle Qualité** | Évaluation multicritères assistée IA |
+|  **Coaching & Recommandations** | Plans de développement personnalisés |
+|  **Académie de Formation** | Modules de formation intégrés |
+|  **Fiches Conseillers 360°** | Profils détaillés et évolution des performances |
+|  **Rapports & Synthèses** | Exports PDF/CSV automatisés |
+|  **Laboratoire Expérimental ASR** | Benchmark WER/CER/RTF sur pipelines de débruitage |
+|  **Audit & Sécurité** | Traçabilité complète, RGPD-compliant |
 
 ---
 
-## 🔬 Module Recherche (Mémoire Master)
+##  Module Recherche (Mémoire Master)
 
 Le **Laboratoire Expérimental ASR** est le cœur de la contribution scientifique :
 
@@ -80,7 +80,7 @@ Le **Laboratoire Expérimental ASR** est le cœur de la contribution scientifiqu
 
 ---
 
-## 🏗️ Architecture Technique
+##  Architecture Technique
 
 ```
 KALA VOICE QA
@@ -103,7 +103,7 @@ KALA VOICE QA
 
 ---
 
-## 🖥️ Prérequis
+##  Prérequis
 
 - **Node.js** ≥ 18.x
 - **npm** ≥ 9.x
@@ -111,7 +111,7 @@ KALA VOICE QA
 
 ---
 
-## ⚡ Installation & Lancement
+##  Installation & Lancement
 
 ```bash
 # Cloner le dépôt
@@ -128,21 +128,21 @@ npm run dev
 
 ---
 
-## 👥 Rôles Utilisateurs
+##  Rôles Utilisateurs
 
 L'application supporte **5 profils** avec navigation adaptée :
 
 | Rôle | Accès Principal |
 |------|----------------|
-| 🏢 **Admin** | Toutes les fonctionnalités + paramètres système |
-| 📊 **Superviseur** | Tableaux de bord, appels, performance équipes |
-| ✅ **QA Manager** | Contrôle qualité, évaluations, rapports |
-| 💼 **Formateur** | Coaching, formation, profils agents |
-| 🎧 **Agent** | Propre profil, transcriptions, formations |
+|  **Admin** | Toutes les fonctionnalités + paramètres système |
+|  **Superviseur** | Tableaux de bord, appels, performance équipes |
+|  **QA Manager** | Contrôle qualité, évaluations, rapports |
+|  **Formateur** | Coaching, formation, profils agents |
+|  **Agent** | Propre profil, transcriptions, formations |
 
 ---
 
-## 🎨 Stack Technologique
+##  Stack Technologique
 
 - **Framework** : React 18 + TypeScript
 - **Build Tool** : Vite 5
@@ -153,13 +153,13 @@ L'application supporte **5 profils** avec navigation adaptée :
 
 ---
 
-## 📄 Licence
+##  Licence
 
 Projet académique – Mémoire Master 2 IA & Big Data.
 
 ---
 
-## ✍️ Auteur
+##  Auteur
 
 Développé dans le cadre du Mémoire de Master 2, option **IA & Big Data**.
 

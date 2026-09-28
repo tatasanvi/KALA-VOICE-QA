@@ -338,11 +338,11 @@ export const LoginView: React.FC = () => {
               <ShieldCheck size={13} color="#6db89a" />
               Sécurité JWT & Traçabilité RBAC
             </span>
-            <span>v1.0.0 • Master 2 IA</span>
+            <span>v1.0.0 • Prototype Démo</span>
           </div>
         </div>
 
-        {/* Colonne Droite : Accès Démonstration Rapide pour la Soutenance */}
+        {/* Colonne Droite : Accès Démonstration Rapide */}
         <div style={{
           background: 'rgba(15, 23, 42, 0.65)',
           border: '1px solid rgba(125, 122, 166, 0.2)',
@@ -355,7 +355,7 @@ export const LoginView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <Sparkles size={18} color="#7d7aa6" />
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#b3aed1', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-              Environnement Soutenance Master 2
+              Environnement Démonstration & Test
             </span>
           </div>
 
@@ -369,56 +369,56 @@ export const LoginView: React.FC = () => {
           </p>
 
           {/* Grille des profils démo */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
             {demoAccounts.map((acc) => (
               <div
                 key={acc.email}
                 onClick={() => handleQuickLogin(acc.email)}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  background: email === acc.email ? 'rgba(74, 111, 165, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                  border: `1px solid ${email === acc.email ? 'rgba(74, 111, 165, 0.4)' : 'rgba(255, 255, 255, 0.06)'}`,
+                  flexDirection: 'column',
+                  gap: '8px',
+                  padding: '16px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: email === acc.email ? 'rgba(74, 111, 165, 0.2)' : 'rgba(255, 255, 255, 0.03)',
+                  border: `1.5px solid ${email === acc.email ? acc.color : 'rgba(255, 255, 255, 0.08)'}`,
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: acc.color,
-                    boxShadow: 'none'
-                  }} />
-                  <div>
-                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: acc.color,
+                      boxShadow: `0 0 8px ${acc.color}`
+                    }} />
+                    <span style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-primary)' }}>
                       {acc.title}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      {acc.email} • {acc.desc}
-                    </div>
+                    </span>
                   </div>
+                  <span className={`badge ${acc.role === 'ADMIN' ? 'badge-purple' : 'badge-green'}`} style={{ fontSize: '10.5px' }}>
+                    {acc.badge}
+                  </span>
                 </div>
 
-                <button
-                  type="button"
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    padding: '4px 10px',
-                    borderRadius: 'var(--radius-full)',
-                    background: email === acc.email ? '#4a6fa5' : 'rgba(255, 255, 255, 0.06)',
-                    color: email === acc.email ? '#ffffff' : 'var(--text-secondary)',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {email === acc.email ? 'Sélectionné' : 'Choisir'}
-                </button>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                  {acc.desc}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <code style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{acc.email}</code>
+                  <span style={{ 
+                    fontSize: '11px', 
+                    fontWeight: 700, 
+                    color: email === acc.email ? acc.color : 'var(--text-muted)' 
+                  }}>
+                    {email === acc.email ? '✓ Profil Sélectionné' : 'Cliquer pour charger →'}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

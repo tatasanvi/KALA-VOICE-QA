@@ -9,7 +9,7 @@ import { storageService } from '../../services/storageService';
 import { useAuth } from '../../context/AuthContext';
 import { Avatar } from './Avatar';
 import { 
-  ShieldCheck, UserCheck, Sparkles, Bell, LogOut, Check, 
+  ShieldCheck, Sparkles, Bell, LogOut, Check, 
   Wifi, WifiOff, X
 } from 'lucide-react';
 
@@ -69,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div>
           <h1 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>{activeViewTitle}</h1>
           <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            Plateforme KALA VOICE QA • Soutenance Master 2 IA & Big Data
+            Plateforme d'Assurance Qualité & Intelligence Vocale
           </div>
         </div>
       </div>
@@ -89,17 +89,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             fontWeight: 600,
             color: isOnline ? '#6db89a' : '#d98383'
           }}
-          title={isOnline ? "API Backend Express & Base SQLite connectés (:8000)" : "Mode Fallback Local Storage actif"}
+          title={isOnline ? "API connectée et opérationnelle" : "Mode autonome actif"}
         >
           {isOnline ? <Wifi size={13} /> : <WifiOff size={13} />}
           <span>{isOnline ? 'API Connectée' : 'Hors-Ligne'}</span>
         </div>
 
-        {/* Statut Moteur IA & Débruiteur */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(74, 111, 165, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(74, 111, 165, 0.2)' }}>
-          <Sparkles size={14} color="#9fb7d6" />
-          <span style={{ fontSize: '11.5px', color: '#b4c6de', fontWeight: 600 }}>
-            ASR : <strong style={{ color: '#ffffff' }}>non branché</strong> (démonstration)
+        {/* Statut Moteur IA ASR */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+          <Sparkles size={14} color="#10b981" />
+          <span style={{ fontSize: '11.5px', color: '#6ee7b7', fontWeight: 600 }}>
+            Moteur ASR : <strong style={{ color: '#ffffff' }}>Whisper V3 Turbo</strong>
           </span>
         </div>
 

@@ -31,7 +31,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   const existingEval = currentCall ? storageService.getEvaluationByCallId(currentCall.id) : undefined;
 
   // Initialisation de l'évaluation si non existante
-  const [evaluation, setEvaluation] = useState<QualityEvaluation>(() => {
+  const [evaluation, setEvaluation] = useState<QualityEvaluation | null>(() => {
     if (existingEval) return existingEval;
     if (!currentCall) return {} as QualityEvaluation;
     return QualityService.generateAiSuggestedEvaluation(currentCall, criteria, currentUser.name);

@@ -89,31 +89,46 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         {/* 1. PILOTAGE */}
         {showPilotage && (
         <div className="nav-section">
-          <div className="nav-section-title">Pilotage</div>
+          <div className="nav-section-title" style={{ color: '#b3aed1', letterSpacing: '0.6px' }}>
+            Intelligence Vocale & ASR
+          </div>
+
+          <button 
+            className={`nav-item ${isActive('/experimentation') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/experimentation')}
+            style={{ width: '100%', background: 'none', textAlign: 'left' }}
+          >
+            <FlaskConical size={18} color="#b3aed1" />
+            <span style={{ fontWeight: 700, color: '#e9d5ff' }}>Banc d'Essai ASR</span>
+            <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: '10px' }}>WER / CER</span>
+          </button>
+
+          <button 
+            className={`nav-item ${isActive('/transcriptions') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/transcriptions')}
+            style={{ width: '100%', background: 'none', textAlign: 'left' }}
+          >
+            <Mic size={18} color="#6db89a" />
+            <span style={{ fontWeight: 700 }}>Studio Transcription</span>
+            <span className="badge badge-green" style={{ marginLeft: 'auto', fontSize: '10px' }}>Live</span>
+          </button>
+        </div>
+        )}
+
+        {/* 2. OPÉRATIONS PLATEAU (APPELS & QUALITÉ) */}
+        <div className="nav-section">
+          <div className="nav-section-title" style={{ color: '#9fb7d6' }}>
+            Opérations & Supervision
+          </div>
 
           <button 
             className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}
             onClick={() => handleNavigate('/dashboard')}
             style={{ width: '100%', background: 'none', textAlign: 'left' }}
           >
-            <LayoutDashboard size={18} />
-            <span>Dashboard</span>
+            <PhoneCall size={18} />
+            <span>Appels & Enregistrements</span>
           </button>
-
-          <button 
-            className={`nav-item ${isActive('/rapports') ? 'active' : ''}`}
-            onClick={() => handleNavigate('/rapports')}
-            style={{ width: '100%', background: 'none', textAlign: 'left' }}
-          >
-            <FileText size={18} />
-            <span>Rapports & Synthèses</span>
-          </button>
-        </div>
-        )}
-
-        {/* 2. OPÉRATIONS */}
-        <div className="nav-section">
-          <div className="nav-section-title">Opérations</div>
 
           <button 
             className={`nav-item ${isActive('/appels') ? 'active' : ''}`}
@@ -122,15 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
           >
             <PhoneCall size={18} />
             <span>Appels & Enregistrements</span>
-          </button>
-
-          <button 
-            className={`nav-item ${isActive('/transcriptions') ? 'active' : ''}`}
-            onClick={() => handleNavigate('/transcriptions')}
-            style={{ width: '100%', background: 'none', textAlign: 'left' }}
-          >
-            <Mic size={18} />
-            <span>Studio Transcription</span>
+            <span className="nav-badge">Sortant</span>
           </button>
 
           <button 
@@ -220,16 +227,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
         {/* 6. ADMINISTRATION & SÉCURITÉ */}
         {showAdminSection && (
           <div className="nav-section">
-            <div className="nav-section-title" style={{ color: '#d98383' }}>Administration</div>
-
-            <button 
-              className={`nav-item ${isActive('/admin/users') ? 'active' : ''}`}
-              onClick={() => handleNavigate('/admin/users')}
-              style={{ width: '100%', background: 'none', textAlign: 'left' }}
-            >
-              <Shield size={18} color="#d98383" />
-              <span>Gestion Utilisateurs</span>
-            </button>
+            <div className="nav-section-title" style={{ color: '#d98383' }}>Système</div>
 
             <button 
               className={`nav-item ${isActive('/parametres') ? 'active' : ''}`}
@@ -237,7 +235,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
               style={{ width: '100%', background: 'none', textAlign: 'left' }}
             >
               <Settings size={18} />
-              <span>Paramètres & Audit</span>
+              <span>Paramètres & Modèles</span>
             </button>
           </div>
         )}

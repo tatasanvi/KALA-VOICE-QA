@@ -182,7 +182,7 @@ export interface Call {
   callDate: string;
   durationSeconds: number;
   direction: 'ENTRANT' | 'SORTANT';
-  callType: 'SUPPORT_TECHNIQUE' | 'RÉTENTION' | 'RÉCLAMATION' | 'COMMERCIAL' | 'ENQUÊTE';
+  callType: 'SUPPORT_TECHNIQUE' | 'RÉTENTION' | 'RÉCLAMATION' | 'COMMERCIAL' | 'ENQUÊTE' | 'PROSPECTION';
   status?: CallStatus;
   audioMetadata: AudioMetadata;
   transcription: Transcription;
@@ -309,7 +309,7 @@ export interface TrainingSession {
 }
 
 // ----------------------------------------------------------------------------
-// MODÈLE DU DÉMONSTRATEUR D'EXPÉRIMENTATION SCIENTIFIQUE (MÉMOIRE DE MASTER)
+// MODÈLE DU LABORATOIRE D'ÉVALUATION ACOUSTIQUE & BENCHMARK ASR
 // ----------------------------------------------------------------------------
 export interface ExperimentConfiguration {
   id: string;

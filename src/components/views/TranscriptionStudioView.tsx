@@ -33,6 +33,13 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
   const [activeTab, setActiveTab] = useState<'SEGMENTS' | 'COMPARE'>('SEGMENTS');
 
   useEffect(() => {
+    const unsubStorage = storageService.subscribe(() => {
+      setCalls([...storageService.getCalls()]);
+    });
+    return () => unsubStorage();
+  }, []);
+
+  useEffect(() => {
     const unsub = audioSignalService.onTimeUpdate((time) => {
       setCurrentTime(time);
     });
@@ -365,13 +372,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
               </button>
             </div>
 
-            <RealTranscription />
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button className="btn btn-secondary" onClick={() => setShowImportModal(false)}>
-                Fermer
-              </button>
-            </div>
+            <RealTranscription onSaved={handleImportSaved} />
           </div>
         </div>
       )}

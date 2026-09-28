@@ -1,5 +1,5 @@
 // ============================================================================
-// Service d'Expérimentation Scientifique (Mémoire Master IA & Big Data)
+// Service d'Expérimentation & Benchmark ASR KALA VOICE QA
 // Calcul rigoureux des métriques ASR : WER, CER, RTF, Matrice de Levenshtein
 // ============================================================================
 

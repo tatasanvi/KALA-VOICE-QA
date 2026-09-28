@@ -389,8 +389,8 @@ class StorageService {
     this.teams = INITIAL_TEAMS;
     this.agents = INITIAL_AGENTS;
     this.criteria = QUALITY_CRITERIA_LIST;
-    this.calls = INITIAL_CALLS;
-    this.evaluations = INITIAL_EVALUATIONS;
+    this.calls = [];         // Réinitialisation : aucun appel prédéfini
+    this.evaluations = []; // Réinitialisation : aucune évaluation prédéfinie
     this.coachingPlans = INITIAL_COACHING_PLANS;
     this.trainingModules = INITIAL_TRAINING_MODULES;
     this.trainingSessions = INITIAL_TRAINING_SESSIONS;
