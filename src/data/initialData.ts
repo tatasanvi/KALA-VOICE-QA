@@ -2119,7 +2119,12 @@ export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
     audioPreprocessingMethod: 'Aucun (Signal audio direct non filtré)',
     asrModel: 'Whisper-Small-v3 / Wav2Vec2-FR',
     denoiserAlgorithm: 'Aucun',
-    postProcessingApplied: 'Découpage standard par énergie'
+    postProcessingApplied: 'Découpage standard par énergie',
+    estimatedRtf: 0.18,
+    averageWer: 28.4,
+    averageCer: 9.7,
+    snrImprovementDb: 0,
+    confidenceScoreAvg: 0.61
   },
   {
     id: 'cfg-preprocessed',
@@ -2128,16 +2133,26 @@ export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
     audioPreprocessingMethod: 'Spectral Subtraction (Boll 1979) + Filtre Passe-Bande 300-3400Hz',
     asrModel: 'Whisper-Small-v3',
     denoiserAlgorithm: 'Soustraction Spectrale Adaptative',
-    postProcessingApplied: 'Normalisation RMS'
+    postProcessingApplied: 'Normalisation RMS',
+    estimatedRtf: 0.22,
+    averageWer: 21.6,
+    averageCer: 7.1,
+    snrImprovementDb: 4.2,
+    confidenceScoreAvg: 0.71
   },
   {
     id: 'cfg-acoustic-tuned',
     name: '3. Modèle ASR Adapté Bruit Plateau',
     category: 'MODÈLE_AMÉLIORÉ',
     audioPreprocessingMethod: 'Filtrage Wiener Adaptatif + Débruiteur RNNoise',
-    asrModel: 'Conformer-CTC Fine-tuned sur corpus audio centre d\'appels bruité',
+    asrModel: "Conformer-CTC Fine-tuned sur corpus audio centre d'appels bruité",
     denoiserAlgorithm: 'Wiener Filtering',
-    postProcessingApplied: 'Rescoring avec modèle de langage n-gram 4-gram'
+    postProcessingApplied: 'Rescoring avec modèle de langage n-gram 4-gram',
+    estimatedRtf: 0.31,
+    averageWer: 14.3,
+    averageCer: 4.8,
+    snrImprovementDb: 7.8,
+    confidenceScoreAvg: 0.82
   },
   {
     id: 'cfg-kala-full',
@@ -2146,7 +2161,12 @@ export const SCIENTIFIC_EXPERIMENT_CONFIGS: ExperimentConfiguration[] = [
     audioPreprocessingMethod: 'Deep Complex UNet (DCUNet) Débruitage Neuronal + Masquage de phase',
     asrModel: 'Whisper-Large-v3 enrichi avec Prompting Métier & Vocabulaire Télécom/Assurance',
     denoiserAlgorithm: 'Réseau Récurrent Débruiteur KALA-Denoiser',
-    postProcessingApplied: 'Alignement dynamique Viterbi + Re-ponctuation par Transformer RoBERTa-FR'
+    postProcessingApplied: 'Alignement dynamique Viterbi + Re-ponctuation par Transformer RoBERTa-FR',
+    estimatedRtf: 0.47,
+    averageWer: 8.9,
+    averageCer: 2.6,
+    snrImprovementDb: 12.5,
+    confidenceScoreAvg: 0.91
   }
 ];
 

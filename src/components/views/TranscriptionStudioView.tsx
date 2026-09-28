@@ -23,7 +23,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
 }) => {
   // Ingestion réservée aux rôles superviseur et au-dessus (contrôle réel côté backend).
   const canImport = currentRole === 'ADMIN' || currentRole === 'QUALITE_FORMATION';
-  const calls = storageService.getCalls();
+  const [calls, setCalls] = useState<Call[]>(() => storageService.getCalls());
   const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
 
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -60,6 +60,11 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
 
   const handleCancelEdit = () => {
     setEditingSegmentId(null);
+  };
+
+  const handleImportSaved = () => {
+    setCalls([...storageService.getCalls()]);
+    setShowImportModal(false);
   };
 
   const handleSegmentClick = (startTime: number) => {
