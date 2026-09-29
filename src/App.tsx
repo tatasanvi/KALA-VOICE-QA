@@ -37,7 +37,11 @@ import { ReportsView } from './components/views/ReportsView';
 import { SettingsAuditView } from './components/views/SettingsAuditView';
 import { UserManagementView } from './components/views/UserManagementView';
 
-import { authApi } from './services/apiClient';
+import {
+  authApi, agentsApi, campaignsApi, callsApi, coachingApi,
+  qualityApi, teamsApi, trainingApi,
+} from './services/apiClient';
+import { storageService } from './services/storageService';
 import { PrivacyView } from './components/views/PrivacyView';
 
 // ─── Layout Authentifié avec Sidebar, Navbar & Bannière Master 2 ───────────────
@@ -67,7 +71,9 @@ const SessionStrip: React.FC<{ isApiOnline: boolean }> = ({ isApiOnline }) => {
 
 const AppLayout: React.FC = () => {
   const location = useLocation();
+  const { user } = useAuth();
   const [isApiOnline, setIsApiOnline] = useState<boolean>(true);
+  const [dataRevision, setDataRevision] = useState(0);
 
   // Tester la connectivité de l'API backend
   useEffect(() => {
@@ -77,6 +83,34 @@ const AppLayout: React.FC = () => {
     }, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const syncData = async () => {
+      const [agents, teams, campaigns, calls, coaching, modules, sessions, evaluations] = await Promise.all([
+        agentsApi.list(), teamsApi.list(), campaignsApi.list(), callsApi.list({ limit: '500' }),
+        coachingApi.list(), trainingApi.listModules(), trainingApi.listSessions(), qualityApi.list(),
+      ]);
+      if (!active) return;
+      if (agents.ok && Array.isArray(agents.data)) storageService.setAgents(agents.data);
+      if (teams.ok && Array.isArray(teams.data)) storageService.setTeams(teams.data);
+      if (campaigns.ok && Array.isArray(campaigns.data)) storageService.setCampaigns(campaigns.data);
+      if (calls.ok && Array.isArray(calls.data?.data)) storageService.setCalls(calls.data.data);
+      if (coaching.ok && Array.isArray(coaching.data)) storageService.setCoachingPlans(coaching.data);
+      if (modules.ok && Array.isArray(modules.data)) storageService.setTrainingModules(modules.data);
+      if (sessions.ok && Array.isArray(sessions.data)) storageService.setTrainingSessions(sessions.data);
+      if (evaluations.ok && Array.isArray(evaluations.data)) storageService.setEvaluations(evaluations.data);
+      setDataRevision(revision => revision + 1);
+    };
+    const refresh = () => { void syncData(); };
+    refresh();
+    window.addEventListener('kala:data-refresh', refresh);
+    return () => {
+      active = false;
+      window.removeEventListener('kala:data-refresh', refresh);
+    };
+  }, [user?.id]);
 
   const getPageTitle = (path: string): string => {
     if (path.startsWith('/dashboard')) return "Tableau de Bord Exécutif Centre d'Appels";
@@ -112,7 +146,7 @@ const AppLayout: React.FC = () => {
         {/* État réel de la session : utilisateur connecté et services. Aucun chiffre estimé. */}
         <SessionStrip isApiOnline={isApiOnline} />
 
-        <main className="content-area">
+        <main key={dataRevision} className="content-area">
           <Outlet />
         </main>
       </div>

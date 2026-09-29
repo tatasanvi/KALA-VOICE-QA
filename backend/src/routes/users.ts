@@ -62,6 +62,19 @@ router.post('/', requireAuth, adminOnly, async (req: Request, res: Response): Pr
     VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)
   `).run(id, name.trim(), email.toLowerCase().trim(), passwordHash, role, department ?? '', phone ?? '', isActive ? 1 : 0, createdAt);
 
+  // Une création de compte conseiller crée aussi sa fiche métier. Aucune
+  // équipe ou campagne n'est attribuée sans information fournie par un admin.
+  if (role === 'AGENT') {
+    await sqlite().prepare(`
+      INSERT INTO agents (id, user_id, name, email, avatar_url, team_id, team_name,
+        campaign_id, campaign_name, hire_date, seniority, status, calls_analyzed_count,
+        average_quality_score, monthly_scores_json, strengths_json, improvement_axes_json,
+        assigned_coaching_plan_id, completed_trainings_count, compliance_rate)
+      VALUES (?, ?, ?, ?, '', 'unassigned', 'Non attribué', 'unassigned', 'Non attribuée',
+        ?, 'Non renseignée', 'ACTIF', 0, 0, '[]', '[]', '[]', NULL, 0, 0)
+    `).run(`agent-${id}`, id, name.trim(), email.toLowerCase().trim(), createdAt);
+  }
+
   const newUser = await sqlite().prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
 
   await logAudit(req.user!.userId, req.user!.name, req.user!.role,
@@ -117,6 +130,25 @@ router.put('/:id', requireAuth, adminOnly, async (req: Request, res: Response): 
   }
 
   await sqlite().prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...updateValues, id);
+
+  if (role === 'AGENT') {
+    const linkedAgent = await sqlite().prepare('SELECT id FROM agents WHERE user_id = ?').get(id) as any;
+    if (linkedAgent) {
+      await sqlite().prepare('UPDATE agents SET name = ?, email = ? WHERE user_id = ?')
+        .run(name?.trim() ?? prev.name, email?.toLowerCase().trim() ?? prev.email, id);
+    } else {
+      const currentUser = await sqlite().prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
+      const createdAt = currentUser.created_at ?? new Date().toISOString().substring(0, 10);
+      await sqlite().prepare(`
+        INSERT INTO agents (id, user_id, name, email, avatar_url, team_id, team_name,
+          campaign_id, campaign_name, hire_date, seniority, status, calls_analyzed_count,
+          average_quality_score, monthly_scores_json, strengths_json, improvement_axes_json,
+          assigned_coaching_plan_id, completed_trainings_count, compliance_rate)
+        VALUES (?, ?, ?, ?, '', 'unassigned', 'Non attribué', 'unassigned', 'Non attribuée',
+          ?, 'Non renseignée', 'ACTIF', 0, 0, '[]', '[]', '[]', NULL, 0, 0)
+      `).run(`agent-${id}`, id, currentUser.name, currentUser.email, createdAt);
+    }
+  }
 
   const updated = await sqlite().prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
 

@@ -4,6 +4,10 @@
 
 import { Call, QualityEvaluation, Agent } from '../types';
 
+const escapeHtml = (value: unknown): string => String(value ?? '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 export class ReportService {
   /**
    * Export CSV de la liste des appels
@@ -47,12 +51,17 @@ export class ReportService {
    * Impression / Export PDF stylisé d'une fiche d'appel & audit qualité
    */
   public static printCallQualityReport(call: Call, evaluation?: QualityEvaluation, agent?: Agent): void {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert("Veuillez autoriser les fenêtres pop-up pour générer l'impression du rapport.");
-      return;
-    }
-
+    const callNumber = escapeHtml(call.callNumber);
+    const evaluatorName = escapeHtml(evaluation?.evaluatorName || 'Non renseigné');
+    const evaluationStatus = escapeHtml(evaluation?.status || 'Non évalué');
+    const callDate = escapeHtml(call.callDate);
+    const agentName = escapeHtml(call.agentName);
+    const campaignName = escapeHtml(call.campaignName);
+    const customer = escapeHtml(`${call.customerNameMasked} (${call.customerPhoneMasked})`);
+    const noiseLevel = escapeHtml(call.audioMetadata.estimatedNoiseLevel);
+    const summary = escapeHtml(call.analytics.summary);
+    const contactIntent = escapeHtml(call.analytics.contactIntent);
+    const resolutionStatus = escapeHtml(call.analytics.resolutionStatus);
     const html = `
       <!DOCTYPE html>
       <html>
@@ -80,38 +89,38 @@ export class ReportService {
       <body>
         <div class="header">
           <div>
-            <div class="brand">KALA VOICE QA · Audit Qualité & Interaction Vocale</div>
-            <div class="subtitle">Rapport d'évaluation officielle certifié • Centre de contacts</div>
+          <div class="brand">KALA VOICE QA · Audit Qualité & Interaction Vocale</div>
+            <div class="subtitle">Rapport d'appel</div>
           </div>
           <div style="text-align: right;">
-            <div><strong>N° Appel :</strong> ${call.callNumber}</div>
-            <div><strong>Date :</strong> ${call.callDate}</div>
+            <div><strong>N° Appel :</strong> ${callNumber}</div>
+            <div><strong>Date :</strong> ${callDate}</div>
           </div>
         </div>
 
         <div class="score-card">
           <div>
             <h2 style="margin: 0; font-size: 20px;">Score Qualité de l'Appel</h2>
-            <div style="color: #64748b;">Évaluateur : ${evaluation?.evaluatorName || 'Contrôle Qualité Automatisé'}</div>
-            <div style="color: #64748b;">Statut : <strong>${evaluation?.status || 'VALIDÉ'}</strong></div>
+            <div style="color: #64748b;">Évaluateur : ${evaluatorName}</div>
+            <div style="color: #64748b;">Statut : <strong>${evaluationStatus}</strong></div>
           </div>
           <div style="text-align: right;">
-            <div class="score-val">${call.qualityScore ?? 84} / 100</div>
-            <span class="tag tag-green">CONFORME AU STANDARD</span>
+            <div class="score-val">${call.qualityScore == null ? 'Non évalué' : `${call.qualityScore} / 100`}</div>
+            ${call.qualityScore == null ? '' : '<span class="tag tag-green">Score qualité enregistré</span>'}
           </div>
         </div>
 
         <div class="grid">
           <div class="card">
             <h3>Informations Appel & Agent</h3>
-            <p><strong>Agent :</strong> ${call.agentName}</p>
-            <p><strong>Campagne :</strong> ${call.campaignName}</p>
-            <p><strong>Client :</strong> ${call.customerNameMasked} (${call.customerPhoneMasked})</p>
+            <p><strong>Agent :</strong> ${agentName}</p>
+            <p><strong>Campagne :</strong> ${campaignName}</p>
+            <p><strong>Client :</strong> ${customer}</p>
             <p><strong>Durée audio :</strong> ${Math.floor(call.durationSeconds / 60)}m ${call.durationSeconds % 60}s</p>
           </div>
           <div class="card">
             <h3>Qualité Signal & Environnement</h3>
-            <p><strong>Niveau de bruit ambiant :</strong> ${call.audioMetadata.estimatedNoiseLevel}</p>
+            <p><strong>Niveau de bruit ambiant :</strong> ${noiseLevel}</p>
             <p><strong>Rapport Signal/Bruit (SNR) :</strong> ${call.audioMetadata.snrDb ?? 'non mesuré'}</p>
             <p><strong>Interruptions de parole :</strong> ${call.analytics.interruptionCount}</p>
             <p><strong>Ratio de parole Agent/Client :</strong> ${call.analytics.talkToListenRatio}x</p>
@@ -120,14 +129,14 @@ export class ReportService {
 
         <div class="card" style="margin-bottom: 25px;">
           <h3>Synthèse & Résumé IA de l'Interaction</h3>
-          <p>${call.analytics.summary}</p>
-          <p><strong>Motif détecté :</strong> ${call.analytics.contactIntent}</p>
-          <p><strong>Résolution :</strong> <span class="tag tag-green">${call.analytics.resolutionStatus}</span></p>
+          <p>${summary}</p>
+          <p><strong>Motif détecté :</strong> ${contactIntent}</p>
+          <p><strong>Résolution :</strong> <span>${resolutionStatus}</span></p>
         </div>
 
         <div class="disclaimer">
           KALA VOICE QA · Plateforme d'optimisation de la qualité et d'expérimentation en transcription vocale bruitée.<br/>
-          Les scores et suggestions de l'IA sont des indicateurs d'aide à la décision validés par le superviseur qualité.
+          Les informations affichées correspondent aux données enregistrées pour cet appel.
         </div>
 
         <script>
@@ -137,8 +146,27 @@ export class ReportService {
       </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    const printFrame = document.createElement('iframe');
+    printFrame.title = `Impression du rapport ${callNumber}`;
+    printFrame.style.position = 'fixed';
+    printFrame.style.width = '1px';
+    printFrame.style.height = '1px';
+    printFrame.style.left = '-10000px';
+    printFrame.style.border = '0';
+    printFrame.onload = () => {
+      const printWindow = printFrame.contentWindow;
+      if (!printWindow) {
+        printFrame.remove();
+        alert("L'impression n'a pas pu démarrer. Réessayez depuis le rapport.");
+        return;
+      }
+      printWindow.addEventListener('afterprint', () => printFrame.remove(), { once: true });
+      printWindow.focus();
+      printWindow.print();
+      window.setTimeout(() => printFrame.remove(), 60000);
+    };
+    document.body.appendChild(printFrame);
+    printFrame.srcdoc = html;
   }
 
   private static downloadFile(content: string, filename: string): void {

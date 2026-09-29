@@ -10,19 +10,68 @@ import { canAccessCall, canAccessAgent } from '../middleware/callAccess.js';
 
 const sqlite = () => (db as any).session.client;
 
+const toQualityEvaluation = (e: any) => ({
+  id: e.id, callId: e.call_id, agentId: e.agent_id, evaluatorId: e.evaluator_id,
+  evaluatorName: e.evaluator_name, formTitle: e.form_title, overallScore: e.overall_score,
+  aiSuggestedScore: e.ai_suggested_score, status: e.status,
+  items: JSON.parse(e.items_json ?? '[]'), strengths: JSON.parse(e.strengths_json ?? '[]'),
+  weaknesses: JSON.parse(e.weaknesses_json ?? '[]'),
+  potentialErrors: JSON.parse(e.potential_errors_json ?? '[]'),
+  unmetCriteriaCount: e.unmet_criteria_count,
+  recommendations: JSON.parse(e.recommendations_json ?? '[]'),
+  evaluatorFinalNotes: e.evaluator_final_notes, evaluatedAt: e.evaluated_at,
+  validatedAt: e.validated_at ?? undefined,
+});
+
+const toAgent = (a: any) => ({
+  id: a.id, userId: a.user_id, name: a.name, email: a.email, avatarUrl: a.avatar_url,
+  teamId: a.team_id, teamName: a.team_name, campaignId: a.campaign_id,
+  campaignName: a.campaign_name, hireDate: a.hire_date, seniority: a.seniority,
+  status: a.status, callsAnalyzedCount: a.calls_analyzed_count,
+  averageQualityScore: a.average_quality_score,
+  monthlyScores: JSON.parse(a.monthly_scores_json ?? '[]'),
+  strengths: JSON.parse(a.strengths_json ?? '[]'),
+  improvementAxes: JSON.parse(a.improvement_axes_json ?? '[]'),
+  assignedCoachingPlanId: a.assigned_coaching_plan_id,
+  completedTrainingsCount: a.completed_trainings_count, complianceRate: a.compliance_rate,
+});
+
+const toCoachingPlan = (p: any) => ({
+  id: p.id, agentId: p.agent_id, agentName: p.agent_name,
+  trainerId: p.trainer_id, trainerName: p.trainer_name, createdAt: p.created_at,
+  targetCompletionDate: p.target_completion_date, status: p.status,
+  overallObjectiveSummary: p.overall_objective_summary,
+  strengthsSummary: JSON.parse(p.strengths_summary_json ?? '[]'),
+  improvementAxesSummary: JSON.parse(p.improvement_axes_summary_json ?? '[]'),
+  objectives: JSON.parse(p.objectives_json ?? '[]'), trainerNotes: p.trainer_notes,
+  nextSessionDate: p.next_session_date ?? undefined, progressionPercentage: p.progression_percentage,
+});
+
+const toTrainingModule = (m: any) => ({
+  id: m.id, code: m.code, title: m.title, category: m.category,
+  durationMinutes: m.duration_minutes, description: m.description,
+  targetCompetencies: JSON.parse(m.target_competencies_json ?? '[]'),
+  interactiveSimulationsCount: m.interactive_simulations_count,
+  difficultyLevel: m.difficulty_level,
+});
+
+const toTrainingSession = (s: any) => ({
+  id: s.id, agentId: s.agent_id, agentName: s.agent_name,
+  trainerId: s.trainer_id, trainerName: s.trainer_name,
+  moduleId: s.module_id, moduleTitle: s.module_title, scheduledDate: s.scheduled_date,
+  status: s.status, scoreObtained: s.score_obtained,
+  preTrainingQualityScore: s.pre_training_quality_score,
+  postTrainingQualityScore: s.post_training_quality_score, upliftPercentage: s.uplift_percentage,
+  trainerFeedback: s.trainer_feedback,
+  simulationExercises: JSON.parse(s.simulation_exercises_json ?? '[]'),
+});
+
 // ─── Quality Evaluations ──────────────────────────────────────────────────────
 export const qualityRouter = Router();
 
 qualityRouter.get('/', requireAuth, requireRole(...STAFF_UP), async (_req, res) => {
   const rows = await sqlite().prepare('SELECT * FROM evaluations ORDER BY evaluated_at DESC').all();
-  res.json(rows.map((e: any) => ({
-    ...e,
-    items:          JSON.parse(e.items_json ?? '[]'),
-    strengths:      JSON.parse(e.strengths_json ?? '[]'),
-    weaknesses:     JSON.parse(e.weaknesses_json ?? '[]'),
-    potentialErrors: JSON.parse(e.potential_errors_json ?? '[]'),
-    recommendations: JSON.parse(e.recommendations_json ?? '[]'),
-  })));
+  res.json(rows.map(toQualityEvaluation));
 });
 
 // GET /api/evaluations/mine — les évaluations qui concernent l'utilisateur connecté
@@ -32,13 +81,13 @@ qualityRouter.get('/mine', requireAuth, requireRole(...ALL_ROLES), async (req, r
     WHERE agent_id IN (SELECT id FROM agents WHERE user_id = ?)
     ORDER BY evaluated_at DESC
   `).all(req.user!.userId);
-  res.json(rows.map((e: any) => ({
-    ...e,
-    items: JSON.parse(e.items_json ?? '[]'),
-    strengths: JSON.parse(e.strengths_json ?? '[]'),
-    weaknesses: JSON.parse(e.weaknesses_json ?? '[]'),
-    recommendations: JSON.parse(e.recommendations_json ?? '[]'),
-  })));
+  res.json(rows.map(toQualityEvaluation));
+});
+
+qualityRouter.get('/agent/:agentId', requireAuth, requireRole(...STAFF_UP), async (req, res) => {
+  const rows = await sqlite().prepare('SELECT * FROM evaluations WHERE agent_id = ? ORDER BY evaluated_at DESC')
+    .all(req.params.agentId);
+  res.json(rows.map(toQualityEvaluation));
 });
 
 qualityRouter.get('/call/:callId', requireAuth, requireRole(...ALL_ROLES), async (req, res) => {
@@ -46,7 +95,7 @@ qualityRouter.get('/call/:callId', requireAuth, requireRole(...ALL_ROLES), async
   if (call && !(await canAccessCall(req.user!, call))) { res.status(404).json({ error: 'Évaluation introuvable.' }); return; }
   const row = await sqlite().prepare('SELECT * FROM evaluations WHERE call_id = ?').get(req.params.callId) as any;
   if (!row) { res.status(404).json({ error: 'Évaluation introuvable.' }); return; }
-  res.json({ ...row, items: JSON.parse(row.items_json ?? '[]'), strengths: JSON.parse(row.strengths_json ?? '[]'), weaknesses: JSON.parse(row.weaknesses_json ?? '[]'), recommendations: JSON.parse(row.recommendations_json ?? '[]') });
+  res.json(toQualityEvaluation(row));
 });
 
 qualityRouter.post('/', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response): Promise<void> => {
@@ -70,6 +119,29 @@ qualityRouter.post('/', requireAuth, requireRole(...STAFF_UP), async (req: Reque
   if (body.callId) {
     await sqlite().prepare('UPDATE calls SET quality_score = ?, quality_evaluation_id = ? WHERE id = ?')
       .run(body.overallScore, id, body.callId);
+  }
+
+  if (body.status === 'VALIDÉE_RESPONSABLE' && body.agentId) {
+    const aggregates = await sqlite().prepare(`
+      SELECT COUNT(*) AS count, AVG(overall_score) AS average
+      FROM evaluations WHERE agent_id = ? AND status = 'VALIDÉE_RESPONSABLE'
+    `).get(body.agentId) as any;
+    const strengths = await sqlite().prepare(`
+      SELECT strengths_json FROM evaluations
+      WHERE agent_id = ? AND status = 'VALIDÉE_RESPONSABLE' ORDER BY evaluated_at DESC
+    `).all(body.agentId) as any[];
+    const weaknesses = await sqlite().prepare(`
+      SELECT weaknesses_json FROM evaluations
+      WHERE agent_id = ? AND status = 'VALIDÉE_RESPONSABLE' ORDER BY evaluated_at DESC
+    `).all(body.agentId) as any[];
+    const uniqueItems = (rows: any[], column: string) => [...new Set(rows.flatMap(row => {
+      try { return JSON.parse(row[column] ?? '[]'); } catch { return []; }
+    }).filter((item: unknown) => typeof item === 'string' && item.trim()))];
+    await sqlite().prepare(`UPDATE agents SET calls_analyzed_count = ?, average_quality_score = ?,
+      strengths_json = ?, improvement_axes_json = ? WHERE id = ?`)
+      .run(aggregates.count, aggregates.average ?? 0,
+        JSON.stringify(uniqueItems(strengths, 'strengths_json')),
+        JSON.stringify(uniqueItems(weaknesses, 'weaknesses_json')), body.agentId);
   }
 
   await logAudit(req.user!.userId, req.user!.name, req.user!.role, 'VALIDATION_QUALITE',
@@ -102,19 +174,14 @@ agentsRouter.get('/', requireAuth, requireRole(...ALL_ROLES), async (req, res) =
   const rows = req.user!.role === 'AGENT'
     ? await sqlite().prepare('SELECT * FROM agents WHERE user_id = ? ORDER BY name').all(req.user!.userId)
     : await sqlite().prepare('SELECT * FROM agents ORDER BY name').all();
-  res.json(rows.map((a: any) => ({
-    ...a,
-    monthlyScores:   JSON.parse(a.monthly_scores_json ?? '[]'),
-    strengths:       JSON.parse(a.strengths_json ?? '[]'),
-    improvementAxes: JSON.parse(a.improvement_axes_json ?? '[]'),
-  })));
+  res.json(rows.map(toAgent));
 });
 
 agentsRouter.get('/:id', requireAuth, requireRole(...ALL_ROLES), async (req, res) => {
   const a = await sqlite().prepare('SELECT * FROM agents WHERE id = ?').get(req.params.id) as any;
   // 404 hors périmètre : on ne révèle pas l'existence d'une fiche inaccessible.
   if (!a || !(await canAccessAgent(req.user!, req.params.id))) { res.status(404).json({ error: 'Agent introuvable.' }); return; }
-  res.json({ ...a, monthlyScores: JSON.parse(a.monthly_scores_json ?? '[]'), strengths: JSON.parse(a.strengths_json ?? '[]'), improvementAxes: JSON.parse(a.improvement_axes_json ?? '[]') });
+  res.json(toAgent(a));
 });
 
 // ─── Teams & Campaigns ────────────────────────────────────────────────────────
@@ -133,18 +200,13 @@ export const coachingRouter = Router();
 
 coachingRouter.get('/', requireAuth, requireRole(...STAFF_UP), async (_req, res) => {
   const rows = await sqlite().prepare('SELECT * FROM coaching_plans ORDER BY created_at DESC').all();
-  res.json(rows.map((p: any) => ({
-    ...p,
-    objectives:       JSON.parse(p.objectives_json ?? '[]'),
-    strengthsSummary: JSON.parse(p.strengths_summary_json ?? '[]'),
-    improvementAxesSummary: JSON.parse(p.improvement_axes_summary_json ?? '[]'),
-  })));
+  res.json(rows.map(toCoachingPlan));
 });
 
 coachingRouter.get('/agent/:agentId', requireAuth, requireRole(...ALL_ROLES), async (req, res) => {
   const row = await sqlite().prepare('SELECT * FROM coaching_plans WHERE agent_id = ? ORDER BY created_at DESC LIMIT 1').get(req.params.agentId) as any;
   if (!row || !(await canAccessAgent(req.user!, req.params.agentId))) { res.status(404).json({ error: 'Plan introuvable.' }); return; }
-  res.json({ ...row, objectives: JSON.parse(row.objectives_json ?? '[]'), strengthsSummary: JSON.parse(row.strengths_summary_json ?? '[]') });
+  res.json(toCoachingPlan(row));
 });
 
 coachingRouter.post('/', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response) => {
@@ -171,28 +233,91 @@ export const trainingRouter = Router();
 
 trainingRouter.get('/modules', requireAuth, requireRole(...ALL_ROLES), async (_req, res) => {
   const rows = await sqlite().prepare('SELECT * FROM training_modules ORDER BY title').all();
-  res.json(rows.map((m: any) => ({ ...m, targetCompetencies: JSON.parse(m.target_competencies_json ?? '[]') })));
+  res.json(rows.map(toTrainingModule));
+});
+
+trainingRouter.post('/modules', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response) => {
+  const body = req.body as any;
+  if (!String(body.title ?? '').trim() || !String(body.code ?? '').trim() || !String(body.category ?? '').trim()) {
+    res.status(400).json({ error: 'Le code, le titre et la catégorie du module sont requis.' });
+    return;
+  }
+  const id = body.id ?? `module-${Date.now()}`;
+  await sqlite().prepare(`
+    INSERT INTO training_modules (id, code, title, category, duration_minutes, description,
+      target_competencies_json, interactive_simulations_count, difficulty_level)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, String(body.code).trim(), String(body.title).trim(), String(body.category).trim(),
+    Math.max(1, Number(body.durationMinutes) || 60), body.description ?? '',
+    JSON.stringify(Array.isArray(body.targetCompetencies) ? body.targetCompetencies : []),
+    Math.max(0, Number(body.interactiveSimulationsCount) || 0), body.difficultyLevel ?? 'INTERMÉDIAIRE');
+  await logAudit(req.user!.userId, req.user!.name, req.user!.role,
+    'CREATION_FORMATION', `Module ${body.title}`, `Module ajouté : ${body.code}`, req.ip);
+  res.status(201).json({ ...body, id });
+});
+
+trainingRouter.put('/modules/:id', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response) => {
+  const body = req.body as any;
+  const existing = await sqlite().prepare('SELECT id FROM training_modules WHERE id = ?').get(req.params.id);
+  if (!existing) { res.status(404).json({ error: 'Module introuvable.' }); return; }
+  if (!String(body.title ?? '').trim() || !String(body.code ?? '').trim() || !String(body.category ?? '').trim()) {
+    res.status(400).json({ error: 'Le code, le titre et la catégorie du module sont requis.' });
+    return;
+  }
+  await sqlite().prepare(`UPDATE training_modules SET code = ?, title = ?, category = ?, duration_minutes = ?,
+    description = ?, target_competencies_json = ?, difficulty_level = ? WHERE id = ?`)
+    .run(String(body.code).trim(), String(body.title).trim(), String(body.category).trim(),
+      Math.max(1, Number(body.durationMinutes) || 60), body.description ?? '',
+      JSON.stringify(Array.isArray(body.targetCompetencies) ? body.targetCompetencies : []),
+      body.difficultyLevel ?? 'INTERMÉDIAIRE', req.params.id);
+  res.json({ ...body, id: req.params.id });
+});
+
+trainingRouter.delete('/modules/:id', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response) => {
+  const sessions = await sqlite().prepare('SELECT COUNT(*) as c FROM training_sessions WHERE module_id = ?').get(req.params.id) as any;
+  if (sessions.c > 0) {
+    res.status(409).json({ error: 'Ce module est associé à des sessions. Modifiez-le ou annulez ses sessions pour le retirer.' });
+    return;
+  }
+  await sqlite().prepare('DELETE FROM training_modules WHERE id = ?').run(req.params.id);
+  res.status(204).end();
 });
 
 trainingRouter.get('/sessions', requireAuth, requireRole(...STAFF_UP), async (_req, res) => {
   const rows = await sqlite().prepare('SELECT * FROM training_sessions ORDER BY scheduled_date DESC').all();
-  res.json(rows.map((s: any) => ({ ...s, simulationExercises: JSON.parse(s.simulation_exercises_json ?? '[]') })));
+  res.json(rows.map(toTrainingSession));
 });
 
 trainingRouter.post('/sessions', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response) => {
   const body = req.body as any;
+  const agent = await sqlite().prepare('SELECT id, name FROM agents WHERE id = ?').get(body.agentId) as any;
+  const module = await sqlite().prepare('SELECT id, title FROM training_modules WHERE id = ?').get(body.moduleId) as any;
+  if (!agent || !module || !body.scheduledDate) {
+    res.status(400).json({ error: 'Un conseiller, un module et une date valide sont requis.' });
+    return;
+  }
+  const baseline = await sqlite().prepare(`
+    SELECT COUNT(*) AS count, AVG(overall_score) AS average FROM evaluations
+    WHERE agent_id = ? AND status = 'VALIDÉE_RESPONSABLE'
+  `).get(agent.id) as any;
+  if (!baseline.count) {
+    res.status(400).json({ error: 'Une évaluation QA validée est requise pour établir le niveau initial.' });
+    return;
+  }
   const id = body.id ?? `session-${Date.now()}`;
   await sqlite().prepare(`
     INSERT INTO training_sessions (id, agent_id, agent_name, trainer_id, trainer_name, module_id, module_title,
       scheduled_date, status, score_obtained, pre_training_quality_score, post_training_quality_score,
       uplift_percentage, trainer_feedback, simulation_exercises_json)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, body.agentId, body.agentName, req.user!.userId, req.user!.name,
-    body.moduleId, body.moduleTitle, body.scheduledDate, body.status ?? 'PLANIFIÉE',
-    body.scoreObtained ?? null, body.preTrainingQualityScore ?? 0,
+  `).run(id, agent.id, agent.name, req.user!.userId, req.user!.name,
+    module.id, module.title, body.scheduledDate, 'PLANIFIÉE',
+    null, baseline.average,
     body.postTrainingQualityScore ?? null, body.upliftPercentage ?? null,
     body.trainerFeedback ?? '', JSON.stringify(body.simulationExercises ?? []));
-  res.status(201).json({ id, ...body });
+  res.status(201).json({ id, ...body, agentId: agent.id, agentName: agent.name,
+    trainerId: req.user!.userId, trainerName: req.user!.name, moduleId: module.id,
+    moduleTitle: module.title, status: 'PLANIFIÉE', preTrainingQualityScore: baseline.average });
 });
 
 // ─── Dashboard Metrics ────────────────────────────────────────────────────────

@@ -267,13 +267,4 @@ async function ensureDemoAccounts(sqlite: any): Promise<void> {
 
 async function seedDefaults(sqlite: any): Promise<void> {
   // Les comptes sont gérés par ensureDemoAccounts (conditionné à SEED_DEMO_ACCOUNTS).
-
-  await sqlite.prepare(`INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run('team-1', 'Équipe Alpha – Fibre & Mobile', 'user-staff', 'Claire Delattre', 'Équipe dédiée fibre et 5G.', 8, 84.2, '2024-01-20');
-
-  await sqlite.prepare(`INSERT OR IGNORE INTO campaigns (id, name, type, client_sector, target_quality_score, active_agents_count, total_calls_count, compliance_rate, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run('camp-1', 'Télécom Fibre & Mobile — Rétention', 'ENTRANT', 'Télécommunications', 85, 24, 1420, 94.2, "Fidélisation et traitement des résiliations.", '2024-01-15');
-
-  await sqlite.prepare(`INSERT OR IGNORE INTO audit_logs (id, timestamp, user_id, user_name, user_role, action, target_resource, details, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    .run(`log-init-${Date.now()}`, new Date().toISOString().replace('T', ' ').substring(0, 19), 'user-admin', 'Système', 'ADMIN', 'IMPORT_AUDIO', 'Système', 'Base de données KALA VOICE QA initialisée v1.0', '127.0.0.1');
 }

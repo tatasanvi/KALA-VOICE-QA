@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { TrendingUp, Target, Plus, CheckCircle2, Calendar, Award, Sparkles, BookOpen, User, Clock, ArrowRight, Check } from 'lucide-react';
 import { storageService } from '../../services/storageService';
-import { CoachingPlan, UserRole } from '../../types';
+import { CoachingPlan, CoachingObjective, UserRole } from '../../types';
+import { coachingApi, qualityApi, tokenStore } from '../../services/apiClient';
 import { EmptyState } from '../common/EmptyState';
 import { Avatar } from '../common/Avatar';
 
@@ -17,11 +18,69 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
   const trainingSessions = storageService.getTrainingSessions();
 
   const [selectedAgentId, setSelectedAgentId] = useState<string>(agents[0]?.id ?? '');
+  const [targetCompletionDate, setTargetCompletionDate] = useState('');
+  const [notice, setNotice] = useState<string | null>(null);
 
   const selectedAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
   if (agents.length === 0 || !selectedAgent) return <EmptyState title="Aucun plan de coaching" />;
   const activePlan = coachingPlans.find(cp => cp.agentId === selectedAgent.id);
   const agentSessions = trainingSessions.filter(ts => ts.agentId === selectedAgent.id);
+
+  const createPlanFromValidatedEvaluation = async () => {
+    if (!targetCompletionDate) {
+      setNotice('Choisis une date cible avant de créer le plan.');
+      return;
+    }
+    const evaluations = await qualityApi.listByAgent(selectedAgent.id);
+    if (!evaluations.ok || !Array.isArray(evaluations.data)) {
+      setNotice(evaluations.error ?? 'Les évaluations du conseiller sont indisponibles.');
+      return;
+    }
+    const source = evaluations.data.find((item: any) => item.status === 'VALIDÉE_RESPONSABLE'
+      && Array.isArray(item.recommendations) && item.recommendations.some((value: string) => value.trim()));
+    if (!source) {
+      setNotice('Aucune évaluation validée avec recommandations saisies. Évalue d’abord un appel transcrit et valide ses recommandations.');
+      return;
+    }
+    const objectives: CoachingObjective[] = source.recommendations
+      .filter((recommendation: string) => recommendation.trim())
+      .map((recommendation: string, index: number) => ({
+        id: `${source.id}-objective-${index + 1}`,
+        title: recommendation,
+        description: recommendation,
+        targetCompetency: 'À préciser avec le responsable',
+        currentLevel: 'À établir',
+        targetLevel: 'À définir',
+        action: recommendation,
+        status: 'A_FAIRE',
+        suggestedExercises: [],
+      }));
+    const currentUser = tokenStore.getUser();
+    const plan: CoachingPlan = {
+      id: `coaching-${source.id}`,
+      agentId: selectedAgent.id,
+      agentName: selectedAgent.name,
+      trainerId: currentUser?.id ?? '',
+      trainerName: currentUser?.name ?? '',
+      createdAt: new Date().toISOString().slice(0, 10),
+      targetCompletionDate,
+      status: 'ACTIF',
+      overallObjectiveSummary: 'Plan construit à partir des recommandations de la dernière évaluation qualité validée.',
+      strengthsSummary: source.strengths ?? [],
+      improvementAxesSummary: source.weaknesses ?? [],
+      objectives,
+      trainerNotes: `Source : évaluation ${source.id} du ${source.evaluatedAt}.`,
+      progressionPercentage: 0,
+    };
+    const saved = await coachingApi.save(plan);
+    if (!saved.ok) {
+      setNotice(saved.error ?? 'Le plan de coaching n’a pas pu être enregistré.');
+      return;
+    }
+    storageService.saveCoachingPlan(plan);
+    window.dispatchEvent(new CustomEvent('kala:data-refresh'));
+    setNotice('Plan de coaching créé à partir des recommandations validées.');
+  };
 
 
   return (
@@ -66,6 +125,18 @@ export const CoachingView: React.FC<CoachingViewProps> = ({ onNavigate, onSelect
             <span>Catalogue des Formations</span>
           </button>
         </div>
+      </div>
+
+      {notice && <div className="glass-panel" role="status" style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>{notice}</div>}
+
+      <div className="glass-panel" style={{ display: 'flex', alignItems: 'end', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <label htmlFor="coaching-target-date" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Date cible du plan</label>
+          <input id="coaching-target-date" type="date" value={targetCompletionDate} onChange={e => setTargetCompletionDate(e.target.value)} />
+        </div>
+        <button className="btn btn-secondary btn-sm" onClick={createPlanFromValidatedEvaluation}>
+          Créer depuis l’évaluation validée
+        </button>
       </div>
 
       {/* Profil Synthétique Agent & KPI Coaching */}

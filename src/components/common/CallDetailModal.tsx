@@ -50,8 +50,9 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
   const durationMin = Math.floor(call.durationSeconds / 60);
   const durationSec = call.durationSeconds % 60;
 
-  const agentTalkPct = Math.round((a.agentTalkTimeSeconds / call.durationSeconds) * 100);
-  const clientTalkPct = Math.round((a.clientTalkTimeSeconds / call.durationSeconds) * 100);
+  const hasTalkMetrics = typeof a.agentTalkTimeSeconds === 'number' && typeof a.clientTalkTimeSeconds === 'number';
+  const agentTalkPct = hasTalkMetrics && call.durationSeconds > 0 ? Math.round((a.agentTalkTimeSeconds! / call.durationSeconds) * 100) : 0;
+  const clientTalkPct = hasTalkMetrics && call.durationSeconds > 0 ? Math.round((a.clientTalkTimeSeconds! / call.durationSeconds) * 100) : 0;
 
   const tabs = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: Eye },
@@ -190,7 +191,7 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 {audio.estimatedNoiseLevel}{audio.snrDb !== undefined ? ` • SNR ${audio.snrDb} dB` : ''}
               </span>
             </span>
-            <span>Qualité audio : <strong style={{ color: audio.audioQualityScore >= 80 ? '#6db89a' : '#d9ae55' }}>{audio.audioQualityScore}/100</strong></span>
+            <span>Qualité audio : <strong style={{ color: audio.audioQualityScore == null ? 'var(--text-muted)' : audio.audioQualityScore >= 80 ? '#6db89a' : '#d9ae55' }}>{audio.audioQualityScore == null ? 'Non mesurée' : `${audio.audioQualityScore}/100`}</strong></span>
             <span>{audio.noiseType.replace(/_/g, ' ')}</span>
           </div>
         </div>
@@ -234,9 +235,9 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
                 {[
                   { label: 'Score Qualité', value: call.qualityScore ? `${call.qualityScore}/100` : 'Non évalué', color: call.qualityScore && call.qualityScore >= 80 ? '#6db89a' : call.qualityScore ? '#d9ae55' : '#94a3b8' },
-                  { label: 'Résolution', value: a.resolutionStatus, color: a.resolutionStatus === 'RÉSOLU' ? '#6db89a' : a.resolutionStatus === 'EN_COURS' ? '#d9ae55' : '#d98383' },
-                  { label: 'Confiance ASR', value: `${t.globalConfidenceScore}%`, color: t.globalConfidenceScore >= 85 ? '#6db89a' : '#d9ae55' },
-                  { label: 'Robustesse Bruit', value: `${t.noiseRobustnessScore}%`, color: t.noiseRobustnessScore >= 80 ? '#6db89a' : '#d9ae55' },
+                  { label: 'Résolution', value: a.resolutionStatus === 'NON_DÉTERMINÉ' ? 'Non déterminée' : a.resolutionStatus, color: a.resolutionStatus === 'RÉSOLU' ? '#6db89a' : a.resolutionStatus === 'EN_COURS' ? '#d9ae55' : '#d98383' },
+                  { label: 'Confiance ASR', value: t.globalConfidenceScore == null ? 'Non mesurée' : `${t.globalConfidenceScore}%`, color: '#94a3b8' },
+                  { label: 'Robustesse Bruit', value: t.noiseRobustnessScore == null ? 'Non mesurée' : `${t.noiseRobustnessScore}%`, color: '#94a3b8' },
                   { label: 'Modèle ASR', value: t.asrModelUsed, color: '#9fb7d6' },
                 ].map((kpi, i) => (
                   <div key={i} style={{
@@ -283,8 +284,8 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                        <span>Agent ({agentTalkPct}%)</span>
-                        <span>{Math.floor(a.agentTalkTimeSeconds / 60)}m {a.agentTalkTimeSeconds % 60}s</span>
+                        <span>Agent ({hasTalkMetrics ? `${agentTalkPct}%` : 'Non mesuré'})</span>
+                        <span>{hasTalkMetrics ? `${Math.floor(a.agentTalkTimeSeconds! / 60)}m ${a.agentTalkTimeSeconds! % 60}s` : 'Non mesuré'}</span>
                       </div>
                       <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${agentTalkPct}%`, background: '#9fb7d6', borderRadius: '3px' }} />
@@ -292,17 +293,17 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                     </div>
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                        <span>Client ({clientTalkPct}%)</span>
-                        <span>{Math.floor(a.clientTalkTimeSeconds / 60)}m {a.clientTalkTimeSeconds % 60}s</span>
+                        <span>Client ({hasTalkMetrics ? `${clientTalkPct}%` : 'Non mesuré'})</span>
+                        <span>{hasTalkMetrics ? `${Math.floor(a.clientTalkTimeSeconds! / 60)}m ${a.clientTalkTimeSeconds! % 60}s` : 'Non mesuré'}</span>
                       </div>
                       <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${clientTalkPct}%`, background: '#6db89a', borderRadius: '3px' }} />
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '16px', fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      <span><Scissors size={12} /> {a.interruptionCount} interruptions</span>
-                      <span>⏸ {a.totalSilenceSeconds}s silences</span>
-                      <span><MessageSquare size={12} /> {a.speechRateWpm} mots/min</span>
+                      <span><Scissors size={12} /> {a.interruptionCount == null ? 'Interruptions non mesurées' : `${a.interruptionCount} interruptions`}</span>
+                      <span>⏸ {a.totalSilenceSeconds == null ? 'Silences non mesurés' : `${a.totalSilenceSeconds}s de silence`}</span>
+                      <span><MessageSquare size={12} /> {a.speechRateWpm == null ? 'Débit non mesuré' : `${a.speechRateWpm} mots/min`}</span>
                     </div>
                   </div>
                 </div>
@@ -364,11 +365,11 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <span className={`badge ${t.globalConfidenceScore >= 85 ? 'badge-green' : 'badge-amber'}`}>
-                    Confiance : {t.globalConfidenceScore}%
+                  <span className={`badge ${t.globalConfidenceScore == null ? 'badge-gray' : t.globalConfidenceScore >= 85 ? 'badge-green' : 'badge-amber'}`}>
+                    Confiance : {t.globalConfidenceScore == null ? 'Non mesurée' : `${t.globalConfidenceScore}%`}
                   </span>
-                  <span className={`badge ${t.noiseRobustnessScore >= 80 ? 'badge-green' : 'badge-amber'}`}>
-                    Robustesse : {t.noiseRobustnessScore}%
+                  <span className={`badge ${t.noiseRobustnessScore == null ? 'badge-gray' : t.noiseRobustnessScore >= 80 ? 'badge-green' : 'badge-amber'}`}>
+                    Robustesse : {t.noiseRobustnessScore == null ? 'Non mesurée' : `${t.noiseRobustnessScore}%`}
                   </span>
                 </div>
               </div>
@@ -377,15 +378,13 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                 <div key={seg.id} style={{
                   display: 'flex', gap: '12px', alignItems: 'flex-start',
                   padding: '12px 14px', borderRadius: '10px',
-                  background: seg.speaker === 'AGENT' 
-                    ? 'rgba(74, 111, 165,0.08)' 
-                    : 'rgba(52,211,153,0.06)',
+                  background: seg.speaker === 'AGENT' ? 'rgba(74, 111, 165,0.08)' : seg.speaker === 'CLIENT' ? 'rgba(52,211,153,0.06)' : 'rgba(148,163,184,0.05)',
                   border: `1px solid ${seg.speaker === 'AGENT' ? 'rgba(74, 111, 165,0.2)' : 'rgba(52,211,153,0.15)'}`,
-                  borderLeft: `3px solid ${seg.speaker === 'AGENT' ? 'var(--primary-light)' : '#6db89a'}`,
+                  borderLeft: `3px solid ${seg.speaker === 'AGENT' ? 'var(--primary-light)' : seg.speaker === 'CLIENT' ? '#6db89a' : '#94a3b8'}`,
                 }}>
                   {seg.speaker === 'AGENT' 
                     ? <User size={15} color="var(--primary-light)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                    : <Bot size={15} color="#6db89a" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    : <Bot size={15} color={seg.speaker === 'CLIENT' ? '#6db89a' : '#94a3b8'} style={{ flexShrink: 0, marginTop: '2px' }} />
                   }
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -404,10 +403,10 @@ export const CallDetailModal: React.FC<CallDetailModalProps> = ({
                         </span>
                         <span style={{ 
                           fontSize: '10px', fontWeight: 700, padding: '1px 5px', borderRadius: '4px',
-                          background: seg.confidenceScore >= 0.9 ? 'rgba(52,211,153,0.15)' : seg.confidenceScore >= 0.75 ? 'rgba(251,191,36,0.15)' : 'rgba(239,68,68,0.15)',
-                          color: seg.confidenceScore >= 0.9 ? '#6db89a' : seg.confidenceScore >= 0.75 ? '#d9ae55' : '#d98383'
+                          background: seg.confidenceScore == null ? 'rgba(148,163,184,0.15)' : seg.confidenceScore >= 0.9 ? 'rgba(52,211,153,0.15)' : seg.confidenceScore >= 0.75 ? 'rgba(251,191,36,0.15)' : 'rgba(239,68,68,0.15)',
+                          color: seg.confidenceScore == null ? '#94a3b8' : seg.confidenceScore >= 0.9 ? '#6db89a' : seg.confidenceScore >= 0.75 ? '#d9ae55' : '#d98383'
                         }}>
-                          {Math.round(seg.confidenceScore * 100)}%
+                          {seg.confidenceScore == null ? 'Confiance non fournie' : `${Math.round(seg.confidenceScore * 100)}%`}
                         </span>
                       </div>
                     </div>

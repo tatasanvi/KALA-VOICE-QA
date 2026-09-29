@@ -31,6 +31,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
   const [showCampModal, setShowCampModal] = useState(false);
   const [campName, setCampName] = useState('');
   const [campSector, setCampSector] = useState('Télécommunications');
+  const [customCampSector, setCustomCampSector] = useState('');
   const [campType, setCampType] = useState<'ENTRANT' | 'SORTANT'>('ENTRANT');
   const [targetQuality, setTargetQuality] = useState(85);
   const [campDesc, setCampDesc] = useState('');
@@ -45,11 +46,11 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
   // Création d'une nouvelle campagne
   const handleCreateCampaign = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!campName.trim()) return;
+    if (!campName.trim() || (campSector === 'Autre' && !customCampSector.trim())) return;
 
     storageService.addCampaign({
       name: campName.trim(),
-      clientSector: campSector,
+      clientSector: campSector === 'Autre' ? customCampSector.trim() : campSector,
       type: campType,
       targetQualityScore: targetQuality,
       activeAgentsCount: 6,
@@ -59,8 +60,9 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
     });
 
     setShowCampModal(false);
-    setCampName('');
-    setCampDesc('');
+      setCampName('');
+      setCampDesc('');
+      setCustomCampSector('');
   };
 
   // Sauvegarde configuration CTI
@@ -417,7 +419,25 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
                     <option value="Banque & Finance">Banque & Finance</option>
                     <option value="Énergie & Services">Énergie & Services</option>
                     <option value="E-commerce & Retail">E-commerce & Retail</option>
+                    <option value="Collecte de dons / Fundraising">Collecte de dons / Fundraising</option>
+                    <option value="Santé & Mutuelle">Santé & Mutuelle</option>
+                    <option value="Immobilier & Habitat">Immobilier & Habitat</option>
+                    <option value="Transport & Mobilité">Transport & Mobilité</option>
+                    <option value="Services publics">Services publics</option>
+                    <option value="Associations & ONG">Associations & ONG</option>
+                    <option value="Autre">Autre (à préciser)</option>
                   </select>
+                  {campSector === 'Autre' && (
+                    <input
+                      type="text"
+                      required
+                      aria-label="Préciser le secteur d'activité"
+                      placeholder="Saisir le secteur"
+                      value={customCampSector}
+                      onChange={e => setCustomCampSector(e.target.value)}
+                      style={{ width: '100%', marginTop: '8px', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', color: 'white' }}
+                    />
+                  )}
                 </div>
 
                 <div>
