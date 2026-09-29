@@ -113,6 +113,7 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
       <div style={{
         background: 'var(--surface-2)', borderRadius: 'var(--radius-xl)',
         border: '1px solid rgba(255,255,255,0.1)', width: '100%', maxWidth: '560px',
+        maxHeight: '90vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)', overflow: 'hidden'
       }} onClick={e => e.stopPropagation()}>
 
@@ -139,7 +140,7 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             {field('Nom complet', 'name', <Users size={14} />, 'text', 'Prénom Nom')}
@@ -152,12 +153,13 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
           </div>
 
           {field(
-            mode === 'create' ? 'Mot de passe initial' : 'Nouveau mot de passe (facultatif)',
+            mode === 'create' ? 'Mot de passe du compte' : 'Nouveau mot de passe (facultatif)',
             'password',
             <LockKeyhole size={14} />,
             'password',
-            mode === 'create' ? '8 caractères minimum' : 'Laisser vide pour conserver le mot de passe actuel'
+            mode === 'create' ? 'Choisir un mot de passe (8 caractères minimum)' : 'Laisser vide pour conserver le mot de passe actuel'
           )}
+          {mode === 'create' && <p style={{ marginTop: '-10px', fontSize: '11px', color: 'var(--text-muted)' }}>Ce mot de passe sera demandé à l’utilisateur lors de sa connexion.</p>}
           {mode === 'edit' && <p style={{ marginTop: '-10px', fontSize: '11px', color: 'var(--text-muted)' }}>Le mot de passe n'est jamais affiché. Saisissez-en un nouveau uniquement pour le remplacer.</p>}
 
           {/* Rôle */}
