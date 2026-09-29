@@ -1,7 +1,8 @@
 // =============================================================================
 // KALA VOICE QA — Routes Appels (Calls)
 // =============================================================================
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from '../utils/asyncRouter.js';
 import { requireAuth, requireRole, STAFF_UP, ALL_ROLES } from '../middleware/auth.js';
 import { logAudit } from '../middleware/audit.js';
 import db from '../db/index.js';
@@ -23,7 +24,7 @@ const toCall = (c: any) => ({
 });
 
 // GET /api/calls  — Liste paginée + filtres
-router.get('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Response): void => {
+router.get('/', requireAuth, requireRole(...ALL_ROLES), async (req: Request, res: Response): Promise<void> => {
   const { page = '1', limit = '20', agentId, campaignId, direction, callType, dateFrom, dateTo } = req.query as Record<string, string>;
   const offset = (parseInt(page) - 1) * parseInt(limit);
 
@@ -47,26 +48,26 @@ router.get('/', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Resp
   if (dateFrom)   { where += ' AND call_date >= ?';  params.push(dateFrom); }
   if (dateTo)     { where += ' AND call_date <= ?';  params.push(dateTo); }
 
-  const total = (sqlite().prepare(`SELECT COUNT(*) as c FROM calls WHERE ${where}`).get(...params) as any).c;
-  const rows = sqlite().prepare(`SELECT * FROM calls WHERE ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`).all(...params, parseInt(limit), offset);
+  const total = (await sqlite().prepare(`SELECT COUNT(*) as c FROM calls WHERE ${where}`).get(...params) as any).c;
+  const rows = await sqlite().prepare(`SELECT * FROM calls WHERE ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`).all(...params, parseInt(limit), offset);
 
   res.json({ total, page: parseInt(page), limit: parseInt(limit), data: rows.map(toCall) });
 });
 
 // GET /api/calls/:id
-router.get('/:id', requireAuth, requireRole(...ALL_ROLES), (req: Request, res: Response): void => {
-  const row = sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(req.params.id) as any;
+router.get('/:id', requireAuth, requireRole(...ALL_ROLES), async (req: Request, res: Response): Promise<void> => {
+  const row = await sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(req.params.id) as any;
   // 404 aussi hors périmètre : on ne révèle pas l'existence d'un appel inaccessible.
-  if (!row || !canAccessCall(req.user!, row)) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
+  if (!row || !(await canAccessCall(req.user!, row))) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
   res.json(toCall(row));
 });
 
 // POST /api/calls  — Importer un appel
-router.post('/', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Response): void => {
+router.post('/', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response): Promise<void> => {
   const body = req.body as any;
   const id = body.id ?? `call-${Date.now()}`;
 
-  sqlite().prepare(`
+  await sqlite().prepare(`
     INSERT INTO calls (id, call_number, agent_id, agent_name, team_id, campaign_id, campaign_name,
       customer_phone_masked, customer_name_masked, call_date, duration_seconds, direction, call_type,
       audio_metadata_json, transcription_json, analytics_json, quality_evaluation_id, quality_score,
@@ -84,21 +85,21 @@ router.post('/', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Resp
     new Date().toISOString().substring(0, 10)
   );
 
-  logAudit(req.user!.userId, req.user!.name, req.user!.role,
+  await logAudit(req.user!.userId, req.user!.name, req.user!.role,
     'IMPORT_AUDIO', `Appel ${body.callNumber}`,
     `Nouvel enregistrement importé : ${body.agentName}`, req.ip);
 
-  const created = sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(id) as any;
+  const created = await sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(id) as any;
   res.status(201).json(toCall(created));
 });
 
 // PATCH /api/calls/:callId/segments/:segId  — Corriger un segment de transcription
-router.patch('/:callId/segments/:segId', requireAuth, requireRole(...STAFF_UP), (req: Request, res: Response): void => {
+router.patch('/:callId/segments/:segId', requireAuth, requireRole(...STAFF_UP), async (req: Request, res: Response): Promise<void> => {
   const { callId, segId } = req.params;
   const { correctedText } = req.body as { correctedText?: string };
 
-  const row = sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(callId) as any;
-  if (!row || !canAccessCall(req.user!, row)) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
+  const row = await sqlite().prepare('SELECT * FROM calls WHERE id = ?').get(callId) as any;
+  if (!row || !(await canAccessCall(req.user!, row))) { res.status(404).json({ error: 'Appel introuvable.' }); return; }
 
   const transcription = JSON.parse(row.transcription_json ?? '{}');
   const segments: any[] = transcription.segments ?? [];
@@ -113,10 +114,10 @@ router.patch('/:callId/segments/:segId', requireAuth, requireRole(...STAFF_UP), 
   transcription.segments = segments;
   transcription.correctedText = segments.map((s: any) => s.correctedText || s.text).join(' ');
 
-  sqlite().prepare('UPDATE calls SET transcription_json = ? WHERE id = ?')
+  await sqlite().prepare('UPDATE calls SET transcription_json = ? WHERE id = ?')
     .run(JSON.stringify(transcription), callId);
 
-  logAudit(req.user!.userId, req.user!.name, req.user!.role,
+  await logAudit(req.user!.userId, req.user!.name, req.user!.role,
     'CORRECTION_TRANSCRIPTION', `Appel ${row.call_number}`,
     `Segment ${segId} corrigé par ${req.user!.name}`, req.ip);
 

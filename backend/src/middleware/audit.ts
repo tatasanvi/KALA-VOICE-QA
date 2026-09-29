@@ -4,7 +4,7 @@
 import { Request, Response, NextFunction } from 'express';
 import db from '../db/index.js';
 
-export function logAudit(
+export async function logAudit(
   userId: string,
   userName: string,
   userRole: string,
@@ -12,10 +12,10 @@ export function logAudit(
   targetResource: string,
   details: string,
   ip: string = '127.0.0.1'
-): void {
+): Promise<void> {
   try {
     const sqlite = (db as any).session.client;
-    sqlite.prepare(`
+    await sqlite.prepare(`
       INSERT INTO audit_logs (id, timestamp, user_id, user_name, user_role, action, target_resource, details, ip_address)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(

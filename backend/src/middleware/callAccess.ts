@@ -9,10 +9,10 @@ import db from '../db/index.js';
 
 const sqlite = () => (db as any).session.client;
 
-export function canAccessCall(user: JwtPayload, row: { agent_id?: string; transcription_json?: string }): boolean {
+export async function canAccessCall(user: JwtPayload, row: { agent_id?: string; transcription_json?: string }): Promise<boolean> {
   if (user.role !== 'AGENT') return true;
 
-  const ownAgent = sqlite()
+  const ownAgent = await sqlite()
     .prepare('SELECT 1 FROM agents WHERE id = ? AND user_id = ?')
     .get(row.agent_id ?? '', user.userId);
   if (ownAgent) return true;
@@ -26,9 +26,9 @@ export function canAccessCall(user: JwtPayload, row: { agent_id?: string; transc
 
 // Un AGENT n'accède qu'à sa propre fiche agent (et donc à son coaching).
 // ADMIN et QUALITE_FORMATION conservent l'accès à tous les conseillers.
-export function canAccessAgent(user: JwtPayload, agentId: string): boolean {
+export async function canAccessAgent(user: JwtPayload, agentId: string): Promise<boolean> {
   if (user.role !== 'AGENT') return true;
   return Boolean(
-    sqlite().prepare('SELECT 1 FROM agents WHERE id = ? AND user_id = ?').get(agentId, user.userId)
+    await sqlite().prepare('SELECT 1 FROM agents WHERE id = ? AND user_id = ?').get(agentId, user.userId)
   );
 }

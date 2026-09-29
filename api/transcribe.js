@@ -13,13 +13,12 @@ import path from 'node:path';
 
 function resolveGroqKey() {
   if (process.env.GROQ_API_KEY) return process.env.GROQ_API_KEY;
-  if (process.env.VITE_GROQ_API_KEY) return process.env.VITE_GROQ_API_KEY;
   try {
     for (const filename of ['.env.local', '.env']) {
       const fullPath = path.resolve(process.cwd(), filename);
       if (fs.existsSync(fullPath)) {
         const content = fs.readFileSync(fullPath, 'utf8');
-        const m = content.match(/(?:VITE_)?GROQ_API_KEY=["']?([^"'\r\n]+)/);
+        const m = content.match(/GROQ_API_KEY=["']?([^"'\r\n]+)/);
         if (m && m[1]) return m[1].trim();
       }
     }

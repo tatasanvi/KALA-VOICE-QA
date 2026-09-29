@@ -5,10 +5,10 @@ import bcrypt from 'bcryptjs';
 const { hashSync } = bcrypt;
 import db from './index.js';
 
-export function createTables(): void {
+export async function createTables(): Promise<void> {
   const sqlite = (db as any).session.client;
 
-  sqlite.exec(`
+  await sqlite.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'AGENT',
@@ -151,15 +151,46 @@ export function createTables(): void {
   `);
 
   // Migration des rôles : exécutée à chaque démarrage, sur une base existante comme neuve.
-  migrateRoles(sqlite);
+  await migrateRoles(sqlite);
 
   // Seed initial si la table users est vide
-  const count = sqlite.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number };
+  const count = await sqlite.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number };
   if (count.c === 0) {
     console.log('🌱 Initialisation des données par défaut...');
-    seedDefaults(sqlite);
+    await seedDefaults(sqlite);
     console.log('✅ Données par défaut insérées.');
   }
+
+  await ensureBootstrapAdmin(sqlite);
+}
+
+// Création du premier compte administrateur de production depuis des variables
+// privées du fournisseur d'hébergement. Les redémarrages ne réinitialisent jamais
+// son mot de passe et aucun endpoint public ne permet cette opération.
+async function ensureBootstrapAdmin(sqlite: any): Promise<void> {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  const email = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  if (!email && !password) return;
+  if (!email || !password || password.length < 16) {
+    throw new Error('BOOTSTRAP_ADMIN_EMAIL et un BOOTSTRAP_ADMIN_PASSWORD de 16 caractères minimum sont requis ensemble.');
+  }
+
+  const existing = await sqlite.prepare('SELECT id, role FROM users WHERE email = ?').get(email) as any;
+  if (existing) {
+    if (existing.role !== 'ADMIN') {
+      throw new Error('BOOTSTRAP_ADMIN_EMAIL est déjà utilisé par un compte non administrateur.');
+    }
+    return;
+  }
+
+  const passwordHash = hashSync(password, 12);
+  await sqlite.prepare(`
+    INSERT INTO users (id, name, email, password_hash, role, department, phone, is_active, must_change_password, created_at)
+    VALUES (?, ?, ?, ?, 'ADMIN', 'Administration', '', 1, 0, ?)
+  `).run(`user-admin-${Date.now()}`, 'Administrateur KALA', email, passwordHash, new Date().toISOString());
+  console.log(`✅ Compte administrateur initial créé pour ${email}.`);
 }
 
 // Comptes de démonstration : créés uniquement si SEED_DEMO_ACCOUNTS=true, et
@@ -184,40 +215,40 @@ const DEMO_USERS = [
 
 // Migration des rôles : passage de six rôles à trois.
 // MANAGER, SUPERVISOR, QA_MANAGER et TRAINER deviennent QUALITE_FORMATION.
-function migrateRoles(sqlite: any): void {
-  const changed = sqlite.prepare(`
+async function migrateRoles(sqlite: any): Promise<void> {
+  const changed = (await sqlite.prepare(`
     UPDATE users SET role = 'QUALITE_FORMATION'
     WHERE role IN ('MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER')
-  `).run().changes;
-  sqlite.prepare(`
+  `).run()).changes;
+  await sqlite.prepare(`
     UPDATE audit_logs SET user_role = 'QUALITE_FORMATION'
     WHERE user_role IN ('MANAGER', 'SUPERVISOR', 'QA_MANAGER', 'TRAINER')
   `).run();
   // Comptes de démonstration de l'ancienne série (un par ancien rôle), remplacés
   // par les trois comptes ci-dessous.
-  const removed = sqlite.prepare(`
+  const removed = (await sqlite.prepare(`
     DELETE FROM users WHERE id IN ('user-manager', 'user-supervisor', 'user-qa', 'user-trainer', 'user-agent-1')
-  `).run().changes;
+  `).run()).changes;
   if (changed || removed) {
     console.log(`  ↪ Migration des rôles : ${changed} compte(s) converti(s), ${removed} ancien(s) compte(s) de démonstration retiré(s).`);
   }
 
   // L'ancien compte administrateur reprend l'adresse courte.
-  sqlite.prepare("UPDATE users SET email = 'admin@kalavoice.ai' WHERE id = 'user-admin' AND email = 'a.moreau@kalavoice.ai'").run();
+  await sqlite.prepare("UPDATE users SET email = 'admin@kalavoice.ai' WHERE id = 'user-admin' AND email = 'a.moreau@kalavoice.ai'").run();
 
   // Colonne ajoutée après coup sur une base existante.
-  const cols = sqlite.prepare('PRAGMA table_info(users)').all() as { name: string }[];
+  const cols = await sqlite.prepare('PRAGMA table_info(users)').all() as { name: string }[];
   if (!cols.some(c => c.name === 'must_change_password')) {
-    sqlite.prepare('ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0').run();
+    await sqlite.prepare('ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0').run();
   }
 
   // Les trois comptes de démonstration, uniquement si la configuration l'autorise.
-  ensureDemoAccounts(sqlite);
+  await ensureDemoAccounts(sqlite);
 }
 
 // Crée (ou complète) les comptes de démonstration. Ne fait rien sans
 // SEED_DEMO_ACCOUNTS=true, ni en production.
-function ensureDemoAccounts(sqlite: any): void {
+async function ensureDemoAccounts(sqlite: any): Promise<void> {
   if (!demoSeedEnabled()) return;
   const password = demoPassword();
   if (!password) return;
@@ -226,23 +257,23 @@ function ensureDemoAccounts(sqlite: any): void {
   const now = new Date().toISOString().substring(0, 10);
   const ins = sqlite.prepare(`INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, is_active, must_change_password, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1, ?)`);
   let created = 0;
-  for (const u of DEMO_USERS) created += ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now).changes;
+  for (const u of DEMO_USERS) created += (await ins.run(u.id, u.name, u.email, hash, u.role, u.dept, u.phone, now)).changes;
   // Les comptes de démonstration partagent un mot de passe connu : ils restent
   // marqués « à changer » tant qu'un déploiement réel n'a pas imposé le changement.
   const mark = sqlite.prepare('UPDATE users SET must_change_password = 1 WHERE id = ?');
-  for (const u of DEMO_USERS) mark.run(u.id);
+  for (const u of DEMO_USERS) await mark.run(u.id);
   if (created) console.log(`  ↪ ${created} compte(s) de démonstration créé(s) (mot de passe : variable DEMO_PASSWORD).`);
 }
 
-function seedDefaults(sqlite: any): void {
+async function seedDefaults(sqlite: any): Promise<void> {
   // Les comptes sont gérés par ensureDemoAccounts (conditionné à SEED_DEMO_ACCOUNTS).
 
-  sqlite.prepare(`INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
+  await sqlite.prepare(`INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
     .run('team-1', 'Équipe Alpha – Fibre & Mobile', 'user-staff', 'Claire Delattre', 'Équipe dédiée fibre et 5G.', 8, 84.2, '2024-01-20');
 
-  sqlite.prepare(`INSERT OR IGNORE INTO campaigns (id, name, type, client_sector, target_quality_score, active_agents_count, total_calls_count, compliance_rate, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+  await sqlite.prepare(`INSERT OR IGNORE INTO campaigns (id, name, type, client_sector, target_quality_score, active_agents_count, total_calls_count, compliance_rate, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .run('camp-1', 'Télécom Fibre & Mobile — Rétention', 'ENTRANT', 'Télécommunications', 85, 24, 1420, 94.2, "Fidélisation et traitement des résiliations.", '2024-01-15');
 
-  sqlite.prepare(`INSERT OR IGNORE INTO audit_logs (id, timestamp, user_id, user_name, user_role, action, target_resource, details, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+  await sqlite.prepare(`INSERT OR IGNORE INTO audit_logs (id, timestamp, user_id, user_name, user_role, action, target_resource, details, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .run(`log-init-${Date.now()}`, new Date().toISOString().replace('T', ' ').substring(0, 19), 'user-admin', 'Système', 'ADMIN', 'IMPORT_AUDIO', 'Système', 'Base de données KALA VOICE QA initialisée v1.0', '127.0.0.1');
 }

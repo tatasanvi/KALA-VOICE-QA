@@ -1,21 +1,10 @@
-// =============================================================================
-// KALA VOICE QA — Seed de la Base de Données avec les Données Initiales
-// =============================================================================
-import bcrypt from 'bcryptjs';
-const { hashSync } = bcrypt;
-import db from './index.js';
-import * as schema from './schema.js';
-import { sql } from 'drizzle-orm';
-
-// Créer les tables si elles n'existent pas
-async function createTables() {
-  const sqlite = (db as any).session.client;
-  await sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS users (
+-- Initial PostgreSQL schema for KALA VOICE QA, adapted from the SQLite schema.
+CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'AGENT',
       department TEXT, phone TEXT, avatar_url TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
+      must_change_password INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL, last_login_at TEXT
     );
     CREATE TABLE IF NOT EXISTS teams (
@@ -62,6 +51,14 @@ async function createTables() {
       quality_evaluation_id TEXT, quality_score REAL,
       is_urgent_review_required INTEGER NOT NULL DEFAULT 0,
       notes TEXT, created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS revision_requests (
+      id TEXT PRIMARY KEY, evaluation_id TEXT NOT NULL, call_id TEXT,
+      agent_id TEXT NOT NULL, requested_by_user_id TEXT NOT NULL,
+      requested_by_name TEXT NOT NULL, reason TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'EN_ATTENTE',
+      created_at TEXT NOT NULL,
+      handled_by_name TEXT, handled_at TEXT, resolution_note TEXT
     );
     CREATE TABLE IF NOT EXISTS evaluations (
       id TEXT PRIMARY KEY, call_id TEXT NOT NULL, agent_id TEXT NOT NULL,
@@ -141,86 +138,3 @@ async function createTables() {
       target_resource TEXT NOT NULL, details TEXT NOT NULL,
       ip_address TEXT NOT NULL DEFAULT '127.0.0.1'
     );
-  `);
-}
-
-// ─── Données Initiales ────────────────────────────────────────────────────────
-const demoPassword = process.env.DEMO_PASSWORD?.trim() ?? '';
-if (!demoPassword) {
-  console.error('DEMO_PASSWORD manquant : définissez-le dans backend/.env avant de lancer le seed.');
-  process.exit(1);
-}
-
-const SEED_USERS = [
-  { id: 'user-admin', name: 'Alexandre Moreau', email: 'admin@kalavoice.ai',   role: 'ADMIN',             department: 'Direction Informatique & IA',      phone: '+33 1 42 68 00 01', avatarUrl: '' },
-  { id: 'user-staff', name: 'Claire Delattre',  email: 'qualite@kalavoice.ai', role: 'QUALITE_FORMATION', department: 'Qualité, Formation & Supervision', phone: '+33 1 42 68 00 02', avatarUrl: '' },
-  { id: 'user-agent', name: 'Jean Dupont',      email: 'agent@kalavoice.ai',   role: 'AGENT',             department: 'Conseillers',                      phone: '+33 1 42 68 00 03', avatarUrl: '' },
-];
-
-const now = () => new Date().toISOString().substring(0, 10);
-
-async function seed() {
-  console.log('🌱 Création des tables...');
-  await createTables();
-  console.log('✅ Tables créées.');
-
-  const sqlite = (db as any).session.client;
-
-  // Vérifier si déjà seedé
-  const count = await sqlite.prepare('SELECT COUNT(*) as c FROM users').get() as { c: number };
-  if (count.c > 0) {
-    console.log('⏭️  Base de données déjà initialisée, seed ignoré.');
-    return;
-  }
-
-  console.log('🌱 Insertion des données initiales...');
-
-  // Users
-  const insertUser = sqlite.prepare(`
-    INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, phone, avatar_url, is_active, created_at, last_login_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-  `);
-  for (const u of SEED_USERS) {
-    const hash = hashSync(demoPassword, 10);
-    await insertUser.run(u.id, u.name, u.email, hash, u.role, u.department, u.phone, u.avatarUrl, now(), now());
-  }
-  console.log(`  ✅ ${SEED_USERS.length} utilisateurs créés (mot de passe : variable DEMO_PASSWORD).`);
-
-  // Teams
-  const insertTeam = sqlite.prepare(`
-    INSERT OR IGNORE INTO teams (id, name, supervisor_id, supervisor_name, description, member_count, average_quality_score, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  await insertTeam.run('team-1', 'Équipe Alpha – Fibre & Mobile',    'user-staff', 'Claire Delattre', 'Équipe dédiée aux abonnés Fibre et forfaits 5G.', 8, 84.2, '2024-01-20');
-  await insertTeam.run('team-2', 'Équipe Beta – Assurance Sinistres', 'user-staff', 'Claire Delattre', 'Traitement des déclarations de sinistres auto et habitation.', 6, 79.5, '2024-02-01');
-  await insertTeam.run('team-3', 'Équipe Gamma – Banque Pro',         'user-staff', 'Claire Delattre', 'Gestion des comptes professionnels et PME.', 7, 88.1, '2024-02-15');
-  console.log('  ✅ 3 équipes créées.');
-
-  // Campaigns
-  const insertCampaign = sqlite.prepare(`
-    INSERT OR IGNORE INTO campaigns (id, name, type, client_sector, target_quality_score, active_agents_count, total_calls_count, compliance_rate, description, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  await insertCampaign.run('camp-1', 'Télécom Fibre & Mobile — Rétention',    'ENTRANT', 'Télécommunications', 85, 24, 1420, 94.2, "Campagne de fidélisation et traitement des résiliations d'abonnements.", '2024-01-15');
-  await insertCampaign.run('camp-2', 'Assurance Auto & Habitation — Sinistres','ENTRANT', 'Assurances',         80, 18, 890,  88.7, 'Réception et qualification des déclarations de sinistres.', '2024-02-01');
-  await insertCampaign.run('camp-3', 'Banque Pro — Support PME',               'SORTANT', 'Banque & Finance',   88, 15, 640,  91.3, 'Accompagnement des clients professionnels et PME.', '2024-02-15');
-  console.log('  ✅ 3 campagnes créées.');
-
-  // Audit initial
-  const insertAudit = sqlite.prepare(`
-    INSERT OR IGNORE INTO audit_logs (id, timestamp, user_id, user_name, user_role, action, target_resource, details, ip_address)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  await insertAudit.run('log-seed-1', new Date().toISOString().replace('T', ' ').substring(0, 19),
-    'user-admin', 'Alexandre Moreau', 'ADMIN', 'IMPORT_AUDIO',
-    'Système', 'Initialisation de la base de données KALA VOICE QA v1.0', '127.0.0.1');
-  console.log('  ✅ Journal d\'audit initialisé.');
-
-  console.log('\n🎉 Base de données KALA initialisée avec succès !');
-  console.log('📧 Comptes disponibles :');
-  for (const u of SEED_USERS) {
-    console.log(`   ${u.role.padEnd(18)} | ${u.email}`);
-  }
-}
-
-seed().catch(console.error).finally(() => process.exit(0));
