@@ -18,6 +18,10 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
   const teams = storageService.getTeams();
   const campaigns = storageService.getCampaigns();
   const sessions = storageService.getTrainingSessions();
+  const scoredCalls = calls.filter(call => typeof call.qualityScore === 'number');
+  const averageQuality = scoredCalls.length
+    ? scoredCalls.reduce((total, call) => total + (call.qualityScore ?? 0), 0) / scoredCalls.length
+    : null;
 
   const [selectedReportType, setSelectedReportType] = useState<string>('CALL');
   const [selectedCallId, setSelectedCallId] = useState<string>(calls[0]?.id ?? '');
@@ -26,7 +30,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
 
   const currentCall: Call | undefined = calls.find(c => c.id === selectedCallId) || calls[0];
   const currentAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
-  if (calls.length === 0 || agents.length === 0 || !currentCall || !currentAgent) return <EmptyState title="Aucun rapport disponible" />;
+  if (calls.length === 0 || !currentCall) return <EmptyState title="Aucun appel enregistré pour générer un rapport" />;
 
   const handlePrintCurrentReport = () => {
     if (selectedReportType === 'CALL') {
@@ -51,7 +55,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
             <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Centre d'Édition & Rapports Métiers</h2>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px' }}>
-            Génération de bilans opérationnels certifiés, conformes aux exigences qualité et d'audit.
+            Rapports et exports construits à partir des données disponibles dans l'application.
           </p>
         </div>
 
@@ -154,27 +158,27 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
         {selectedReportType === 'QUALITY' && (
           <div>
             <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '14px' }}>
-              Bilan Global du Contrôle Qualité (Période Avril 2024)
+              Bilan du contrôle qualité — données chargées
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Moyenne Générale Qualité</div>
-                <div style={{ fontSize: '32px', fontWeight: 900, color: '#6db89a' }}>82.8 / 100</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Sur un échantillon de 2 840 appels analysés</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Moyenne des appels évalués</div>
+                <div style={{ fontSize: '32px', fontWeight: 900, color: '#6db89a' }}>{averageQuality === null ? 'Non mesurée' : `${averageQuality.toFixed(1)} / 100`}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>{scoredCalls.length} appel(s) avec un score enregistré</div>
               </div>
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Conformité Légale & RGPD</div>
-                <div style={{ fontSize: '32px', fontWeight: 900, color: 'var(--primary-light)' }}>94.6 %</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>0 anomalie critique non traitée</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Données disponibles</div>
+                <div style={{ fontSize: '32px', fontWeight: 900, color: 'var(--primary-light)' }}>{calls.length}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>appel(s) chargé(s) pour ce rapport</div>
               </div>
             </div>
           </div>
         )}
 
-        {selectedReportType === 'AGENT' && (
+        {selectedReportType === 'AGENT' && currentAgent && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Rapport Annuel de Performance Conseiller</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Données de performance du conseiller</h3>
               <select 
                 value={currentAgent.id}
                 onChange={(e) => setSelectedAgentId(e.target.value)}
@@ -187,7 +191,7 @@ export const ReportsView: React.FC<ReportsViewProps> = () => {
               </select>
             </div>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              L'agent <strong>{currentAgent.name}</strong> ({currentAgent.teamName}) affiche un score moyen de <strong>{currentAgent.averageQualityScore}%</strong>. Sa progression a atteint <strong>+13 points</strong> entre Janvier et Avril 2024 grâce à la validation du module de reformulation empathique.
+              <strong>{currentAgent.name}</strong> — {currentAgent.teamName}. Score moyen enregistré : <strong>{currentAgent.averageQualityScore}%</strong>. Appels analysés : <strong>{currentAgent.callsAnalyzedCount}</strong>.
             </p>
           </div>
         )}

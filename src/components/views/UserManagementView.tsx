@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Users, Plus, Pencil, Trash2, UserCheck, UserX, ShieldCheck,
-  X, Save, Mail, Phone, Building2, AlertTriangle, Search, Filter
+  X, Save, Mail, Phone, Building2, AlertTriangle, Search, Filter, LockKeyhole
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 import { usersApi } from '../../services/apiClient';
@@ -32,11 +32,12 @@ interface UserFormData {
   department: string;
   phone: string;
   isActive: boolean;
+  password: string;
 }
 
 const EMPTY_FORM: UserFormData = {
   name: '', email: '', role: 'AGENT',
-  department: '', phone: '', isActive: true,
+  department: '', phone: '', isActive: true, password: '',
 };
 
 // ─── Modal Formulaire ──────────────────────────────────────────────────────
@@ -58,6 +59,8 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
     if (!form.name.trim()) errs.name = 'Le nom est obligatoire';
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Email invalide';
     if (!form.department.trim()) errs.department = 'Le département est obligatoire';
+    if (mode === 'create' && form.password.length < 8) errs.password = '8 caractères minimum';
+    if (mode === 'edit' && form.password && form.password.length < 8) errs.password = '8 caractères minimum';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -147,6 +150,15 @@ const UserModal: React.FC<UserModalProps> = ({ mode, initial, onSave, onClose })
             {field('Département / Service', 'department', <Building2 size={14} />, 'text', 'Ex: Assurance Qualité')}
             {field('Téléphone (optionnel)', 'phone', <Phone size={14} />, 'tel', '+33 1 XX XX XX XX')}
           </div>
+
+          {field(
+            mode === 'create' ? 'Mot de passe initial' : 'Nouveau mot de passe (facultatif)',
+            'password',
+            <LockKeyhole size={14} />,
+            'password',
+            mode === 'create' ? '8 caractères minimum' : 'Laisser vide pour conserver le mot de passe actuel'
+          )}
+          {mode === 'edit' && <p style={{ marginTop: '-10px', fontSize: '11px', color: 'var(--text-muted)' }}>Le mot de passe n'est jamais affiché. Saisissez-en un nouveau uniquement pour le remplacer.</p>}
 
           {/* Rôle */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -288,13 +300,14 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
   const [modal, setModal] = useState<{ mode: FormMode; user?: User } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [messageIsError, setMessageIsError] = useState(false);
 
   const refresh = () => setUsers(storageService.getUsers());
 
   // Synchronisation avec l'API backend si disponible
   React.useEffect(() => {
     usersApi.list().then(res => {
-      if (res.ok && res.data && Array.isArray(res.data) && res.data.length > 0) {
+      if (res.ok && Array.isArray(res.data)) {
         // Met à jour l'affichage avec les données backend
         setUsers(res.data);
       }
@@ -303,26 +316,35 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
     });
   }, []);
 
-  const notify = (msg: string) => {
+  const notify = (msg: string, isError = false) => {
+    setMessageIsError(isError);
     setSuccessMsg(msg);
     setTimeout(() => setSuccessMsg(null), 3500);
   };
 
   const handleSave = async (data: UserFormData) => {
+    const { password, ...profile } = data;
     if (modal?.mode === 'create') {
-      const created = storageService.createUser(data);
+      const result = await usersApi.create({ ...profile, password });
+      if (!result.ok || !result.data) {
+        notify(result.error ?? "Le compte n'a pas pu être créé.", true);
+        return;
+      }
+      setUsers(current => [result.data as User, ...current.filter(user => user.id !== (result.data as User).id)]);
       notify(`Compte de ${data.name} créé avec succès.`);
-      refresh();
       setModal(null);
-      // Appel API en arrière-plan
-      await usersApi.create({ ...data, password: (data as any).password });
     } else if (modal?.mode === 'edit' && modal.user) {
-      storageService.updateUser({ ...modal.user, ...data });
+      const result = await usersApi.update(modal.user.id, {
+        ...profile,
+        ...(password ? { password } : {}),
+      });
+      if (!result.ok || !result.data) {
+        notify(result.error ?? "Le compte n'a pas pu être mis à jour.", true);
+        return;
+      }
+      setUsers(current => current.map(user => user.id === modal.user!.id ? result.data as User : user));
       notify(`Compte de ${data.name} mis à jour.`);
-      refresh();
       setModal(null);
-      // Appel API en arrière-plan
-      await usersApi.update(modal.user.id, data);
     }
   };
 
@@ -368,7 +390,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
         <UserModal
           mode={modal.mode}
           initial={modal.mode === 'edit' && modal.user
-            ? { name: modal.user.name, email: modal.user.email, role: modal.user.role, department: modal.user.department ?? '', phone: modal.user.phone ?? '', isActive: modal.user.isActive }
+            ? { name: modal.user.name, email: modal.user.email, role: modal.user.role, department: modal.user.department ?? '', phone: modal.user.phone ?? '', isActive: modal.user.isActive, password: '' }
             : EMPTY_FORM}
           onSave={handleSave}
           onClose={() => setModal(null)}
@@ -383,9 +405,10 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({ currentU
       {/* Notification */}
       {successMsg && (
         <div style={{
-          background: 'rgba(16,185,129,0.15)', border: '1px solid #3f9a7a',
+          background: messageIsError ? 'rgba(217,131,131,0.15)' : 'rgba(16,185,129,0.15)',
+          border: `1px solid ${messageIsError ? '#d98383' : '#3f9a7a'}`,
           padding: '12px 18px', borderRadius: 'var(--radius-md)',
-          color: '#b9d6c8', fontSize: '13px', fontWeight: 600,
+          color: messageIsError ? '#f0b8b8' : '#b9d6c8', fontSize: '13px', fontWeight: 600,
           animation: 'slideIn 0.3s ease'
         }}>
           {successMsg}

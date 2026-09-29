@@ -12,15 +12,18 @@ const router = Router();
 const sqlite = () => (db as any).session.client;
 
 const toCall = (c: any) => ({
-  ...c,
+  id: c.id, callNumber: c.call_number, agentId: c.agent_id, agentName: c.agent_name,
+  teamId: c.team_id, campaignId: c.campaign_id, campaignName: c.campaign_name,
+  customerPhoneMasked: c.customer_phone_masked, customerNameMasked: c.customer_name_masked,
+  callDate: c.call_date, durationSeconds: c.duration_seconds, direction: c.direction,
+  callType: c.call_type, qualityEvaluationId: c.quality_evaluation_id,
+  qualityScore: c.quality_score ?? undefined,
+  status: c.quality_evaluation_id ? 'EVALUE' : (c.transcription_json && c.transcription_json !== '{}' ? 'TRANSCRIT' : 'A_ANALYSER'),
+  notes: c.notes ?? undefined, createdAt: c.created_at,
   audioMetadata:   JSON.parse(c.audio_metadata_json  ?? '{}'),
   transcription:   JSON.parse(c.transcription_json   ?? '{}'),
   analytics:       JSON.parse(c.analytics_json       ?? '{}'),
   isUrgentReviewRequired: Boolean(c.is_urgent_review_required),
-  audio_metadata_json: undefined,
-  transcription_json: undefined,
-  analytics_json: undefined,
-  is_urgent_review_required: undefined,
 });
 
 // GET /api/calls  — Liste paginée + filtres

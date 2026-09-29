@@ -822,7 +822,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
                   <span style={{ fontWeight: 800, fontSize: '13px', color: '#b3aed1' }}>Whisper Large-v3-Turbo</span>
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  Inférence acoustique accélérée, prompt d'amorce adapté au vocabulaire télécom / énergie, timestamps au niveau des segments.
+                  Inférence acoustique accélérée. Les résultats affichés proviennent de l'audio et de la configuration sélectionnés.
                 </div>
               </div>
 

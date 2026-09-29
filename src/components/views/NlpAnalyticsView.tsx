@@ -18,10 +18,20 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
   const currentCall = calls.find(c => c.id === selectedCallId) || calls[0];
   if (calls.length === 0 || !currentCall) return <EmptyState title="Aucune analyse disponible" />;
   const analytics = currentCall.analytics;
+  const hasNlpAnalysis = analytics.resolutionStatus !== 'NON_DÉTERMINÉ'
+    || analytics.interruptionCount != null
+    || analytics.speechRateWpm != null
+    || analytics.sentimentAgent !== 'NON_DÉTERMINÉ';
+  if (!hasNlpAnalysis) {
+    return <EmptyState title="Aucune analyse automatique disponible" hint="Cet appel possède une transcription, mais aucun résultat d'analyse sémantique ou comportementale n'a été calculé." />;
+  }
 
   // Calcul des pourcentages de temps de parole
-  const totalTalk = analytics.agentTalkTimeSeconds + analytics.clientTalkTimeSeconds;
-  const agentPercent = totalTalk > 0 ? Math.round((analytics.agentTalkTimeSeconds / totalTalk) * 100) : 50;
+  const agentTalkTime = analytics.agentTalkTimeSeconds ?? 0;
+  const clientTalkTime = analytics.clientTalkTimeSeconds ?? 0;
+  const hasTalkTime = analytics.agentTalkTimeSeconds != null && analytics.clientTalkTimeSeconds != null;
+  const totalTalk = agentTalkTime + clientTalkTime;
+  const agentPercent = hasTalkTime && totalTalk > 0 ? Math.round((agentTalkTime / totalTalk) * 100) : 0;
   const clientPercent = 100 - agentPercent;
 
 
@@ -127,15 +137,15 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
         <div className="glass-panel">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Répartition du Temps de Parole</h3>
-            <span className="badge badge-blue">Ratio : {analytics.talkToListenRatio}x</span>
+            <span className="badge badge-blue">Ratio : {analytics.talkToListenRatio == null ? 'Non mesuré' : `${analytics.talkToListenRatio}x`}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
             <span style={{ color: 'var(--primary-light)', fontWeight: 600 }}>
-              Agent : {agentPercent}% ({Math.round(analytics.agentTalkTimeSeconds)}s)
+              {hasTalkTime ? `Agent : ${agentPercent}% (${Math.round(agentTalkTime)}s)` : 'Temps de parole non mesuré'}
             </span>
             <span style={{ color: '#6db89a', fontWeight: 600 }}>
-              Client : {clientPercent}% ({Math.round(analytics.clientTalkTimeSeconds)}s)
+              {hasTalkTime ? `Client : ${clientPercent}% (${Math.round(clientTalkTime)}s)` : ''}
             </span>
           </div>
 
@@ -147,18 +157,18 @@ export const NlpAnalyticsView: React.FC<NlpAnalyticsViewProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '18px' }}>
             <div style={{ background: 'rgba(0,0,0,0.25)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Chevauchements / Interruptions</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: analytics.interruptionCount > 3 ? '#d98383' : '#6db89a', marginTop: '2px' }}>
-                {analytics.interruptionCount} coupure{analytics.interruptionCount > 1 ? 's' : ''}
+              <div style={{ fontSize: '20px', fontWeight: 800, color: '#94a3b8', marginTop: '2px' }}>
+                {analytics.interruptionCount == null ? 'Non mesuré' : `${analytics.interruptionCount} coupure${analytics.interruptionCount > 1 ? 's' : ''}`}
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{analytics.interruptionCount > 3 ? 'Alerte : fréquence élevée' : 'Rythme fluide'}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{analytics.interruptionCount == null ? 'Aucune mesure disponible' : analytics.interruptionCount > 3 ? 'Alerte : fréquence élevée' : 'Rythme fluide'}</div>
             </div>
 
             <div style={{ background: 'rgba(0,0,0,0.25)', padding: '12px', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Temps de Silence Cumulé</div>
               <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
-                {analytics.totalSilenceSeconds} sec
+                {analytics.totalSilenceSeconds == null ? 'Non mesuré' : `${analytics.totalSilenceSeconds} sec`}
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Débit : {analytics.speechRateWpm} mots/min</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Débit : {analytics.speechRateWpm == null ? 'Non mesuré' : `${analytics.speechRateWpm} mots/min`}</div>
             </div>
           </div>
         </div>

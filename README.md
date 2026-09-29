@@ -39,7 +39,7 @@ Trois comptes de démonstration, dont le mot de passe est celui de `DEMO_PASSWOR
 `agent@kalavoice.ai` (AGENT). L'ingestion audio est réservée aux rôles ADMIN et
 QUALITE_FORMATION.
 
-## 📋 Description du Projet
+## Description du Projet
 
 **KALA VOICE QA** est une plateforme professionnelle SaaS B2B conçue pour les centres d'appels. Elle combine l'amélioration de la transcription vocale en milieux bruités avec l'analyse conversationnelle avancée, le contrôle qualité assisté par IA et le coaching personnalisé des conseillers.
 

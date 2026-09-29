@@ -119,6 +119,7 @@ export const callsApi = {
 // ─── Quality API ──────────────────────────────────────────────────────────────
 export const qualityApi = {
   list:          ()           => apiCall('/evaluations'),
+  listByAgent:   (agentId: string) => apiCall(`/evaluations/agent/${agentId}`),
   getByCall:     (callId: string) => apiCall(`/evaluations/call/${callId}`),
   save:          (data: any)  => apiCall('/evaluations', 'POST', data),
   listCriteria:  ()           => apiCall('/criteria'),
@@ -130,8 +131,29 @@ export const agentsApi = {
   list: () => apiCall('/agents'),
   get:  (id: string) => apiCall(`/agents/${id}`),
 };
-export const teamsApi     = { list: () => apiCall('/teams') };
-export const campaignsApi = { list: () => apiCall('/campaigns') };
+export const teamsApi = {
+  list: async () => {
+    const res = await apiCall<any[]>('/teams');
+    return { ...res, data: res.data?.map(team => ({
+      id: team.id, name: team.name, supervisorId: team.supervisor_id,
+      supervisorName: team.supervisor_name, description: team.description,
+      memberCount: team.member_count, averageQualityScore: team.average_quality_score,
+      createdAt: team.created_at,
+    })) };
+  },
+};
+export const campaignsApi = {
+  list: async () => {
+    const res = await apiCall<any[]>('/campaigns');
+    return { ...res, data: res.data?.map(campaign => ({
+      id: campaign.id, name: campaign.name, type: campaign.type,
+      clientSector: campaign.client_sector, targetQualityScore: campaign.target_quality_score,
+      activeAgentsCount: campaign.active_agents_count, totalCallsCount: campaign.total_calls_count,
+      complianceRate: campaign.compliance_rate, description: campaign.description,
+      createdAt: campaign.created_at,
+    })) };
+  },
+};
 
 // ─── Coaching API ─────────────────────────────────────────────────────────────
 export const coachingApi = {
@@ -142,8 +164,11 @@ export const coachingApi = {
 
 // ─── Training API ─────────────────────────────────────────────────────────────
 export const trainingApi = {
-  listModules:  ()          => apiCall('/training/modules'),
-  listSessions: ()          => apiCall('/training/sessions'),
+  listModules:  () => apiCall('/training/modules'),
+  createModule: (data: any) => apiCall('/training/modules', 'POST', data),
+  updateModule: (id: string, data: any) => apiCall(`/training/modules/${id}`, 'PUT', data),
+  deleteModule: (id: string) => apiCall(`/training/modules/${id}`, 'DELETE'),
+  listSessions: () => apiCall('/training/sessions'),
   addSession:   (data: any) => apiCall('/training/sessions', 'POST', data),
 };
 

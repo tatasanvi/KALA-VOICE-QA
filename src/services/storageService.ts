@@ -50,7 +50,7 @@ class StorageService {
     this.calls = this.load('kala_calls_v2', []);
     this.evaluations = this.load('kala_evaluations_v2', []);
     this.coachingPlans = this.load('kala_coaching_plans_v2', []);
-    this.trainingModules = this.load('kala_training_modules', INITIAL_TRAINING_MODULES);
+    this.trainingModules = this.load('kala_training_modules_v2', []);
     this.trainingSessions = this.load('kala_training_sessions_v2', []);
     this.auditLogs = this.load('kala_audit_logs_v2', []);
     this.metrics = this.load('kala_metrics_v2', EMPTY_METRICS);
@@ -206,7 +206,7 @@ class StorageService {
 
       call.transcription = trans;
       this.calls[callIndex] = call;
-      this.save('kala_calls', this.calls);
+      this.save('kala_calls_v2', this.calls);
 
       this.logAudit(
         'CORRECTION_TRANSCRIPTION',
@@ -218,12 +218,16 @@ class StorageService {
 
   public addCall(newCall: Call): void {
     this.calls.unshift(newCall);
-    this.save('kala_calls', this.calls);
+    this.save('kala_calls_v2', this.calls);
     this.logAudit('IMPORT_AUDIO', `Appel ${newCall.callNumber}`, `Nouvel enregistrement importé (${newCall.audioMetadata.filename})`);
   }
 
   // --- Quality Evaluations ---
   public getEvaluations(): QualityEvaluation[] { return this.evaluations; }
+  public setEvaluations(evaluations: QualityEvaluation[]): void {
+    this.evaluations = evaluations;
+    this.save('kala_evaluations_v2', evaluations);
+  }
   public getEvaluationByCallId(callId: string): QualityEvaluation | undefined {
     return this.evaluations.find(e => e.callId === callId);
   }
@@ -235,14 +239,14 @@ class StorageService {
     } else {
       this.evaluations.push(evaluation);
     }
-    this.save('kala_evaluations', this.evaluations);
+    this.save('kala_evaluations_v2', this.evaluations);
 
     // Mettre à jour l'appel lié
     const callIndex = this.calls.findIndex(c => c.id === evaluation.callId);
     if (callIndex >= 0) {
       this.calls[callIndex].qualityScore = evaluation.overallScore;
       this.calls[callIndex].qualityEvaluationId = evaluation.id;
-      this.save('kala_calls', this.calls);
+      this.save('kala_calls_v2', this.calls);
     }
 
     this.logAudit(
@@ -265,14 +269,34 @@ class StorageService {
 
   // --- Agents & Teams ---
   public getAgents(): Agent[] { return this.agents; }
+  public setAgents(agents: Agent[]): void {
+    this.agents = agents;
+    this.save('kala_agents_v2', agents);
+  }
   public getAgentById(id: string): Agent | undefined {
     return this.agents.find(a => a.id === id);
   }
   public getTeams(): Team[] { return this.teams; }
+  public setTeams(teams: Team[]): void {
+    this.teams = teams;
+    this.save('kala_teams_v2', teams);
+  }
   public getCampaigns(): Campaign[] { return this.campaigns; }
+  public setCampaigns(campaigns: Campaign[]): void {
+    this.campaigns = campaigns;
+    this.save('kala_campaigns_v2', campaigns);
+  }
+  public setCalls(calls: Call[]): void {
+    this.calls = calls;
+    this.save('kala_calls_v2', calls);
+  }
 
   // --- Coaching & Training ---
   public getCoachingPlans(): CoachingPlan[] { return this.coachingPlans; }
+  public setCoachingPlans(plans: CoachingPlan[]): void {
+    this.coachingPlans = plans;
+    this.save('kala_coaching_plans_v2', plans);
+  }
   public getCoachingPlanByAgentId(agentId: string): CoachingPlan | undefined {
     return this.coachingPlans.find(cp => cp.agentId === agentId);
   }
@@ -283,15 +307,23 @@ class StorageService {
     } else {
       this.coachingPlans.push(plan);
     }
-    this.save('kala_coaching_plans', this.coachingPlans);
+    this.save('kala_coaching_plans_v2', this.coachingPlans);
     this.logAudit('CREATION_COACHING', `Plan Agent ${plan.agentName}`, `Objectifs mis à jour`);
   }
 
   public getTrainingModules(): TrainingModule[] { return this.trainingModules; }
+  public setTrainingModules(modules: TrainingModule[]): void {
+    this.trainingModules = modules;
+    this.save('kala_training_modules_v2', modules);
+  }
   public getTrainingSessions(): TrainingSession[] { return this.trainingSessions; }
+  public setTrainingSessions(sessions: TrainingSession[]): void {
+    this.trainingSessions = sessions;
+    this.save('kala_training_sessions_v2', sessions);
+  }
   public addTrainingSession(session: TrainingSession): void {
     this.trainingSessions.push(session);
-    this.save('kala_training_sessions', this.trainingSessions);
+    this.save('kala_training_sessions_v2', this.trainingSessions);
   }
 
   // --- Experiments & Benchmarks ---
@@ -366,7 +398,7 @@ class StorageService {
       createdAt: new Date().toISOString().substring(0, 10)
     };
     this.campaigns.push(newCamp);
-    this.save('kala_campaigns', this.campaigns);
+    this.save('kala_campaigns_v2', this.campaigns);
     this.logAudit('IMPORT_AUDIO', `Campagne ${newCamp.name}`, 'Nouvelle campagne créée');
     this.notify();
     return newCamp;
@@ -375,7 +407,7 @@ class StorageService {
     const idx = this.campaigns.findIndex(c => c.id === campaign.id);
     if (idx !== -1) {
       this.campaigns[idx] = campaign;
-      this.save('kala_campaigns', this.campaigns);
+      this.save('kala_campaigns_v2', this.campaigns);
       this.logAudit('IMPORT_AUDIO', `Campagne ${campaign.name}`, 'Paramètres de campagne mis à jour');
       this.notify();
     }

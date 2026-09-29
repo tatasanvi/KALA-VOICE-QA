@@ -143,7 +143,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
           <div className="kpi-value" style={{ fontSize: '20px', marginTop: '4px' }}>
             {Math.floor(meta.durationSeconds / 60)}m {meta.durationSeconds % 60}s
           </div>
-          <div className="kpi-subtext">{meta.sampleRateHz / 1000} kHz • Mono</div>
+          <div className="kpi-subtext">{meta.sampleRateHz == null ? 'Fréquence non fournie' : `${meta.sampleRateHz / 1000} kHz`}{meta.channels == null ? '' : ` • ${meta.channels} canal/canaux`}</div>
         </div>
 
         <div className="kpi-card" style={{ padding: '14px 18px' }}>
@@ -242,10 +242,10 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {/* Badge Confiance */}
                       <span className={`badge ${
-                        seg.confidenceScore >= 0.85 ? 'badge-green' : 
+                        seg.confidenceScore == null ? 'badge-gray' : seg.confidenceScore >= 0.85 ? 'badge-green' :
                         seg.confidenceScore >= 0.60 ? 'badge-amber' : 'badge-red'
                       }`} style={{ fontSize: '10.5px' }}>
-                        Confiance : {Math.round(seg.confidenceScore * 100)}%
+                        Confiance : {seg.confidenceScore == null ? 'Non fournie' : `${Math.round(seg.confidenceScore * 100)}%`}
                       </span>
 
                       {/* Marqueur Bruit Ambiant */}

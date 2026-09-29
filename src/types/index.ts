@@ -71,19 +71,19 @@ export interface Agent {
   complianceRate: number;
 }
 
-export type NoiseLevel = 'FAIBLE' | 'MODÉRÉ' | 'SÉVÈRE' | 'CRITIQUE';
+export type NoiseLevel = 'FAIBLE' | 'MODÉRÉ' | 'SÉVÈRE' | 'CRITIQUE' | 'NON_MESURÉ';
 
 export interface AudioMetadata {
   id: string;
   filename: string;
   fileSizeBytes: number;
   durationSeconds: number;
-  sampleRateHz: number;
-  channels: number;
+  sampleRateHz?: number;
+  channels?: number;
   snrDb?: number; // SNR : uniquement si réellement mesuré
   estimatedNoiseLevel: NoiseLevel;
-  noiseType: 'PLATEAU_CALL_CENTER' | 'GSM_COMPRESSION' | 'RUE_URBAIN' | 'ECHO_ACOUSTIQUE' | 'AUCUN';
-  audioQualityScore: number; // / 100
+  noiseType: 'PLATEAU_CALL_CENTER' | 'GSM_COMPRESSION' | 'RUE_URBAIN' | 'ECHO_ACOUSTIQUE' | 'AUCUN' | 'NON_DÉTERMINÉ';
+  audioQualityScore?: number; // / 100, uniquement si mesuré
   waveformSamples: number[]; // Tableau d'amplitudes normalisées (0.0 à 1.0)
   originalUrl?: string;
   denoisedUrl?: string;
@@ -92,15 +92,15 @@ export interface AudioMetadata {
 export interface TranscriptionSegment {
   id: string;
   transcriptionId: string;
-  speaker: 'AGENT' | 'CLIENT';
+  speaker: 'AGENT' | 'CLIENT' | 'NON_IDENTIFIÉ';
   speakerLabel: string;
   startTime: number; // secondes
   endTime: number; // secondes
   text: string;
   correctedText?: string;
-  confidenceScore: number; // 0.0 à 1.0 (ex: 0.92)
-  isNoisyPassage: boolean;
-  noiseImpactLevel: 'AUCUN' | 'LÉGER' | 'MODÉRÉ' | 'FORT';
+  confidenceScore?: number; // 0.0 à 1.0 uniquement si fourni par le modèle
+  isNoisyPassage?: boolean;
+  noiseImpactLevel: 'AUCUN' | 'LÉGER' | 'MODÉRÉ' | 'FORT' | 'NON_MESURÉ';
   hasBeenEdited?: boolean;
 }
 
@@ -113,8 +113,8 @@ export interface Transcription {
   asrModelUsed: string; // ex: "KALA-Denoiser+Whisper-Large-v3" ou "Baseline-Wav2Vec2"
   totalWords: number;
   processingTimeMs: number;
-  globalConfidenceScore: number; // / 100
-  noiseRobustnessScore: number; // / 100
+  globalConfidenceScore?: number; // / 100 uniquement si calculé
+  noiseRobustnessScore?: number; // / 100 uniquement si calculé
   rawText: string;
   correctedText?: string;
   segments: TranscriptionSegment[];
@@ -123,8 +123,8 @@ export interface Transcription {
   lastEditedAt?: string;
 }
 
-export type CallResolutionStatus = 'RÉSOLU' | 'EN_COURS' | 'NON_RÉSOLU' | 'ESCALADÉ';
-export type SentimentType = 'POSITIF' | 'NEUTRE' | 'MITIGÉ' | 'NÉGATIF' | 'TRÈS_FRUSTRÉ';
+export type CallResolutionStatus = 'RÉSOLU' | 'EN_COURS' | 'NON_RÉSOLU' | 'ESCALADÉ' | 'NON_DÉTERMINÉ';
+export type SentimentType = 'POSITIF' | 'NEUTRE' | 'MITIGÉ' | 'NÉGATIF' | 'TRÈS_FRUSTRÉ' | 'NON_DÉTERMINÉ';
 
 export interface CallAnalytics {
   id: string;
@@ -152,12 +152,12 @@ export interface CallAnalytics {
   }[];
   
   // Métriques de communication paralinguistiques
-  agentTalkTimeSeconds: number;
-  clientTalkTimeSeconds: number;
-  talkToListenRatio: number; // ex: 1.15 (115% agent vs client)
-  interruptionCount: number;
-  totalSilenceSeconds: number;
-  speechRateWpm: number; // Words Per Minute (Rythme)
+  agentTalkTimeSeconds?: number;
+  clientTalkTimeSeconds?: number;
+  talkToListenRatio?: number; // uniquement si mesuré
+  interruptionCount?: number;
+  totalSilenceSeconds?: number;
+  speechRateWpm?: number; // uniquement si mesuré
   detectedCommunicationIssues: string[];
   
   // Règle d'explicabilité IA
@@ -211,6 +211,7 @@ export interface QualityEvaluationItem {
   aiProposedScore: number; // Suggestion calculée par l'IA
   aiConfidence: number;
   isAiAccepted: boolean; // True si le responsable a validé la proposition de l'IA
+  isScored?: boolean; // Saisie explicite du responsable qualité
   comment: string;
   transcriptEvidenceQuotes: {
     segmentId: string;
@@ -278,7 +279,7 @@ export interface TrainingModule {
   id: string;
   code: string;
   title: string;
-  category: 'RELATION_CLIENT' | 'GESTION_OBJECTIONS' | 'CONFORMITÉ_RGPD' | 'RÉSOLUTION_TECHNIQUE' | 'POSTURE_ÉCOUTE';
+  category: string;
   durationMinutes: number;
   description: string;
   targetCompetencies: string[];

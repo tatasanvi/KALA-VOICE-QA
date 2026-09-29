@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  CheckCircle2, Sparkles, Award, ShieldAlert, 
+  CheckCircle2, Award, ShieldAlert,
   MessageSquare, Quote, Save, Printer, Sliders, Target, Eye, ArrowRight
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
+import { qualityApi } from '../../services/apiClient';
 import { QualityService } from '../../services/qualityService';
 import { ReportService } from '../../services/reportService';
 import { QualityEvaluation, QualityCriterion, Call, UserRole } from '../../types';
@@ -33,7 +34,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
   // Initialisation de l'évaluation si non existante
   const [evaluation, setEvaluation] = useState<QualityEvaluation | null>(() => {
     if (existingEval) return existingEval;
-    if (currentCall) return QualityService.generateAiSuggestedEvaluation(currentCall, criteria, currentUser.name);
+    if (currentCall) return QualityService.createManualEvaluation(currentCall, criteria, currentUser.name);
     return null;
   });
 
@@ -56,7 +57,8 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
         return {
           ...item,
           score: newScore,
-          isAiAccepted: false
+          isAiAccepted: false,
+          isScored: true,
         };
       }
       return item;
@@ -82,29 +84,21 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
     setEvaluation({ ...evaluation, items: updatedItems });
   };
 
-  const handleAcceptAiScore = (criterionId: string) => {
+  const handleListChange = (field: 'strengths' | 'weaknesses' | 'recommendations', value: string) => {
     if (!evaluation) return;
-    const updatedItems = evaluation.items.map(item => {
-      if (item.criterionId === criterionId) {
-        return {
-          ...item,
-          score: item.aiProposedScore,
-          isAiAccepted: true
-        };
-      }
-      return item;
-    });
-
-    const newOverallScore = QualityService.calculateOverallScore(updatedItems, criteria);
-    setEvaluation({
-      ...evaluation,
-      items: updatedItems,
-      overallScore: newOverallScore
-    });
+    setEvaluation({ ...evaluation, [field]: value.split('\n').map(line => line.trim()).filter(Boolean) });
   };
 
-  const handleFinalValidation = () => {
+  const handleFinalValidation = async () => {
     if (!evaluation) return;
+    if (evaluation.items.some(item => !item.isScored)) {
+      setNotification('Note chaque critère avant de valider cette évaluation.');
+      return;
+    }
+    if (!currentCall.transcription?.rawText && !currentCall.transcription?.segments?.length) {
+      setNotification('Une transcription réelle est nécessaire pour valider une évaluation.');
+      return;
+    }
     const validatedEval: QualityEvaluation = {
       ...evaluation,
       status: 'VALIDÉE_RESPONSABLE',
@@ -113,8 +107,15 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
       validatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
     };
 
+    const saved = await qualityApi.save(validatedEval);
+    if (!saved.ok) {
+      setNotification(saved.error ?? "L'évaluation n'a pas pu être enregistrée sur le serveur.");
+      return;
+    }
+
     setEvaluation(validatedEval);
     storageService.saveEvaluation(validatedEval);
+    window.dispatchEvent(new CustomEvent('kala:data-refresh'));
 
     setNotification("Évaluation validée avec succès ! Le score officiel a été enregistré et archivé dans le dossier agent.");
     setTimeout(() => setNotification(null), 5000);
@@ -181,14 +182,9 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
         <Eye size={16} color="var(--primary-light)" style={{ flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
           <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--primary-light)' }}>
-            Évaluation assistée par IA · validation humaine requise.
-          </span>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '8px' }}>
-            Les notes proposées sont des suggestions extraites de la transcription. L'évaluateur doit valider, ajuster ou refuser chaque score.
-            L'IA ne doit jamais remplacer le jugement du responsable qualité.
+            Évaluation manuelle : les notes, constats et recommandations sont saisis par le responsable qualité à partir de la transcription.
           </span>
         </div>
-        <Sparkles size={14} color="#7d7aa6" style={{ flexShrink: 0 }} />
       </div>
 
       {notification && (
@@ -213,13 +209,13 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          {/* Suggestion IA */}
+          {/* Aucune note n'est préremplie. */}
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
-              <Sparkles size={12} color="#9fb7d6" /> Suggestion IA
+              Critères notés
             </div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: '#b4c6de' }}>
-              {evaluation.aiSuggestedScore} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>/ 100</span>
+              {evaluation.items.filter(item => item.isScored).length} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>/ {criteria.length}</span>
             </div>
           </div>
 
@@ -234,8 +230,8 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
               Score Qualité Global
             </div>
-            <div style={{ fontSize: '38px', fontWeight: 900, color: evaluation.overallScore >= 80 ? '#6db89a' : evaluation.overallScore >= 70 ? '#d9ae55' : '#d98383' }}>
-              {evaluation.overallScore} <span style={{ fontSize: '18px', color: 'var(--text-muted)' }}>/ 100</span>
+            <div style={{ fontSize: '30px', fontWeight: 900, color: '#b4c6de' }}>
+              {evaluation.items.some(item => item.isScored) ? `${evaluation.overallScore} / 100` : 'Non noté'}
             </div>
           </div>
         </div>
@@ -249,8 +245,10 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           </h3>
           <ul style={{ paddingLeft: '18px', fontSize: '13px', lineHeight: 1.6, color: '#d1fae5' }}>
             {evaluation.strengths.map((str, i) => (
-              <li key={i}>{str}</li>
-            ))}
+            <li key={i}>{str}</li>
+          ))}
+          {evaluation.strengths.length === 0 && <li style={{ listStyle: 'none', color: 'var(--text-muted)' }}>Non renseigné</li>}
+          <textarea aria-label="Points forts observés, une ligne par point" value={evaluation.strengths.join('\n')} onChange={e => handleListChange('strengths', e.target.value)} rows={3} placeholder="Saisir les points forts observés, un par ligne" style={{ width: '100%', marginTop: '8px', background: 'rgba(0,0,0,0.25)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '8px' }} />
           </ul>
         </div>
 
@@ -260,8 +258,10 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
           </h3>
           <ul style={{ paddingLeft: '18px', fontSize: '13px', lineHeight: 1.6, color: '#fef3c7' }}>
             {evaluation.weaknesses.map((wk, i) => (
-              <li key={i}>{wk}</li>
-            ))}
+            <li key={i}>{wk}</li>
+          ))}
+          {evaluation.weaknesses.length === 0 && <li style={{ listStyle: 'none', color: 'var(--text-muted)' }}>Non renseigné</li>}
+          <textarea aria-label="Axes d'amélioration observés, une ligne par axe" value={evaluation.weaknesses.join('\n')} onChange={e => handleListChange('weaknesses', e.target.value)} rows={3} placeholder="Saisir les axes constatés, un par ligne" style={{ width: '100%', marginTop: '8px', background: 'rgba(0,0,0,0.25)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '8px' }} />
           </ul>
         </div>
 
@@ -275,6 +275,8 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
             {evaluation.recommendations.map((rec, i) => (
               <li key={i}>{rec}</li>
             ))}
+            {evaluation.recommendations.length === 0 && <li style={{ listStyle: 'none', color: 'var(--text-muted)' }}>Aucune recommandation saisie</li>}
+            <textarea aria-label="Recommandations de coaching, une ligne par recommandation" value={evaluation.recommendations.join('\n')} onChange={e => handleListChange('recommendations', e.target.value)} rows={3} placeholder="Saisir des actions issues de l'évaluation, une par ligne" style={{ width: '100%', marginTop: '8px', background: 'rgba(0,0,0,0.25)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '8px' }} />
           </ul>
           {evaluation.weaknesses.length > 0 && (
             <button 
@@ -307,8 +309,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {criteria.map((crit) => {
             const item = evaluation.items.find(it => it.criterionId === crit.id);
-            const currentScore = item ? item.score : 8;
-            const aiScore = item ? item.aiProposedScore : 8;
+            const currentScore = item ? item.score : 0;
             const evidence = item?.transcriptEvidenceQuotes || [];
 
             return (
@@ -346,22 +347,11 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
 
                   {/* Contrôle de la Note */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    {/* Badge Suggestion IA */}
+                    {/* Le score est toujours saisi par l'évaluateur. */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span className="badge badge-blue" style={{ fontSize: '11px' }}>
-                        <Sparkles size={11} style={{ marginRight: '3px' }} />
-                        IA : {aiScore}/{crit.maxScore}
+                        {item?.isScored ? 'Note saisie' : 'À noter'}
                       </span>
-                      {item && item.score !== aiScore && (
-                        <button 
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleAcceptAiScore(crit.id)}
-                          style={{ padding: '2px 6px', fontSize: '10.5px' }}
-                          title="Restaurer la proposition initiale de l'IA"
-                        >
-                          Adopter {aiScore}
-                        </button>
-                      )}
                     </div>
 
                     {/* Sélecteur Note */}
@@ -400,7 +390,7 @@ export const QualityControlView: React.FC<QualityControlViewProps> = ({
                       « {evidence[0].quote} »
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Justification IA : {evidence[0].relevanceNote}
+                      Note de l'évaluateur : {evidence[0].relevanceNote}
                     </div>
                   </div>
                 )}

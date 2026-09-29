@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { transcriptionsApi, TranscriptionResult, DenoisedResult } from '../../services/apiClient';
 import { storageService } from '../../services/storageService';
+import { callsApi } from '../../services/apiClient';
 import { audioStorageService } from '../../services/audioStorageService';
 import { Call, TranscriptionSegment } from '../../types';
 
@@ -169,7 +170,7 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
 
       try {
         const callId = `call-${Date.now()}`;
-        const finalCallNumber = callTitle.trim() || `CALL-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        const finalCallNumber = callTitle.trim() || `CALL-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8)}`;
         const duration = Math.round(res.data.duration || 60);
         const dateStr = new Date().toISOString().substring(0, 10);
 
@@ -181,46 +182,38 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
           audioUrl = URL.createObjectURL(file);
         }
 
-        const waveformSamples = Array.from({ length: 48 }, (_, idx) => 
-          parseFloat((0.2 + 0.6 * Math.abs(Math.sin((idx + 3) * 0.4))).toFixed(2))
-        );
-
         const segments: TranscriptionSegment[] = (res.data.segments && res.data.segments.length > 0)
           ? res.data.segments.map((s, idx) => ({
               id: `seg-${callId}-${idx}`,
               transcriptionId: `trans-${callId}`,
-              speaker: (idx % 2 === 0 ? 'AGENT' : 'CLIENT') as 'AGENT' | 'CLIENT',
-              speakerLabel: idx % 2 === 0 ? (selectedAgent?.name || 'Conseiller') : 'Client',
+              speaker: 'NON_IDENTIFIÉ' as const,
+              speakerLabel: 'Interlocuteur non identifié',
               startTime: s.start ?? (idx * 4),
               endTime: s.end ?? ((idx + 1) * 4),
               text: s.text,
-              confidenceScore: 0.94,
-              isNoisyPassage: false,
-              noiseImpactLevel: 'AUCUN' as const,
+              noiseImpactLevel: 'NON_MESURÉ' as const,
             }))
           : [{
               id: `seg-${callId}-0`,
               transcriptionId: `trans-${callId}`,
-              speaker: 'AGENT' as const,
-              speakerLabel: selectedAgent?.name || 'Conseiller',
+              speaker: 'NON_IDENTIFIÉ' as const,
+              speakerLabel: 'Interlocuteur non identifié',
               startTime: 0,
               endTime: duration,
               text: res.data.text || '(Enregistrement audio)',
-              confidenceScore: 0.92,
-              isNoisyPassage: false,
-              noiseImpactLevel: 'AUCUN' as const,
+              noiseImpactLevel: 'NON_MESURÉ' as const,
             }];
 
         const callRecord: Call = {
           id: callId,
           callNumber: finalCallNumber,
-          agentId: selectedAgent?.id || 'agent-1',
-          agentName: selectedAgent?.name || 'Sarah Benali',
-          teamId: selectedAgent?.teamId || 'team-1',
-          campaignId: selectedAgent?.campaignId || 'camp-1',
-          campaignName: selectedAgent?.campaignName || 'Campagne Principale',
-          customerPhoneMasked: `+33 6 •• •• ${Math.floor(10 + Math.random() * 90)} ${Math.floor(10 + Math.random() * 90)}`,
-          customerNameMasked: customerName.trim() || `Client #${Math.floor(100 + Math.random() * 900)}`,
+          agentId: selectedAgent?.id || 'unassigned',
+          agentName: selectedAgent?.name || 'Non attribué',
+          teamId: selectedAgent?.teamId || 'unassigned',
+          campaignId: selectedAgent?.campaignId || 'unassigned',
+          campaignName: selectedAgent?.campaignName || 'Non attribuée',
+          customerPhoneMasked: 'Non renseigné',
+          customerNameMasked: customerName.trim() ? `${customerName.trim().slice(0, 1)}•••` : 'Non renseigné',
           callDate: dateStr,
           durationSeconds: duration,
           direction,
@@ -232,13 +225,9 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
             filename: file.name,
             fileSizeBytes: file.size,
             durationSeconds: duration,
-            sampleRateHz: 16000,
-            channels: 1,
-            snrDb: 18.5,
-            estimatedNoiseLevel: 'MODÉRÉ',
-            noiseType: 'PLATEAU_CALL_CENTER',
-            audioQualityScore: 84,
-            waveformSamples,
+            estimatedNoiseLevel: 'NON_MESURÉ',
+            noiseType: 'NON_DÉTERMINÉ',
+            waveformSamples: [],
             originalUrl: audioUrl
           },
           transcription: {
@@ -250,8 +239,6 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
             asrModelUsed: res.data.model || 'Groq Whisper large-v3-turbo',
             totalWords: res.data.text ? res.data.text.split(/\s+/).filter(Boolean).length : 0,
             processingTimeMs: Math.round((res.data.processing_time || 1) * 1000),
-            globalConfidenceScore: 92,
-            noiseRobustnessScore: 88,
             rawText: res.data.text,
             segments,
             createdAt: dateStr
@@ -259,33 +246,32 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
           analytics: {
             id: `analytics-${callId}`,
             callId,
-            summary: res.data.text ? (res.data.text.length > 140 ? res.data.text.substring(0, 140) + '...' : res.data.text) : 'Échange téléphonique enregistré et transcrit.',
-            contactIntent: callType.replace(/_/g, ' '),
-            mainTopics: ['Service Client', 'Échange vocal', 'Contrôle qualité'],
-            keywords: ['Appel', 'Conseiller', 'Demande', 'Résolution'],
-            sentimentAgent: 'POSITIF',
-            sentimentClient: 'NEUTRE',
-            sentimentTimeline: [
-              { minute: 1, agentSentiment: 0.6, clientSentiment: 0.2 }
-            ],
+            summary: 'Aucun résumé automatique fourni.',
+            contactIntent: 'NON_DÉTERMINÉ',
+            mainTopics: [],
+            keywords: [],
+            sentimentAgent: 'NON_DÉTERMINÉ',
+            sentimentClient: 'NON_DÉTERMINÉ',
+            sentimentTimeline: [],
             objectionsDetected: [],
             unresolvedIssues: [],
-            resolutionStatus: 'RÉSOLU',
-            actionItemsRequested: ['Archivage enregistrement', 'Contrôle conformité QA'],
-            importantInformation: ['Enregistrement transcrit via moteur ASR Whisper'],
+            resolutionStatus: 'NON_DÉTERMINÉ',
+            actionItemsRequested: [],
+            importantInformation: [],
             criticalMoments: [],
-            agentTalkTimeSeconds: Math.round(duration * 0.55),
-            clientTalkTimeSeconds: Math.round(duration * 0.45),
-            talkToListenRatio: 1.22,
-            interruptionCount: 0,
-            totalSilenceSeconds: 2,
-            speechRateWpm: 145,
             detectedCommunicationIssues: [],
-            aiDisclaimer: 'Analyse automatique générée par moteur vocal'
+            undeterminedFields: ['Résumé', 'Intention', 'Sentiment', 'Résolution', 'Temps de parole', 'Interruptions', 'Débit de parole'],
+            aiDisclaimer: 'Seule la transcription ASR a été générée. Aucune analyse qualité ou sémantique automatique n’a été réalisée.'
           }
         };
 
-        storageService.addCall(callRecord);
+        const persisted = await callsApi.create(callRecord);
+        if (!persisted.ok || !persisted.data) {
+          setError(persisted.error ?? "La transcription est prête, mais l'appel n'a pas pu être enregistré dans le registre.");
+          return;
+        }
+        storageService.addCall(persisted.data);
+        window.dispatchEvent(new CustomEvent('kala:data-refresh'));
         storageService.addNotification({
           type: 'SYSTEM',
           title: 'Nouvel appel transcrit',
