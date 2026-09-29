@@ -39,25 +39,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setToken(storedToken);
         setUser(storedUser);
         storageService.setCurrentUser(storedUser);
+        // Afficher immédiatement les routes protégées. Une API froide ou lente
+        // ne doit pas laisser l'application bloquée sur son écran de chargement.
+        setIsLoading(false);
 
-        // Si l'API est en ligne, rafraîchir les informations utilisateur via /api/auth/me
-        try {
-          const res = await authApi.me();
+        // Actualiser le profil en arrière-plan. Un 401 déclenche la déconnexion
+        // automatique dans apiClient; les réponses tardives après déconnexion
+        // ou changement de session sont ignorées.
+        void authApi.me().then(res => {
+          if (tokenStore.get() !== storedToken) return;
           if (res.ok && res.data) {
             setUser(res.data);
             tokenStore.setUser(res.data);
             storageService.setCurrentUser(res.data);
           }
-        } catch {
-          // Si l'API est injoignable, la session stockée reste valide en mode local
-        }
+        }).catch(() => {
+          // Si l'API est injoignable, la session déjà stockée reste affichée.
+        });
       } else {
         // Aucun token stocké -> utilisateur non authentifié
         setToken(null);
         setUser(null);
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     initSession();
