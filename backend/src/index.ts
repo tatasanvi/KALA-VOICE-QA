@@ -24,8 +24,13 @@ const app = express();
 const PORT = process.env.PORT ?? 8000;
 
 // ─── Middleware Globaux ───────────────────────────────────────────────────────
+const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:4173,http://localhost:3000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:4173', 'http://localhost:3000'],
+  origin: corsOrigins,
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -39,7 +44,7 @@ app.use((req, _res, next) => {
 });
 
 // ─── Initialisation DB ────────────────────────────────────────────────────────
-createTables();
+await createTables();
 
 // ─── Routes API ───────────────────────────────────────────────────────────────
 app.use('/api/auth',        authRouter);

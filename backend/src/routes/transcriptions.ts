@@ -2,7 +2,7 @@
 // Route Transcriptions — proxy vers le service ASR local (Whisper-small)
 // Le fichier audio reste en mémoire le temps de la requête : il n'est pas conservé.
 // =============================================================================
-import { Router } from 'express';
+import { Router } from '../utils/asyncRouter.js';
 import type { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import http from 'node:http';
@@ -150,7 +150,7 @@ router.post('/', requireAuth, requireRole(...STAFF_UP), handleUpload, async (req
     createdAt: now.toISOString(),
   };
 
-  sqlite().prepare(`
+  await sqlite().prepare(`
     INSERT INTO calls (id, call_number, agent_id, agent_name, team_id, campaign_id, campaign_name,
       customer_phone_masked, customer_name_masked, call_date, duration_seconds, direction, call_type,
       audio_metadata_json, transcription_json, analytics_json, quality_evaluation_id, quality_score,
@@ -164,7 +164,7 @@ router.post('/', requireAuth, requireRole(...STAFF_UP), handleUpload, async (req
     now.toISOString(),
   );
 
-  logAudit(req.user!.userId, req.user!.name, req.user!.role, 'TRANSCRIPTION_AUDIO', `Appel ${callNumber}`,
+  await logAudit(req.user!.userId, req.user!.name, req.user!.role, 'TRANSCRIPTION_AUDIO', `Appel ${callNumber}`,
     `Transcription enregistrée (${req.file.size} octets, ${body.model}, audio ${keepAudio ? 'conservé' : 'non conservé'})`, req.ip);
 
   res.json({ ...body, callId: id, callNumber, audioStored: keepAudio });

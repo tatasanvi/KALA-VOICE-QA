@@ -3,7 +3,7 @@
 // Intercepteur JWT automatique + fallback localStorage en cas d'API hors ligne
 // =============================================================================
 
-const API_BASE = '/api'; // proxy Vite → http://localhost:8000
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, ''); // Vercel: URL de l'API hébergée; local: proxy Vite
 
 // ─── Gestion Token ────────────────────────────────────────────────────────────
 export const tokenStore = {

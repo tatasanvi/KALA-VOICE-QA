@@ -80,7 +80,7 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
   // ── Envoi à l'API Groq Whisper ────────────────────────────────────────────
   const startTime = Date.now();
   const groqForm  = new FormData();
-  groqForm.append('file', new Blob([req.file.buffer], { type: req.file.mimetype }), req.file.originalname);
+  groqForm.append('file', new Blob([new Uint8Array(req.file.buffer)], { type: req.file.mimetype }), req.file.originalname);
   groqForm.append('model',   GROQ_MODEL);
   groqForm.append('language', 'fr');
   groqForm.append('response_format', 'verbose_json');
