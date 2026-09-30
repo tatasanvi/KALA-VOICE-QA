@@ -39,6 +39,21 @@ Trois comptes de démonstration, dont le mot de passe est celui de `DEMO_PASSWOR
 `agent@kalavoice.ai` (AGENT). L'ingestion audio est réservée aux rôles ADMIN et
 QUALITE_FORMATION.
 
+### Données locales de test (sans CRM ni téléphonie)
+
+Pour remplir les référentiels de test sans inventer de conversations, lancez le backend
+avec une base SQLite locale, puis exécutez :
+
+```bash
+npm run db:seed:testdata --prefix backend
+```
+
+Le seed est idempotent, refuse les bases distantes et la production, et crée des
+équipes, campagnes, conseillers de test et modules de formation. Il ne crée aucun
+appel, fichier audio, transcription ou score QA. Importez vos propres audios dans
+l'application pour tester le flux réel de transcription et d'évaluation. Les profils
+et noms préfixés `TEST` sont fictifs.
+
 ## Description du Projet
 
 **KALA VOICE QA** est une plateforme professionnelle SaaS B2B conçue pour les centres d'appels. Elle combine l'amélioration de la transcription vocale en milieux bruités avec l'analyse conversationnelle avancée, le contrôle qualité assisté par IA et le coaching personnalisé des conseillers.

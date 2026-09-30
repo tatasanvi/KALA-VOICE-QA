@@ -119,7 +119,7 @@ export const ComparisonView: React.FC<{ result: TranscriptionResult }> = ({ resu
   );
 };
 
-export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved }) => {
+export const RealTranscription: React.FC<{ onSaved?: (callId: string) => void }> = ({ onSaved }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
@@ -168,9 +168,15 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
     if (res.ok && res.data) {
       setResult(res.data);
 
+      let savedCallId: string | undefined;
       try {
         const callId = `call-${Date.now()}`;
-        const finalCallNumber = callTitle.trim() || `CALL-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8)}`;
+        const callLabel = callTitle.trim();
+        // Le numéro d'appel est UNIQUE en base. Le nom fourni par l'utilisateur
+        // reste lisible, avec un suffixe pour permettre de réimporter un même nom.
+        const finalCallNumber = callLabel
+          ? `${callLabel}-${crypto.randomUUID().slice(0, 8)}`
+          : `CALL-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8)}`;
         const duration = Math.round(res.data.duration || 60);
         const dateStr = new Date().toISOString().substring(0, 10);
 
@@ -267,9 +273,16 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
 
         const persisted = await callsApi.create(callRecord);
         if (!persisted.ok || !persisted.data) {
-          setError(persisted.error ?? "La transcription est prête, mais l'appel n'a pas pu être enregistré dans le registre.");
+          // Garder le résultat consultable même si l'API d'enregistrement est en erreur.
+          // Le studio peut afficher l'appel depuis le stockage local; la synchronisation
+          // serveur pourra être retentée ultérieurement.
+          storageService.addCall(callRecord);
+          window.dispatchEvent(new CustomEvent('kala:data-refresh'));
+          setError(`Transcription terminée, mais l'enregistrement serveur a échoué (HTTP ${persisted.status}${persisted.error ? ` : ${persisted.error}` : ''}). L'appel reste disponible dans cette session.`);
+          onSaved?.(callId);
           return;
         }
+        savedCallId = persisted.data.id;
         storageService.addCall(persisted.data);
         window.dispatchEvent(new CustomEvent('kala:data-refresh'));
         storageService.addNotification({
@@ -283,7 +296,7 @@ export const RealTranscription: React.FC<{ onSaved?: () => void }> = ({ onSaved 
         console.error('Erreur lors de la sauvegarde locale de l\'appel:', saveErr);
       }
 
-      onSaved?.();
+      if (savedCallId) onSaved?.(savedCallId);
     } else {
       setError(res.error ?? 'Échec de la transcription.');
     }

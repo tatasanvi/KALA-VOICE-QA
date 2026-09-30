@@ -6,7 +6,7 @@ interface AudioUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   // Appelé après l'enregistrement en base d'une vraie transcription.
-  onSaved?: () => void;
+  onSaved?: (callId: string) => void;
 }
 
 export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onClose, onSaved }) => {

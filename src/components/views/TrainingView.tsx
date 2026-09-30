@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Clock, GraduationCap, Plus, Pencil, Trash2, X } from 'lucide-react';
-import { trainingApi } from '../../services/apiClient';
+import React, { useEffect, useState } from 'react';
+import { Clock, GraduationCap, Plus, Pencil, Trash2, X, CalendarPlus, Download } from 'lucide-react';
+import { agentsApi, trainingApi } from '../../services/apiClient';
 import { storageService as localStorageService } from '../../services/storageService';
 import { Agent, TrainingModule, TrainingSession, UserRole } from '../../types';
 
@@ -10,7 +10,7 @@ const blankModule = (): Partial<TrainingModule> => ({ code: '', title: '', categ
 export const TrainingView: React.FC<TrainingViewProps> = ({ currentRole }) => {
   const [modules, setModules] = useState(localStorageService.getTrainingModules());
   const [sessions, setSessions] = useState(localStorageService.getTrainingSessions());
-  const [agents] = useState<Agent[]>(localStorageService.getAgents());
+  const [agents, setAgents] = useState<Agent[]>(localStorageService.getAgents());
   const [showSession, setShowSession] = useState(false);
   const [showModuleForm, setShowModuleForm] = useState(false);
   const [editing, setEditing] = useState<TrainingModule | null>(null);
@@ -22,6 +22,36 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentRole }) => {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const canManage = currentRole !== 'AGENT';
+
+  useEffect(() => {
+    let active = true;
+    const refresh = async () => {
+      const [moduleResult, sessionResult, agentResult] = await Promise.all([
+        trainingApi.listModules(), trainingApi.listSessions(), agentsApi.list(),
+      ]);
+      if (!active) return;
+      if (moduleResult.ok && Array.isArray(moduleResult.data)) { setModules(moduleResult.data); localStorageService.setTrainingModules(moduleResult.data); }
+      if (sessionResult.ok && Array.isArray(sessionResult.data)) { setSessions(sessionResult.data); localStorageService.setTrainingSessions(sessionResult.data); }
+      if (agentResult.ok && Array.isArray(agentResult.data)) { setAgents(agentResult.data); localStorageService.setAgents(agentResult.data); }
+    };
+    void refresh();
+    window.addEventListener('kala:data-refresh', refresh);
+    return () => { active = false; window.removeEventListener('kala:data-refresh', refresh); };
+  }, []);
+
+  const openCalendar = (item: TrainingSession) => {
+    const date = item.scheduledDate.replace(/-/g, '');
+    const start = `${date}T090000Z`;
+    const end = `${date}T100000Z`;
+    const params = new URLSearchParams({ action: 'TEMPLATE', text: `Formation KALA · ${item.moduleTitle}`, dates: `${start}/${end}`, details: `Session de formation pour ${item.agentName}.` });
+    window.open(`https://calendar.google.com/calendar/render?${params}`, '_blank', 'noopener,noreferrer');
+  };
+  const downloadCalendar = (item: TrainingSession) => {
+    const date = item.scheduledDate.replace(/-/g, '');
+    const content = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//KALA Voice QA//Training//FR\r\nBEGIN:VEVENT\r\nUID:${item.id}@kala-voice-qa\r\nDTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\\.\d{3}/, '')}\r\nDTSTART:${date}T090000Z\r\nDTEND:${date}T100000Z\r\nSUMMARY:Formation KALA - ${item.moduleTitle}\r\nDESCRIPTION:Session de formation pour ${item.agentName}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+    const url = URL.createObjectURL(new Blob([content], { type: 'text/calendar;charset=utf-8' }));
+    const anchor = document.createElement('a'); anchor.href = url; anchor.download = `formation-${item.id}.ics`; anchor.click(); URL.revokeObjectURL(url);
+  };
 
   const openModule = (module?: TrainingModule) => {
     setEditing(module ?? null);
@@ -61,7 +91,6 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentRole }) => {
     const module = modules.find(item => item.id === selectedModuleId);
     const agent = agents.find(item => item.id === selectedAgentId);
     if (!module || !agent) { setMessage('Choisis un module et un conseiller.'); setBusy(false); return; }
-    if (agent.callsAnalyzedCount < 1) { setMessage('Une évaluation QA réelle est nécessaire pour établir le niveau initial avant la formation.'); setBusy(false); return; }
     const session: Partial<TrainingSession> = {
       id: `session-${crypto.randomUUID()}`, agentId: agent.id, agentName: agent.name,
       moduleId: module.id, moduleTitle: module.title, scheduledDate: sessionDate,
@@ -99,7 +128,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentRole }) => {
     </div>
 
     <div className="glass-panel"><h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14 }}>Sessions enregistrées</h3>
-      {sessions.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>Aucune session de formation enregistrée.</p> : <div className="data-table-container"><table className="data-table"><thead><tr><th>Conseiller</th><th>Module</th><th>Date</th><th>Statut</th><th>Évaluation avant</th><th>Évaluation après</th></tr></thead><tbody>{sessions.map(item => <tr key={item.id}><td>{item.agentName}<div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.trainerName}</div></td><td>{item.moduleTitle}</td><td>{item.scheduledDate}</td><td>{item.status}</td><td>{item.preTrainingQualityScore == null ? 'Non mesurée' : `${item.preTrainingQualityScore}%`}</td><td>{item.postTrainingQualityScore == null ? 'Non mesurée' : `${item.postTrainingQualityScore}%`}</td></tr>)}</tbody></table></div>}
+      {sessions.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>Aucune session de formation enregistrée.</p> : <div className="data-table-container"><table className="data-table"><thead><tr><th>Conseiller</th><th>Module</th><th>Date</th><th>Statut</th><th>Évaluation avant</th><th>Évaluation après</th><th>Calendrier</th></tr></thead><tbody>{sessions.map(item => <tr key={item.id}><td>{item.agentName}<div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.trainerName}</div></td><td>{item.moduleTitle}</td><td>{item.scheduledDate}</td><td>{item.status}</td><td>{item.preTrainingQualityScore == null ? 'Non mesurée' : `${item.preTrainingQualityScore}%`}</td><td>{item.postTrainingQualityScore == null ? 'Non mesurée' : `${item.postTrainingQualityScore}%`}</td><td><button className="btn btn-secondary btn-sm" title="Ajouter à Google Calendar" onClick={() => openCalendar(item)}><CalendarPlus size={14} /></button> <button className="btn btn-secondary btn-sm" title="Télécharger pour Google, Outlook ou Apple Calendar" onClick={() => downloadCalendar(item)}><Download size={14} /></button></td></tr>)}</tbody></table></div>}
     </div>
 
     {showModuleForm && <div style={overlay}><form className="glass-panel" onSubmit={saveModule} style={{ ...dialog, maxHeight: '90vh', overflowY: 'auto' }}>

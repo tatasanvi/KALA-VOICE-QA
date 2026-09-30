@@ -267,7 +267,10 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
       <AudioUploadModal 
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
-        onSaved={() => setShowUploadModal(false)}
+        onSaved={(callId) => {
+          setShowUploadModal(false);
+          onNavigate(`/transcriptions/${callId}`);
+        }}
       />
 
       {/* Modal Fiche Appel Détaillée */}
