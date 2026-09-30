@@ -8,7 +8,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "db:seed:testdata": "npm run build && node dist/db/seedTestData.js"
   },
   "dependencies": {
     "@types/multer": "^2.2.0",
