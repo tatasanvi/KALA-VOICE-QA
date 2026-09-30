@@ -21,7 +21,9 @@ export const AgentProfileView: React.FC<AgentProfileViewProps> = ({
 }) => {
   const agents = storageService.getAgents();
   const currentAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
-  if (agents.length === 0 || !currentAgent) return <EmptyState title="Aucun conseiller enregistré" />;
+  if (agents.length === 0 || !currentAgent) return <EmptyState title="Aucun conseiller enregistré"
+    hint="Les comptes créés avec le rôle Conseiller apparaissent ici automatiquement. Vérifiez la connexion au serveur si vous en avez déjà créé."
+  />;
   const calls = storageService.getCalls().filter(c => c.agentId === currentAgent.id);
   const coachingPlan = storageService.getCoachingPlanByAgentId(currentAgent.id);
   const sessions = storageService.getTrainingSessions().filter(s => s.agentId === currentAgent.id);

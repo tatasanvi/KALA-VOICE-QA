@@ -4,6 +4,7 @@ import {
   UploadCloud, Settings, Wifi, Radio, RefreshCw, Save, X, FileText
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
+import { teamsApi } from '../../services/apiClient';
 import { UserRole, Campaign, CtiIntegrationConfig } from '../../types';
 import { Avatar } from '../common/Avatar';
 
@@ -26,6 +27,26 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
   const ctiConfig = storageService.getCtiConfig();
 
   const [activeTab, setActiveTab] = useState<'CAMPAIGNS' | 'TEAMS' | 'CTI'>(defaultTab);
+  const [showTeamForm, setShowTeamForm] = useState(false);
+  const [teamName, setTeamName] = useState('');
+  const [teamDescription, setTeamDescription] = useState('');
+  const [teamNotice, setTeamNotice] = useState('');
+  const canManage = currentRole !== 'AGENT';
+  const createTeam = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const result = await teamsApi.create({ name: teamName, description: teamDescription });
+    if (!result.ok) { setTeamNotice(result.error ?? 'Création de l’équipe impossible.'); return; }
+    setTeamNotice('Équipe créée.'); setTeamName(''); setTeamDescription(''); setShowTeamForm(false);
+    window.dispatchEvent(new Event('kala:data-refresh'));
+  };
+  const assignAgent = async (agentId: string, teamId: string) => {
+    const result = await teamsApi.assignAgent(agentId, teamId);
+    if (!result.ok) { setTeamNotice(result.error ?? 'Affectation impossible.'); return; }
+    storageService.setAgents(storageService.getAgents().map(agent => agent.id === agentId
+      ? { ...agent, teamId: result.data.teamId, teamName: result.data.teamName } : agent));
+    setTeamNotice('Affectation enregistrée.');
+    window.dispatchEvent(new Event('kala:data-refresh'));
+  };
 
   // État Modal Création Campagne
   const [showCampModal, setShowCampModal] = useState(false);
@@ -103,6 +124,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
               <span>Créer une Campagne</span>
             </button>
           )}
+          {activeTab === 'TEAMS' && canManage && <button className="btn btn-primary btn-sm" onClick={() => setShowTeamForm(true)}><Plus size={14} /> Créer une équipe</button>}
 
           <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
             <button 
@@ -131,6 +153,13 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
           </div>
         </div>
       </div>
+
+      {teamNotice && activeTab === 'TEAMS' && <div role="status" className="glass-panel">{teamNotice}</div>}
+      {showTeamForm && <form className="glass-panel" onSubmit={createTeam} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <input required placeholder="Nom de l’équipe" value={teamName} onChange={e => setTeamName(e.target.value)} />
+        <input placeholder="Description" value={teamDescription} onChange={e => setTeamDescription(e.target.value)} />
+        <button className="btn btn-primary btn-sm">Enregistrer</button><button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowTeamForm(false)}>Annuler</button>
+      </form>}
 
       {/* ─── ONGLET 1 : CAMPAGNES ────────────────────────────────────────── */}
       {activeTab === 'CAMPAIGNS' && (
@@ -244,6 +273,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
                     </div>
                   ))}
                 </div>
+                {canManage && <div style={{ marginTop: 14 }}><label style={{ fontSize: 12 }}>Affecter un conseiller <select aria-label={`Affecter à ${team.name}`} className="role-select" style={{ marginLeft: 8 }} defaultValue="" onChange={e => { if (e.target.value) void assignAgent(e.target.value, team.id); }}><option value="">Choisir…</option>{agents.filter(agent => agent.teamId !== team.id).map(agent => <option key={agent.id} value={agent.id}>{agent.name}</option>)}</select></label></div>}
               </div>
             );
           })}

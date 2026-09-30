@@ -141,6 +141,8 @@ export const teamsApi = {
       createdAt: team.created_at,
     })) };
   },
+  create: (data: { name: string; description?: string; supervisorName?: string }) => apiCall<any>('/teams', 'POST', data),
+  assignAgent: (agentId: string, teamId: string) => apiCall(`/teams/agents/${agentId}`, 'PATCH', { teamId }),
 };
 export const campaignsApi = {
   list: async () => {
