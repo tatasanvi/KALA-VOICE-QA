@@ -110,7 +110,7 @@ export interface Transcription {
   audioFileId: string;
   versionNumber: number; // v1 = originale brute, v2+ = corrigée
   isLatest: boolean;
-  asrModelUsed: string; // ex: "KALA-Denoiser+Whisper-Large-v3" ou "Baseline-Wav2Vec2"
+  asrModelUsed: string; // ex. « Whisper » ou « Wav2Vec2 »
   totalWords: number;
   processingTimeMs: number;
   globalConfidenceScore?: number; // / 100 uniquement si calculé

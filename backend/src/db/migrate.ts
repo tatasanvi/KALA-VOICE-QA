@@ -244,6 +244,32 @@ async function migrateRoles(sqlite: any): Promise<void> {
 
   // Les trois comptes de démonstration, uniquement si la configuration l'autorise.
   await ensureDemoAccounts(sqlite);
+  await ensureAgentProfiles(sqlite);
+}
+
+// Les anciens comptes AGENT ont pu être créés avant que la création du compte
+// ne génère aussi sa fiche métier. Les rattacher une fois permet aux sélecteurs
+// d'agents de fonctionner également sur les bases déjà en ligne.
+async function ensureAgentProfiles(sqlite: any): Promise<void> {
+  const users = await sqlite.prepare(`
+    SELECT u.id, u.name, u.email, u.created_at
+    FROM users u
+    LEFT JOIN agents a ON a.user_id = u.id
+    WHERE u.role = 'AGENT' AND a.id IS NULL
+  `).all() as any[];
+
+  const insert = sqlite.prepare(`
+    INSERT OR IGNORE INTO agents (id, user_id, name, email, avatar_url, team_id, team_name,
+      campaign_id, campaign_name, hire_date, seniority, status, calls_analyzed_count,
+      average_quality_score, monthly_scores_json, strengths_json, improvement_axes_json,
+      assigned_coaching_plan_id, completed_trainings_count, compliance_rate)
+    VALUES (?, ?, ?, ?, '', 'unassigned', 'Non attribué', 'unassigned', 'Non attribuée',
+      ?, 'Non renseignée', 'ACTIF', 0, 0, '[]', '[]', '[]', NULL, 0, 0)
+  `);
+  for (const user of users) {
+    await insert.run(`agent-${user.id}`, user.id, user.name, user.email, user.created_at ?? new Date().toISOString().slice(0, 10));
+  }
+  if (users.length) console.log(`  ↪ ${users.length} fiche(s) conseiller créée(s) pour les comptes AGENT existants.`);
 }
 
 // Crée (ou complète) les comptes de démonstration. Ne fait rien sans

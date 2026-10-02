@@ -325,7 +325,7 @@ export const TeamsCampaignsView: React.FC<TeamsCampaignsViewProps> = ({
               }}>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600 }}>Analyse & Transcription Automatique Immédiate</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Déclencherait Whisper-small (non branché en démonstration) dès la fin de l'appel.</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Déclencherait Whisper (non branché en démonstration) dès la fin de l'appel.</div>
                 </div>
                 <input 
                   type="checkbox"

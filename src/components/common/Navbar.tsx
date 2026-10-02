@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.08)', padding: '5px 12px', borderRadius: 'var(--radius-full)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
           <Sparkles size={14} color="#10b981" />
           <span style={{ fontSize: '11.5px', color: '#6ee7b7', fontWeight: 600 }}>
-            Moteur ASR : <strong style={{ color: '#ffffff' }}>Whisper V3 Turbo</strong>
+            Moteur ASR : <strong style={{ color: '#ffffff' }}>Whisper</strong>
           </span>
         </div>
 

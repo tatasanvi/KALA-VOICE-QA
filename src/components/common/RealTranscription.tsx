@@ -242,7 +242,7 @@ export const RealTranscription: React.FC<{ onSaved?: (callId: string) => void }>
             audioFileId: `audio-${callId}`,
             versionNumber: 1,
             isLatest: true,
-            asrModelUsed: res.data.model || 'Groq Whisper large-v3-turbo',
+            asrModelUsed: 'Whisper',
             totalWords: res.data.text ? res.data.text.split(/\s+/).filter(Boolean).length : 0,
             processingTimeMs: Math.round((res.data.processing_time || 1) * 1000),
             rawText: res.data.text,
@@ -486,7 +486,7 @@ export const RealTranscription: React.FC<{ onSaved?: (callId: string) => void }>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Sparkles size={14} color="#10b981" />
-          <span>Moteur ASR : <strong>Groq Whisper large-v3-turbo</strong> (précision maximale)</span>
+          <span>Moteur ASR : <strong>Whisper</strong> (précision maximale)</span>
         </div>
 
         <button 

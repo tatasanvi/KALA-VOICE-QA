@@ -362,7 +362,7 @@ export const TranscriptionStudioView: React.FC<TranscriptionStudioViewProps> = (
         </div>
       )}
 
-      {/* Modal Import Audio : transcription réelle (Whisper-small, signal brut) */}
+      {/* Modal Import Audio : transcription réelle (Whisper, signal brut) */}
       {showImportModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,

@@ -225,7 +225,7 @@ export function generateCallsDataset(): Call[] {
         audioFileId: `audio-${i}`,
         versionNumber: 1,
         isLatest: true,
-        asrModelUsed: noise.snr < 15 ? 'Whisper Large-v3 + DeepFilterNet3' : 'Whisper Large-v3 (Direct)',
+        asrModelUsed: 'Whisper',
         totalWords: 120 + (i % 60),
         processingTimeMs: 240 + (i % 120),
         globalConfidenceScore: noise.score,

@@ -1,9 +1,9 @@
 // =============================================================================
 // KALA VOICE QA — Laboratoire d'Évaluation & Benchmark ASR en Milieux Bruités
 // Module opérationnel d'ingénierie vocale :
-// 1. Banc de test audio réel (upload / sélection d'appel, transcription Groq Whisper v3,
+// 1. Banc de test audio réel (upload / sélection d'appel, transcription Whisper,
 //    télémétrie acoustique PCM [SNR, RMS, Peak, Bruit de fond], calcul réel WER/CER)
-// 2. Matrice comparative des architectures ASR (DeepFilterNet3, Wiener, Whisper Large-v3)
+// 2. Matrice comparative des architectures ASR (DeepFilterNet3, Wiener, Whisper)
 // 3. Calculateur interactif de programmation dynamique Levenshtein & alignement de tokens
 // =============================================================================
 
@@ -120,7 +120,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
       const metrics = await audioSignalService.analyzeAudioBlob(audioFile);
       setAcousticMetrics(metrics);
 
-      // 2. Appel API Groq Whisper v3 Turbo (via serverless ou direct)
+      // 2. Appel à l'API de transcription (via serverless ou direct)
       const res = await transcriptionsApi.transcribe(audioFile, groundTruthText.trim());
 
       const elapsed = Math.round(performance.now() - startTime);
@@ -200,7 +200,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
           audioFileId: callId,
           versionNumber: 1,
           isLatest: true,
-          asrModelUsed: transcriptionResult.model || 'whisper-large-v3-turbo',
+          asrModelUsed: 'Whisper',
           totalWords: transcriptionResult.text.split(/\s+/).filter(Boolean).length,
           processingTimeMs: benchmarkLatencyMs || 850,
           globalConfidenceScore: 92,
@@ -246,7 +246,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
           totalSilenceSeconds: 2.5,
           speechRateWpm: 140,
           detectedCommunicationIssues: [],
-          aiDisclaimer: 'Analyse générée automatiquement via Whisper Large-v3-Turbo. À valider par le responsable qualité.',
+          aiDisclaimer: 'Analyse générée automatiquement via Whisper. À valider par le responsable qualité.',
         }
       };
 
@@ -341,7 +341,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
               </div>
             </div>
             <p style={{ fontSize: '13px', color: '#b7c0cf', marginTop: '10px', maxWidth: '880px', lineHeight: 1.6 }}>
-              Banc de test acoustique haute fidélité pour centres d'appels : mesurez en temps réel le rapport signal/bruit (SNR), testez la transcription sur de l'audio réel avec Whisper Large-v3-Turbo, et évaluez le taux d'erreur mot (WER/CER) avec alignement dynamique de Levenshtein.
+              Banc de test acoustique haute fidélité pour centres d'appels : mesurez en temps réel le rapport signal/bruit (SNR), testez la transcription sur de l'audio réel avec Whisper, et évaluez le taux d'erreur mot (WER/CER) avec alignement dynamique de Levenshtein.
             </p>
           </div>
 
@@ -649,7 +649,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span style={{ fontWeight: 800, fontSize: '15px', color: '#e2e8f0' }}>
-                        Hypothèse ASR Prédite ({transcriptionResult.model || 'Whisper Large-v3-Turbo'})
+                        Hypothèse ASR Prédite ({'Whisper'})
                       </span>
                       <span className="badge badge-blue">Sortie Inférence Réelle</span>
                     </div>
@@ -819,7 +819,7 @@ export const ExperimentLabView: React.FC<ExperimentLabViewProps> = () => {
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#b3aed1', color: '#0f172a', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>3</div>
-                  <span style={{ fontWeight: 800, fontSize: '13px', color: '#b3aed1' }}>Whisper Large-v3-Turbo</span>
+                  <span style={{ fontWeight: 800, fontSize: '13px', color: '#b3aed1' }}>Whisper</span>
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   Inférence acoustique accélérée. Les résultats affichés proviennent de l'audio et de la configuration sélectionnés.

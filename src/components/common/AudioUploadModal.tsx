@@ -43,7 +43,7 @@ export const AudioUploadModal: React.FC<AudioUploadModalProps> = ({ isOpen, onCl
               <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Import & Analyse d'Enregistrement Audio</h2>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 36px' }}>
-              Import de fichier audio, assignation conseiller et transcription automatique Whisper large-v3-turbo.
+              Import de fichier audio, assignation conseiller et transcription automatique Whisper.
             </p>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>

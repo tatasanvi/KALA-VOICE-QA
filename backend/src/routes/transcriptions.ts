@@ -1,5 +1,5 @@
 // =============================================================================
-// Route Transcriptions — proxy vers le service ASR local (Whisper-small)
+// Route Transcriptions — proxy vers le service ASR local (Whisper)
 // Le fichier audio reste en mémoire le temps de la requête : il n'est pas conservé.
 // =============================================================================
 import { Router } from '../utils/asyncRouter.js';

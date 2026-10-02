@@ -14,7 +14,7 @@ npm run dev:all
 
 Démarre ensemble :
 
-- le service de transcription Python (Whisper-small, port 8500) ;
+- le service de transcription Python (Whisper, port 8500) ;
 - le backend Express + SQLite (port 8000) ;
 - le frontend Vite (port 5173).
 

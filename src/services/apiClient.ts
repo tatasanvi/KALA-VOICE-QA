@@ -338,7 +338,7 @@ async function transcribeDirectGroq(file: File, reference?: string): Promise<Api
         segments,
         duration,
         processing_time: processingTime,
-        model: 'whisper-large-v3-turbo (Groq)',
+        model: 'Whisper',
         wer,
         cer,
         reference_normalized: refNorm,

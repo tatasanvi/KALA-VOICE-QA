@@ -215,7 +215,7 @@ export const SettingsAuditView: React.FC<SettingsAuditViewProps> = ({ currentRol
             <div style={{ background: 'rgba(0,0,0,0.25)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Modèle ASR Actif</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                Pipeline : <strong>Whisper-small (non branché en démonstration)</strong>
+                Pipeline : <strong>Whisper (non branché en démonstration)</strong>
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                 Aucun WER mesuré pour le moment : aucune transcription réelle n'a encore été évaluée.
