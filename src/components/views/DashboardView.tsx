@@ -150,8 +150,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onSelectCall, onNa
                 <tr>
                   <th>Niveau de Bruit (SNR)</th>
                   <th>Condition Acoustique</th>
-                  <th>Whisper Large-v3 (Brut)</th>
-                  <th>Whisper + DeepFilterNet3</th>
+                  <th>Whisper</th>
+                  <th>Whisper</th>
                   <th>Wav2Vec 2.0 XLS-R</th>
                   <th>Gain Réel du Débruitage</th>
                 </tr>
