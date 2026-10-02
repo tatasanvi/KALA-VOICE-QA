@@ -307,7 +307,7 @@ export const CallsView: React.FC<CallsViewProps> = ({ onSelectCall, onNavigate, 
             </h2>
             <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.6, margin: '0 auto 4px' }}>
               Importez vos fichiers audio pour démarrer. KALA transcrit automatiquement l'appel via{' '}
-              <strong style={{ color: 'var(--primary-light)' }}>Whisper large-v3-turbo</strong> et
+              <strong style={{ color: 'var(--primary-light)' }}>Whisper</strong> et
               prépare la fiche pour l'évaluation qualité.
             </p>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 auto' }}>
