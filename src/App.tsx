@@ -23,7 +23,6 @@ import { ResetPasswordView } from './components/views/ResetPasswordView';
 import { OnboardingView } from './components/views/OnboardingView';
 
 // Protected Views
-import { DashboardView } from './components/views/DashboardView';
 import { CallsView } from './components/views/CallsView';
 import { TranscriptionStudioView } from './components/views/TranscriptionStudioView';
 import { NlpAnalyticsView } from './components/views/NlpAnalyticsView';
@@ -32,7 +31,6 @@ import { CoachingView } from './components/views/CoachingView';
 import { TrainingView } from './components/views/TrainingView';
 import { AgentProfileView } from './components/views/AgentProfileView';
 import { TeamsCampaignsView } from './components/views/TeamsCampaignsView';
-import { ExperimentLabView } from './components/views/ExperimentLabView';
 import { ReportsView } from './components/views/ReportsView';
 import { SettingsAuditView } from './components/views/SettingsAuditView';
 import { UserManagementView } from './components/views/UserManagementView';
@@ -113,7 +111,6 @@ const AppLayout: React.FC = () => {
   }, [user?.id]);
 
   const getPageTitle = (path: string): string => {
-    if (path.startsWith('/dashboard')) return "Tableau de Bord Exécutif Centre d'Appels";
     if (path.startsWith('/appels')) return "Registre des Appels & Enregistrements";
     if (path.startsWith('/transcriptions')) return "Studio Audio & Transcription Synchronisée";
     if (path.startsWith('/analytics')) return "Analyse Sémantique & Intelligence Conversationnelle";
@@ -125,7 +122,6 @@ const AppLayout: React.FC = () => {
     if (path.startsWith('/campagnes')) return "Structure des Campagnes Métiers";
     if (path.startsWith('/rapports')) return "Rapports d'Audit & Synthèses Métiers";
     if (path.startsWith('/donnees-personnelles')) return "Protection des Données (RGPD)";
-    if (path.startsWith('/experimentation')) return "Laboratoire Expérimental ASR (Mémoire Master IA)";
     if (path.startsWith('/parametres')) return "Sécurité, Traçabilité & Paramètres Système";
     if (path.startsWith('/admin/users')) return "Administration & Gestion des Comptes Utilisateurs";
     return "KALA Voice QA";
@@ -164,19 +160,6 @@ const CallsRouteWrapper: React.FC = () => {
   return (
     <CallsView 
       initialCallId={id}
-      onSelectCall={(callId) => navigate(`/appels/${callId}`)}
-      onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
-      currentRole={role || 'AGENT'}
-    />
-  );
-};
-
-const DashboardRouteWrapper: React.FC = () => {
-  const navigate = useNavigate();
-  const { role } = useAuth();
-
-  return (
-    <DashboardView 
       onSelectCall={(callId) => navigate(`/appels/${callId}`)}
       onNavigate={(path) => navigate(typeof path === 'string' && path.startsWith('/') ? path : `/${path}`)}
       currentRole={role || 'AGENT'}
@@ -301,11 +284,6 @@ const ReportsRouteWrapper: React.FC = () => {
   return <ReportsView currentRole={role || 'AGENT'} />;
 };
 
-const ExperimentLabRouteWrapper: React.FC = () => {
-  const { role } = useAuth();
-  return <ExperimentLabView currentRole={role || 'AGENT'} />;
-};
-
 const SettingsRouteWrapper: React.FC = () => {
   const { role } = useAuth();
   return <SettingsAuditView currentRole={role || 'AGENT'} />;
@@ -346,8 +324,9 @@ export const App: React.FC = () => {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<DashboardRouteWrapper />} />
+            <Route path="/" element={<Navigate to="/appels" replace />} />
+            <Route path="/dashboard" element={<Navigate to="/appels" replace />} />
+            <Route path="/experimentation" element={<Navigate to="/appels" replace />} />
 
             {/* Appels & Fiche Détail */}
             <Route path="/appels" element={<CallsRouteWrapper />} />
@@ -380,9 +359,8 @@ export const App: React.FC = () => {
             <Route path="/campagnes" element={<CampaignsRouteWrapper />} />
             <Route path="/campagnes/:id" element={<CampaignsRouteWrapper />} />
 
-            {/* Rapports & Expérimentation */}
+            {/* Rapports */}
             <Route path="/rapports" element={<ReportsRouteWrapper />} />
-            <Route path="/experimentation" element={<ExperimentLabRouteWrapper />} />
             <Route path="/donnees-personnelles" element={<PrivacyView />} />
 
             {/* Administration & Paramètres (RBAC Protégé) */}
@@ -406,7 +384,7 @@ export const App: React.FC = () => {
           </Route>
 
           {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/appels" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -5,16 +5,15 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  LayoutDashboard, PhoneCall, Mic, Sparkles, CheckCircle2, 
+  PhoneCall, Mic, CheckCircle2, 
   TrendingUp, GraduationCap, Users, FolderGit2, Flag, 
-  FileText, FlaskConical, Settings, LogOut, UserCheck, Shield
+  Settings, LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { Avatar } from './Avatar';
 
 export type ViewType = 
-  | 'dashboard'
   | 'calls'
   | 'transcriptions'
   | 'analytics'
@@ -25,7 +24,6 @@ export type ViewType =
   | 'teams'
   | 'campaigns'
   | 'reports'
-  | 'experimentation'
   | 'settings'
   | 'users';
 
@@ -42,10 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = () => {
 
   const currentPath = location.pathname;
 
-  const isActive = (path: string) => {
-    if (path === '/dashboard') return currentPath === '/dashboard' || currentPath === '/';
-    return currentPath.startsWith(path);
-  };
+  const isActive = (path: string) => currentPath.startsWith(path);
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -63,17 +58,15 @@ export const Sidebar: React.FC<SidebarProps> = () => {
   const isAgent = role === 'AGENT';
   // Le conseiller n'accède qu'à ses propres données : pas de pilotage global,
   // ni de vues d'équipe (le backend renvoie 403 sur ces données de toute façon).
-  const showPilotage = !isAgent;
   const showPerformance = !isAgent;
   const showAdminSection = role === 'ADMIN';
-  const showExperimentation = role === 'ADMIN' || role === 'QUALITE_FORMATION';
 
   return (
     <aside className="sidebar" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
       {/* Brand Header */}
       <div 
         className="sidebar-header" 
-        onClick={() => handleNavigate('/dashboard')} 
+        onClick={() => handleNavigate('/appels')} 
         style={{ cursor: 'pointer' }}
       >
         <div className="logo-badge">
@@ -86,23 +79,11 @@ export const Sidebar: React.FC<SidebarProps> = () => {
       </div>
 
       <div style={{ flex: 1, paddingBottom: '16px' }}>
-        {/* 1. PILOTAGE */}
-        {showPilotage && (
+        {/* Studio de transcription */}
         <div className="nav-section">
           <div className="nav-section-title" style={{ color: '#b3aed1', letterSpacing: '0.6px' }}>
-            Intelligence Vocale & ASR
+            Transcription
           </div>
-
-          <button 
-            className={`nav-item ${isActive('/experimentation') ? 'active' : ''}`}
-            onClick={() => handleNavigate('/experimentation')}
-            style={{ width: '100%', background: 'none', textAlign: 'left' }}
-          >
-            <FlaskConical size={18} color="#b3aed1" />
-            <span style={{ fontWeight: 700, color: '#e9d5ff' }}>Banc d'Essai ASR</span>
-            <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: '10px' }}>WER / CER</span>
-          </button>
-
           <button 
             className={`nav-item ${isActive('/transcriptions') ? 'active' : ''}`}
             onClick={() => handleNavigate('/transcriptions')}
@@ -113,22 +94,12 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <span className="badge badge-green" style={{ marginLeft: 'auto', fontSize: '10px' }}>Live</span>
           </button>
         </div>
-        )}
 
         {/* 2. OPÉRATIONS PLATEAU (APPELS & QUALITÉ) */}
         <div className="nav-section">
           <div className="nav-section-title" style={{ color: '#9fb7d6' }}>
             Opérations & Supervision
           </div>
-
-          <button 
-            className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}
-            onClick={() => handleNavigate('/dashboard')}
-            style={{ width: '100%', background: 'none', textAlign: 'left' }}
-          >
-            <PhoneCall size={18} />
-            <span>Appels & Enregistrements</span>
-          </button>
 
           <button 
             className={`nav-item ${isActive('/appels') ? 'active' : ''}`}
@@ -206,23 +177,6 @@ export const Sidebar: React.FC<SidebarProps> = () => {
             <span>Académie & Uplift</span>
           </button>
         </div>
-
-        {/* 5. RECHERCHE SCIENTIFIQUE (MASTER 2) */}
-        {showExperimentation && (
-          <div className="nav-section">
-            <div className="nav-section-title" style={{ color: '#b3aed1' }}>Recherche Scientifique</div>
-
-            <button 
-              className={`nav-item ${isActive('/experimentation') ? 'active' : ''}`}
-              onClick={() => handleNavigate('/experimentation')}
-              style={{ width: '100%', background: 'none', textAlign: 'left' }}
-            >
-              <FlaskConical size={18} color="#b3aed1" />
-              <span style={{ color: '#e9d5ff', fontWeight: 600 }}>Expérimentation ASR</span>
-              <span className="badge badge-purple" style={{ marginLeft: 'auto', fontSize: '10px' }}>WER/CER</span>
-            </button>
-          </div>
-        )}
 
         {/* 6. ADMINISTRATION & SÉCURITÉ */}
         {showAdminSection && (
