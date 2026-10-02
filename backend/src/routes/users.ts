@@ -175,6 +175,19 @@ router.patch('/:id/role', requireAuth, adminOnly, async (req: Request, res: Resp
 
   const prevRole = user.role;
   await sqlite().prepare('UPDATE users SET role = ? WHERE id = ?').run(role, id);
+  if (role === 'AGENT') {
+    const linkedAgent = await sqlite().prepare('SELECT id FROM agents WHERE user_id = ?').get(id);
+    if (!linkedAgent) {
+      await sqlite().prepare(`
+        INSERT OR IGNORE INTO agents (id, user_id, name, email, avatar_url, team_id, team_name,
+          campaign_id, campaign_name, hire_date, seniority, status, calls_analyzed_count,
+          average_quality_score, monthly_scores_json, strengths_json, improvement_axes_json,
+          assigned_coaching_plan_id, completed_trainings_count, compliance_rate)
+        VALUES (?, ?, ?, ?, '', 'unassigned', 'Non attribué', 'unassigned', 'Non attribuée',
+          ?, 'Non renseignée', 'ACTIF', 0, 0, '[]', '[]', '[]', NULL, 0, 0)
+      `).run(`agent-${id}`, id, user.name, user.email, user.created_at ?? new Date().toISOString().slice(0, 10));
+    }
+  }
 
   await logAudit(req.user!.userId, req.user!.name, req.user!.role,
     'CHANGEMENT_ROLE', `Utilisateur ${user.name}`,
